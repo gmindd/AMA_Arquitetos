@@ -1,0 +1,40 @@
+---
+import { getCollection } from 'astro:content';
+import Base from '../layouts/Base.astro';
+import BeforeAfter from '../components/BeforeAfter.astro';
+
+const obras = (await getCollection('reabilitacao')).sort(
+  (a, b) => a.data.ordem - b.data.ordem || b.data.ano - a.data.ano
+);
+---
+
+<Base
+  title="Reabilitação — AMA | André Melissa Arquitetos"
+  description="Fachadas, condomínios e reabilitações executadas pela equipa de construção própria do gabinete. Registo antes e depois."
+>
+  <h1 class="titulo-pagina wrap" data-reveal>Reabilitação</h1>
+
+  <p class="intro-seccao wrap" data-reveal>
+    Fachadas, condomínios e reabilitações executadas pela equipa de construção
+    própria do gabinete. Quem desenha é quem executa.
+  </p>
+
+  <section class="lista-reabilitacao wrap" aria-label="Obras de reabilitação">
+    {obras.map((obra) => (
+      <article data-reveal>
+        <div class="obra__meta">
+          <h2>{obra.data.titulo}</h2>
+          <span>{obra.data.local} · {obra.data.ano}</span>
+        </div>
+        <BeforeAfter
+          titulo={obra.data.titulo}
+          antes={obra.data.antes}
+          depois={obra.data.depois}
+        />
+        {obra.body && obra.body.trim().length > 0 && (
+          <p class="obra__nota">{obra.body.trim()}</p>
+        )}
+      </article>
+    ))}
+  </section>
+</Base>

@@ -1,0 +1,17 @@
+---
+titulo: Casa na Areosa
+tipologia: Habitação unifamiliar
+local: Areosa, Viana do Castelo
+area: 187 m²
+ano: 2023
+capa: /images/projetos/habitacao-unifamiliar-areosa-capa.svg
+galeria:
+  - /images/projetos/habitacao-unifamiliar-areosa-01.svg
+  - /images/projetos/habitacao-unifamiliar-areosa-02.svg
+  - /images/projetos/habitacao-unifamiliar-areosa-03.svg
+variacaoLogo: MA/A
+logoClaro: false
+ordem: 5
+---
+
+Casa térrea organizada em torno de um pátio. Zonas de dormir a nascente, zonas comuns abertas ao jardim poente.

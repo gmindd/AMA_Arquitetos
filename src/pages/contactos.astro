@@ -1,0 +1,75 @@
+---
+import Base from '../layouts/Base.astro';
+---
+
+<Base title="Contactos — AMA | André Melissa Arquitetos">
+  <h1 class="titulo-pagina wrap" data-reveal>Contactos</h1>
+
+  <section class="contactos wrap">
+    <div class="contactos__dados">
+      <div class="bloco" data-reveal>
+        <span class="rotulo">Morada</span>
+        <p>
+          Avenida do Atlântico 221, loja 10<br />
+          4935-580 Chafé<br />
+          Praia da Amorosa, Viana do Castelo
+        </p>
+      </div>
+      <div class="bloco" data-reveal>
+        <span class="rotulo">Telefone</span>
+        <p>
+          André Machado — <a href="tel:+351917091338">917 091 338</a><br />
+          Melissa Fazendeiro — <a href="tel:+351918133120">918 133 120</a>
+        </p>
+      </div>
+      <div class="bloco" data-reveal>
+        <span class="rotulo">E-mail</span>
+        <p><a href="mailto:andremelissaarquitetos@gmail.com">andremelissaarquitetos@gmail.com</a></p>
+      </div>
+      <div class="bloco" data-reveal>
+        <span class="rotulo">Instagram</span>
+        <p><a href="https://www.instagram.com/andremelissaarquitetos" rel="noopener" target="_blank">@andremelissaarquitetos</a></p>
+      </div>
+    </div>
+
+    <!-- Formulário de orçamento: 5 campos, nem mais um -->
+    <form
+      class="formulario"
+      name="orcamento"
+      method="POST"
+      data-netlify="true"
+      netlify-honeypot="empresa"
+      data-reveal
+    >
+      <p class="oculto">
+        <label>Não preencher: <input name="empresa" /></label>
+      </p>
+      <div class="campo">
+        <label for="nome">Nome</label>
+        <input id="nome" name="nome" type="text" autocomplete="name" required />
+      </div>
+      <div class="campo">
+        <label for="contacto">Contacto</label>
+        <input id="contacto" name="contacto" type="text" autocomplete="tel" required />
+      </div>
+      <div class="campo">
+        <label for="tipo">Tipo</label>
+        <select id="tipo" name="tipo" required>
+          <option value="Projeto de arquitetura">Projeto de arquitetura</option>
+          <option value="Reabilitação">Reabilitação</option>
+          <option value="Ambos">Ambos</option>
+        </select>
+      </div>
+      <div class="campo">
+        <label for="localizacao">Localização</label>
+        <input id="localizacao" name="localizacao" type="text" required />
+      </div>
+      <div class="campo">
+        <label for="mensagem">Mensagem</label>
+        <textarea id="mensagem" name="mensagem" required></textarea>
+      </div>
+      <button class="cta" type="submit">Pedir orçamento</button>
+      <p class="prazo">Respondemos em 24–48h úteis.</p>
+    </form>
+  </section>
+</Base>

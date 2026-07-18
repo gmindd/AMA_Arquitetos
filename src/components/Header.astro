@@ -1,0 +1,47 @@
+---
+// Cabeçalho fixo: logótipo, navegação, CTA e menu de ecrã inteiro (móvel)
+const path = Astro.url.pathname;
+
+const ligacoes = [
+  { rotulo: 'Projetos', href: '/', ativo: path === '/' || path.startsWith('/projetos') },
+  { rotulo: 'Reabilitação', href: '/reabilitacao', ativo: path.startsWith('/reabilitacao') },
+  { rotulo: 'Sobre', href: '/sobre', ativo: path.startsWith('/sobre') },
+  { rotulo: 'Contactos', href: '/contactos', ativo: path.startsWith('/contactos') },
+];
+---
+
+<header class="cabecalho" data-cabecalho>
+  <a class="marca" href="/" aria-label="AMA — página inicial">
+    <span class="marca__sigla">AMA</span>
+    <span class="marca__nome">André Melissa<br />Arquitetos</span>
+  </a>
+
+  <nav class="nav-principal" aria-label="Navegação principal">
+    {ligacoes.map((l) => (
+      <a href={l.href} aria-current={l.ativo ? 'page' : undefined}>{l.rotulo}</a>
+    ))}
+  </nav>
+
+  <a class="cta" href="/contactos">Pedir orçamento</a>
+
+  <button
+    class="botao-menu"
+    type="button"
+    aria-label="Abrir menu"
+    aria-expanded="false"
+    data-botao-menu
+  >
+    <span></span>
+    <span></span>
+  </button>
+
+  <nav class="menu-total" aria-label="Menu" data-menu>
+    {ligacoes.map((l) => (
+      <a href={l.href} aria-current={l.ativo ? 'page' : undefined}>{l.rotulo}</a>
+    ))}
+    <div class="menu-total__pe">
+      <span>Praia da Amorosa, Viana do Castelo</span>
+      <span>Gabinete de arquitetura</span>
+    </div>
+  </nav>
+</header>

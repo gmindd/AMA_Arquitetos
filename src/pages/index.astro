@@ -1,0 +1,28 @@
+---
+import { getCollection } from 'astro:content';
+import Base from '../layouts/Base.astro';
+import ProjectCard from '../components/ProjectCard.astro';
+
+// Home = grelha de projetos, sem texto de abertura. Logótipo e menu bastam.
+const projetos = (await getCollection('projetos')).sort(
+  (a, b) => a.data.ordem - b.data.ordem || b.data.ano - a.data.ano
+);
+---
+
+<Base>
+  <h1 class="oculto">Projetos — AMA, André Melissa Arquitetos</h1>
+  <section class="grelha-projetos wrap" aria-label="Projetos">
+    {projetos.map((p, i) => (
+      <ProjectCard
+        href={`/projetos/${p.id}`}
+        titulo={p.data.titulo}
+        tipologia={p.data.tipologia}
+        ano={p.data.ano}
+        capa={p.data.capa}
+        variacaoLogo={p.data.variacaoLogo}
+        logoClaro={p.data.logoClaro}
+        indice={i}
+      />
+    ))}
+  </section>
+</Base>

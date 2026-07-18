@@ -1,0 +1,17 @@
+---
+titulo: Interiores na Meadela
+tipologia: Decoração de interiores
+local: Meadela, Viana do Castelo
+area: 98 m²
+ano: 2025
+capa: /images/projetos/interiores-meadela-capa.svg
+galeria:
+  - /images/projetos/interiores-meadela-01.svg
+  - /images/projetos/interiores-meadela-02.svg
+  - /images/projetos/interiores-meadela-03.svg
+variacaoLogo: A/AM
+logoClaro: true
+ordem: 6
+---
+
+Projeto de interiores para apartamento T3. Carpintaria desenhada à medida, paleta de materiais reduzida a três: carvalho, lacado e pedra.

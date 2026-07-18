@@ -1,0 +1,79 @@
+---
+import { getCollection, render } from 'astro:content';
+import Base from '../../layouts/Base.astro';
+
+export async function getStaticPaths() {
+  const projetos = (await getCollection('projetos')).sort(
+    (a, b) => a.data.ordem - b.data.ordem || b.data.ano - a.data.ano
+  );
+  return projetos.map((projeto, i) => ({
+    params: { slug: projeto.id },
+    props: {
+      projeto,
+      anterior: projetos[i - 1] ?? null,
+      seguinte: projetos[i + 1] ?? null,
+    },
+  }));
+}
+
+const { projeto, anterior, seguinte } = Astro.props;
+const { Content } = await render(projeto);
+const d = projeto.data;
+const temNota = projeto.body && projeto.body.trim().length > 0;
+---
+
+<Base
+  title={`${d.titulo} — AMA | André Melissa Arquitetos`}
+  description={`${d.tipologia}. ${d.local}. ${d.area}. ${d.ano}.`}
+>
+  <article>
+    <header class="projeto-topo wrap">
+      <h1 data-reveal>{d.titulo}</h1>
+
+      <!-- Ficha técnica: Tipologia · Local · Área · Ano -->
+      <dl class="ficha" data-reveal>
+        <div><dt>Tipologia</dt><dd>{d.tipologia}</dd></div>
+        <div><dt>Local</dt><dd>{d.local}</dd></div>
+        <div><dt>Área</dt><dd>{d.area}</dd></div>
+        <div><dt>Ano</dt><dd>{d.ano}</dd></div>
+      </dl>
+    </header>
+
+    <figure class="projeto-hero" data-reveal>
+      <img src={d.capa} alt={`${d.titulo} — ${d.tipologia}`} data-parallax />
+    </figure>
+
+    <div class="projeto-corpo wrap">
+      {temNota && (
+        <div class="nota" data-reveal>
+          <Content />
+        </div>
+      )}
+
+      {d.galeria.length > 0 && (
+        <div class="galeria">
+          {d.galeria.map((imagem, i) => (
+            <figure data-reveal>
+              <img src={imagem} alt={`${d.titulo} — imagem ${i + 1}`} loading="lazy" />
+            </figure>
+          ))}
+        </div>
+      )}
+    </div>
+
+    <nav class="projeto-nav wrap" aria-label="Outros projetos">
+      {anterior && (
+        <a href={`/projetos/${anterior.id}`} data-sentido="anterior">
+          <span class="rotulo">Anterior</span>
+          <strong>{anterior.data.titulo}</strong>
+        </a>
+      )}
+      {seguinte && (
+        <a href={`/projetos/${seguinte.id}`} data-sentido="seguinte">
+          <span class="rotulo">Seguinte</span>
+          <strong>{seguinte.data.titulo}</strong>
+        </a>
+      )}
+    </nav>
+  </article>
+</Base>

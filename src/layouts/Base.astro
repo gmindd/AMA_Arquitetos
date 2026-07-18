@@ -1,0 +1,39 @@
+---
+import { ClientRouter } from 'astro:transitions';
+import Header from '../components/Header.astro';
+import Footer from '../components/Footer.astro';
+import '../styles/global.css';
+
+interface Props {
+  title?: string;
+  description?: string;
+}
+
+const {
+  title = 'AMA — André Melissa Arquitetos | Gabinete de arquitetura, Viana do Castelo',
+  description = 'Gabinete de arquitetura em Viana do Castelo. Habitação, interiores e reconversão de espaços. Reabilitações e tratamento de fachadas com equipa própria.',
+} = Astro.props;
+---
+
+<!doctype html>
+<html lang="pt">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <ClientRouter />
+    <script>
+      import '../scripts/main.js';
+    </script>
+  </head>
+  <body>
+    <a class="salto-conteudo" href="#conteudo">Saltar para o conteúdo</a>
+    <Header />
+    <main id="conteudo">
+      <slot />
+    </main>
+    <Footer />
+  </body>
+</html>
