@@ -11,7 +11,31 @@ const projetos = (await getCollection('projetos')).sort(
 
 <Base>
   <h1 class="oculto">Projetos — AMA, André Melissa Arquitetos</h1>
-  <section class="grelha-projetos wrap" aria-label="Projetos">
+
+  <!-- Abertura a ecrã inteiro: os projetos em rotação lenta, sem texto de abertura -->
+  <section class="hero" data-hero aria-label="Projetos em destaque">
+    {projetos.map((p, i) => (
+      <a
+        class={`hero__slide${i === 0 ? ' ativo' : ''}`}
+        href={`/projetos/${p.id}`}
+        data-hero-slide
+        tabindex={i === 0 ? undefined : -1}
+        aria-hidden={i === 0 ? undefined : 'true'}
+      >
+        <img
+          src={p.data.capa}
+          alt={`${p.data.titulo} — ${p.data.tipologia}`}
+          loading={i === 0 ? 'eager' : 'lazy'}
+        />
+        <p class="hero__legenda">{p.data.titulo} — {p.data.local}, {p.data.ano}</p>
+      </a>
+    ))}
+    <button class="hero__seta" type="button" data-hero-seta aria-label="Ver todos os projetos">
+      ↓
+    </button>
+  </section>
+
+  <section class="grelha-projetos" id="projetos" aria-label="Projetos">
     {projetos.map((p, i) => (
       <ProjectCard
         href={`/projetos/${p.id}`}

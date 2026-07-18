@@ -240,6 +240,34 @@ main {
   display: none;
 }
 
+/* Sobre o hero da home, o cabeçalho flutua em mistura por diferença:
+   legível sobre qualquer fotografia, sem fundos nem gradientes */
+.cabecalho--difusao:not(.rolado) {
+  mix-blend-mode: difference;
+  color: var(--white);
+}
+
+.cabecalho--difusao:not(.rolado) .nav-principal a::after {
+  background: currentColor;
+}
+
+.cabecalho--difusao:not(.rolado) .cta {
+  border-color: currentColor;
+}
+
+.cabecalho--difusao:not(.rolado) .cta:hover {
+  background: var(--white);
+  color: var(--black);
+}
+
+.cabecalho--difusao:not(.rolado) .botao-menu span {
+  background: currentColor;
+}
+
+body.menu-aberto .cabecalho {
+  mix-blend-mode: normal;
+}
+
 /* Botão do menu móvel: duas linhas que rodam em X */
 .botao-menu {
   position: relative;
@@ -349,22 +377,94 @@ body.menu-aberto .menu-total__pe {
   opacity: 0.75;
 }
 
-/* ---------- Grelha de projetos (home) ---------- */
+/* ---------- Hero da home: fotografia a ecrã inteiro em rotação ---------- */
+.hero {
+  position: relative;
+  height: 100svh;
+  margin-top: calc(var(--header-h) * -1);
+  background: var(--black);
+  overflow: hidden;
+}
+
+.hero__slide {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 1.6s var(--ease);
+}
+
+.hero__slide.ativo {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.hero__slide img {
+  height: 100%;
+  width: 100%;
+  object-fit: cover;
+}
+
+/* Aproximação muito lenta enquanto o diapositivo está visível */
+.hero__slide.ativo img {
+  animation: hero-zoom 8s var(--ease) forwards;
+}
+
+@keyframes hero-zoom {
+  from { transform: scale(1); }
+  to { transform: scale(1.045); }
+}
+
+/* Legenda discreta e seta: mistura por diferença, legíveis sobre tudo */
+.hero__legenda {
+  position: absolute;
+  left: var(--gutter);
+  bottom: 1.5rem;
+  margin: 0;
+  max-width: calc(50% - 3rem);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-size: var(--text-sm);
+  color: var(--white);
+  mix-blend-mode: difference;
+}
+
+.hero__seta {
+  position: absolute;
+  left: 50%;
+  bottom: 1.1rem;
+  transform: translateX(-50%);
+  color: var(--white);
+  mix-blend-mode: difference;
+  font-size: 1.2rem;
+  padding: 0.4rem 0.8rem;
+  animation: seta-pulso 2.6s ease-in-out infinite;
+}
+
+@keyframes seta-pulso {
+  0%, 100% { transform: translateX(-50%) translateY(0); opacity: 0.9; }
+  50% { transform: translateX(-50%) translateY(6px); opacity: 0.5; }
+}
+
+/* ---------- Grelha de projetos (home): mosaico a sangrar ---------- */
 .grelha-projetos {
   display: grid;
   grid-template-columns: 1fr;
-  gap: clamp(3rem, 8vw, 6rem) var(--gutter);
-  padding-block: clamp(1.5rem, 4vh, 3rem) clamp(4rem, 10vh, 7rem);
+  gap: 6px;
+  padding-top: 6px;
 }
 
 .cartao {
   display: block;
+  position: relative;
 }
 
 .cartao__media {
   position: relative;
   overflow: hidden;
   background: var(--black);
+  height: 100%;
 }
 
 .cartao__media img {
@@ -390,38 +490,25 @@ body.menu-aberto .menu-total__pe {
   transition: transform 0.7s var(--ease);
 }
 
-.cartao__marca--escuro {
-  color: var(--black);
-}
-
 .cartao:hover .cartao__marca {
   transform: translateY(-4px);
 }
 
-.cartao__meta {
-  display: flex;
-  align-items: baseline;
-  gap: 0.75rem;
-  padding-top: 0.9rem;
-  border-top: 1px solid var(--hairline);
-  margin-top: 0.9rem;
-}
-
-.cartao__indice {
+/* Legenda mínima sobre a fotografia, ao estilo documental */
+.cartao__legenda {
+  position: absolute;
+  right: 1.25rem;
+  bottom: 1.1rem;
   font-size: var(--text-xs);
-  letter-spacing: 0.1em;
-  opacity: 0.55;
+  letter-spacing: 0.04em;
+  color: var(--white);
+  text-align: right;
 }
 
-.cartao__titulo {
-  font-size: var(--text-lg);
-  letter-spacing: -0.01em;
-}
-
-.cartao__ano {
-  margin-left: auto;
-  font-size: var(--text-sm);
-  opacity: 0.6;
+/* Sobre fotografias claras, a tinta passa a preto */
+.cartao--tinta-escura .cartao__marca,
+.cartao--tinta-escura .cartao__legenda {
+  color: var(--black);
 }
 
 /* ---------- Página de projeto ---------- */
@@ -469,11 +556,11 @@ body.menu-aberto .menu-total__pe {
 .projeto-hero {
   overflow: hidden;
   background: var(--black);
-  max-height: 82vh;
+  height: min(88svh, 60rem);
 }
 
 .projeto-hero img {
-  aspect-ratio: 16 / 9;
+  height: 100%;
   will-change: transform;
 }
 
@@ -490,10 +577,12 @@ body.menu-aberto .menu-total__pe {
   line-height: 1.4;
 }
 
+/* Galeria a sangrar até às margens do ecrã */
 .galeria {
   display: grid;
   grid-template-columns: 1fr;
-  gap: var(--gutter);
+  gap: 6px;
+  margin-inline: calc(var(--gutter) * -1);
 }
 
 .galeria figure {
@@ -862,21 +951,47 @@ body.menu-aberto .menu-total__pe {
 }
 
 /* ---------- Media queries ---------- */
-@media (min-width: 700px) {
-  .grelha-projetos {
-    grid-template-columns: repeat(12, 1fr);
+/* Em ecrãs estreitos a legenda do hero ocupa a largura toda e a seta sai */
+@media (max-width: 699px) {
+  .hero__legenda {
+    max-width: calc(100% - 2 * var(--gutter));
   }
 
-  /* Ritmo editorial: larguras e alinhamentos alternados */
-  .grelha-projetos > :nth-child(6n + 1) { grid-column: 1 / span 7; }
-  .grelha-projetos > :nth-child(6n + 2) { grid-column: 9 / span 4; margin-top: clamp(3rem, 10vh, 7rem); }
-  .grelha-projetos > :nth-child(6n + 3) { grid-column: 2 / span 5; }
-  .grelha-projetos > :nth-child(6n + 4) { grid-column: 8 / span 5; margin-top: clamp(2rem, 7vh, 5rem); }
-  .grelha-projetos > :nth-child(6n + 5) { grid-column: 1 / span 4; }
-  .grelha-projetos > :nth-child(6n + 6) { grid-column: 6 / span 7; margin-top: clamp(-3rem, -6vh, -2rem); }
+  .hero__seta {
+    display: none;
+  }
+}
 
-  .grelha-projetos > :nth-child(6n + 1) .cartao__media img { aspect-ratio: 4 / 3; }
-  .grelha-projetos > :nth-child(6n + 6) .cartao__media img { aspect-ratio: 16 / 10; }
+@media (min-width: 700px) {
+  /* Mosaico assimétrico contínuo: filas de alturas iguais,
+     larguras alternadas 7/5, imagens a preencher a célula */
+  .grelha-projetos {
+    grid-template-columns: repeat(12, 1fr);
+    grid-auto-rows: clamp(10rem, 23vw, 22rem);
+    grid-auto-flow: dense;
+  }
+
+  .grelha-projetos > * {
+    grid-row: span 2;
+  }
+
+  .grelha-projetos > :nth-child(4n + 1) { grid-column: span 7; }
+  .grelha-projetos > :nth-child(4n + 2) { grid-column: span 5; }
+  .grelha-projetos > :nth-child(4n + 3) { grid-column: span 5; }
+  .grelha-projetos > :nth-child(4n) { grid-column: span 7; }
+
+  /* Com total ímpar, o último projeto ocupa a largura toda do ecrã —
+     a grelha fecha sempre sem buracos, com qualquer número de projetos */
+  .grelha-projetos > :last-child:nth-child(4n + 1),
+  .grelha-projetos > :last-child:nth-child(4n + 3) {
+    grid-column: 1 / -1;
+    grid-row: span 3;
+  }
+
+  .grelha-projetos .cartao__media img {
+    aspect-ratio: auto;
+    height: 100%;
+  }
 
   .galeria {
     grid-template-columns: repeat(2, 1fr);

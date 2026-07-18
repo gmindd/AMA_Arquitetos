@@ -42,10 +42,16 @@ function initCabecalho() {
   atualizarCabecalho();
 }
 
-// Aplica o estado do cabeçalho consoante a posição de scroll
+// Aplica o estado do cabeçalho consoante a posição de scroll.
+// Sobre o hero da home, o cabeçalho só ganha fundo depois de o hero sair.
 function atualizarCabecalho() {
   if (!cabecalhoAtual) return;
-  cabecalhoAtual.classList.toggle('rolado', window.scrollY > 24);
+  let limite = 24;
+  if (cabecalhoAtual.classList.contains('cabecalho--difusao')) {
+    const hero = document.querySelector('[data-hero]');
+    if (hero) limite = hero.offsetHeight - cabecalhoAtual.offsetHeight;
+  }
+  cabecalhoAtual.classList.toggle('rolado', window.scrollY > limite);
 }
 
 // Abre e fecha o menu de ecrã inteiro, mantendo aria-expanded coerente
@@ -73,6 +79,45 @@ function fecharMenu() {
     botao.setAttribute('aria-expanded', 'false');
     botao.setAttribute('aria-label', 'Abrir menu');
   }
+}
+
+// Identificador da rotação do hero, limpo a cada navegação
+let heroIntervalo = null;
+
+// Rotação lenta dos diapositivos do hero da home, com fusão cruzada
+function initHero() {
+  if (heroIntervalo) {
+    clearInterval(heroIntervalo);
+    heroIntervalo = null;
+  }
+  const hero = document.querySelector('[data-hero]');
+  if (!hero) return;
+
+  const seta = hero.querySelector('[data-hero-seta]');
+  if (seta) {
+    seta.addEventListener('click', () => {
+      const grelha = document.getElementById('projetos');
+      if (grelha) {
+        grelha.scrollIntoView({ behavior: movimentoReduzido.matches ? 'auto' : 'smooth' });
+      }
+    });
+  }
+
+  const slides = Array.from(hero.querySelectorAll('[data-hero-slide]'));
+  if (slides.length < 2 || movimentoReduzido.matches) return;
+
+  let atual = 0;
+  heroIntervalo = setInterval(() => {
+    const anterior = slides[atual];
+    atual = (atual + 1) % slides.length;
+    const proximo = slides[atual];
+    anterior.classList.remove('ativo');
+    anterior.setAttribute('aria-hidden', 'true');
+    anterior.setAttribute('tabindex', '-1');
+    proximo.classList.add('ativo');
+    proximo.removeAttribute('aria-hidden');
+    proximo.removeAttribute('tabindex');
+  }, 5200);
 }
 
 // Recolhe os alvos de parallax da página atual
@@ -121,6 +166,7 @@ function initPagina() {
   fecharMenu();
   initCabecalho();
   initMenu();
+  initHero();
   initReveal();
   initParallax();
   initBeforeAfter();

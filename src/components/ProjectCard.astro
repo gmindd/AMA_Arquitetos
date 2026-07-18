@@ -1,5 +1,6 @@
 ---
-// Cartão de projeto: capa + variação do logótipo sobreposta + título + ano
+// Cartão de projeto no mosaico: fotografia a sangrar, variação do logótipo
+// e legenda sobrepostas — o cromo desaparece, o projeto é o protagonista.
 interface Props {
   href: string;
   titulo: string;
@@ -15,20 +16,13 @@ const { href, titulo, tipologia, ano, capa, variacaoLogo, logoClaro, indice } = 
 
 // A variação composta divide-se em duas linhas empilhadas (ex.: A / MA)
 const [linha1, linha2] = variacaoLogo.split('/');
-const numero = String(indice + 1).padStart(2, '0');
 ---
 
-<a class="cartao" href={href} data-reveal>
+<a class={`cartao ${logoClaro ? '' : 'cartao--tinta-escura'}`} href={href} data-reveal>
   <figure class="cartao__media">
     <!-- Substituir pelo ficheiro real do projeto via /admin ou public/images -->
     <img src={capa} alt={`${titulo} — ${tipologia}`} loading={indice < 2 ? 'eager' : 'lazy'} />
-    <span class={`cartao__marca ${logoClaro ? '' : 'cartao__marca--escuro'}`} aria-hidden="true">
-      {linha1}<br />{linha2}
-    </span>
+    <span class="cartao__marca" aria-hidden="true">{linha1}<br />{linha2}</span>
+    <span class="cartao__legenda">{titulo} — {ano}</span>
   </figure>
-  <div class="cartao__meta">
-    <span class="cartao__indice">{numero}</span>
-    <h2 class="cartao__titulo">{titulo}</h2>
-    <span class="cartao__ano">{ano}</span>
-  </div>
 </a>

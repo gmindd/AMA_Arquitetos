@@ -2,6 +2,10 @@
 // Cabeçalho fixo: logótipo, navegação, CTA e menu de ecrã inteiro (móvel)
 const path = Astro.url.pathname;
 
+// Na home o cabeçalho flutua sobre a fotografia a ecrã inteiro:
+// mistura por diferença garante legibilidade sobre qualquer imagem.
+const sobreHero = path === '/';
+
 const ligacoes = [
   { rotulo: 'Projetos', href: '/', ativo: path === '/' || path.startsWith('/projetos') },
   { rotulo: 'Reabilitação', href: '/reabilitacao', ativo: path.startsWith('/reabilitacao') },
@@ -10,7 +14,7 @@ const ligacoes = [
 ];
 ---
 
-<header class="cabecalho" data-cabecalho>
+<header class={`cabecalho${sobreHero ? ' cabecalho--difusao' : ''}`} data-cabecalho>
   <a class="marca" href="/" aria-label="AMA — página inicial">
     <span class="marca__sigla">AMA</span>
     <span class="marca__nome">André Melissa<br />Arquitetos</span>
