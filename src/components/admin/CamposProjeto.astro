@@ -1,0 +1,117 @@
+---
+// Campos do formulário de projeto, partilhados entre criar e editar.
+import type { Projeto } from '../../lib/store';
+
+interface Props {
+  projeto: Projeto | null;
+}
+
+const { projeto } = Astro.props;
+---
+
+<div class="campo">
+  <label for="titulo">Título</label>
+  <input id="titulo" name="titulo" type="text" value={projeto?.titulo ?? ''} required />
+</div>
+
+<div class="par">
+  <div class="campo">
+    <label for="tipologia">Tipologia</label>
+    <input
+      id="tipologia"
+      name="tipologia"
+      type="text"
+      value={projeto?.tipologia ?? ''}
+      required
+    />
+    <span class="dica">Ex.: Habitação unifamiliar, Reabilitação, Reconversão de espaço</span>
+  </div>
+  <div class="campo">
+    <label for="local">Local</label>
+    <input id="local" name="local" type="text" value={projeto?.local ?? ''} required />
+    <span class="dica">Ex.: Chafé, Viana do Castelo</span>
+  </div>
+</div>
+
+<div class="par">
+  <div class="campo">
+    <label for="area">Área</label>
+    <input id="area" name="area" type="text" value={projeto?.area ?? ''} required />
+    <span class="dica">Ex.: 84 m²</span>
+  </div>
+  <div class="campo">
+    <label for="ano">Ano</label>
+    <input
+      id="ano"
+      name="ano"
+      type="number"
+      value={projeto?.ano ?? new Date().getFullYear()}
+      required
+    />
+  </div>
+</div>
+
+<div class="campo">
+  <label for="capa">Fotografia de capa</label>
+  {projeto?.capa && (
+    <div class="previa">
+      <figure>
+        <img src={projeto.capa} alt="Capa atual" />
+      </figure>
+    </div>
+  )}
+  <input id="capa" name="capa" type="file" accept="image/*" required={!projeto} />
+  {projeto && <span class="dica">Enviar um ficheiro novo substitui a capa atual.</span>}
+</div>
+
+{projeto && projeto.galeria.length > 0 && (
+  <div class="campo">
+    <label>Galeria atual</label>
+    <div class="previa">
+      {projeto.galeria.map((imagem, i) => (
+        <figure>
+          <img src={imagem} alt={`Imagem ${i + 1} da galeria`} />
+          <label>
+            <input type="checkbox" name="galeria-remover" value={imagem} />
+            Remover
+          </label>
+        </figure>
+      ))}
+    </div>
+  </div>
+)}
+
+<div class="campo">
+  <label for="galeria-novas">Adicionar imagens à galeria</label>
+  <input id="galeria-novas" name="galeria-novas" type="file" accept="image/*" multiple />
+</div>
+
+<div class="par">
+  <div class="campo">
+    <label for="variacaoLogo">Variação do logótipo na capa</label>
+    <select id="variacaoLogo" name="variacaoLogo">
+      {['A/MA', 'A/AM', 'MA/A'].map((v) => (
+        <option value={v} selected={(projeto?.variacaoLogo ?? 'A/MA') === v}>{v}</option>
+      ))}
+    </select>
+  </div>
+  <div class="campo">
+    <label for="ordem">Ordem na grelha</label>
+    <input id="ordem" name="ordem" type="number" value={projeto?.ordem ?? 0} />
+    <span class="dica">Números mais baixos aparecem primeiro.</span>
+  </div>
+</div>
+
+<div class="campo">
+  <label>
+    <input type="checkbox" name="logoClaro" checked={projeto?.logoClaro ?? true} />
+    Logótipo e legenda em branco (fotografia escura)
+  </label>
+  <span class="dica">Desligar para tinta preta sobre fotografia clara.</span>
+</div>
+
+<div class="campo">
+  <label for="nota">Nota breve (opcional)</label>
+  <textarea id="nota" name="nota">{projeto?.nota ?? ''}</textarea>
+  <span class="dica">Duas ou três frases curtas. O projeto é o protagonista.</span>
+</div>

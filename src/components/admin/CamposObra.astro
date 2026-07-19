@@ -1,0 +1,58 @@
+---
+// Campos do formulário de obra de reabilitação, partilhados entre criar e editar.
+import type { Obra } from '../../lib/store';
+
+interface Props {
+  obra: Obra | null;
+}
+
+const { obra } = Astro.props;
+---
+
+<div class="campo">
+  <label for="titulo">Título</label>
+  <input id="titulo" name="titulo" type="text" value={obra?.titulo ?? ''} required />
+  <span class="dica">Ex.: Tratamento de fachada de prédio</span>
+</div>
+
+<div class="par">
+  <div class="campo">
+    <label for="local">Local</label>
+    <input id="local" name="local" type="text" value={obra?.local ?? ''} required />
+  </div>
+  <div class="campo">
+    <label for="ano">Ano</label>
+    <input id="ano" name="ano" type="number" value={obra?.ano ?? new Date().getFullYear()} required />
+  </div>
+</div>
+
+<div class="par">
+  <div class="campo">
+    <label for="antes">Fotografia — antes</label>
+    {obra?.antes && (
+      <div class="previa">
+        <figure><img src={obra.antes} alt="Antes, atual" /></figure>
+      </div>
+    )}
+    <input id="antes" name="antes" type="file" accept="image/*" required={!obra} />
+  </div>
+  <div class="campo">
+    <label for="depois">Fotografia — depois</label>
+    {obra?.depois && (
+      <div class="previa">
+        <figure><img src={obra.depois} alt="Depois, atual" /></figure>
+      </div>
+    )}
+    <input id="depois" name="depois" type="file" accept="image/*" required={!obra} />
+  </div>
+</div>
+
+<div class="campo">
+  <label for="ordem">Ordem na lista</label>
+  <input id="ordem" name="ordem" type="number" value={obra?.ordem ?? 0} />
+</div>
+
+<div class="campo">
+  <label for="nota">Nota breve (opcional)</label>
+  <textarea id="nota" name="nota">{obra?.nota ?? ''}</textarea>
+</div>

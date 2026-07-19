@@ -1,0 +1,46 @@
+---
+// Layout do backoffice: mínimo, na linguagem visual do AMA,
+// sem indexação por motores de busca.
+import '../styles/global.css';
+import '../styles/admin.css';
+
+interface Props {
+  title?: string;
+  comSessao?: boolean;
+}
+
+const { title = 'Gestão de conteúdos — AMA', comSessao = true } = Astro.props;
+---
+
+<!doctype html>
+<html lang="pt">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="robots" content="noindex, nofollow" />
+    <title>{title}</title>
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <script>
+      import '../scripts/admin.js';
+    </script>
+  </head>
+  <body class="admin">
+    <header class="admin-topo">
+      <a class="marca" href="/admin" aria-label="Gestão de conteúdos">
+        <span class="marca__sigla">AMA</span>
+        <span class="marca__nome">Gestão de<br />conteúdos</span>
+      </a>
+      {comSessao && (
+        <nav class="admin-topo__nav" aria-label="Backoffice">
+          <a href="/" rel="noopener" target="_blank">Ver o site</a>
+          <form method="POST" action="/admin/sair">
+            <button type="submit">Sair</button>
+          </form>
+        </nav>
+      )}
+    </header>
+    <main class="admin-conteudo wrap">
+      <slot />
+    </main>
+  </body>
+</html>

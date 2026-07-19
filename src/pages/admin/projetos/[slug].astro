@@ -1,0 +1,54 @@
+---
+import Admin from '../../../layouts/Admin.astro';
+import CamposProjeto from '../../../components/admin/CamposProjeto.astro';
+import { obterProjeto, guardarProjeto, apagar } from '../../../lib/store';
+import { projetoDeFormulario, validarProjeto } from '../../../lib/forms';
+
+let projeto = await obterProjeto(Astro.params.slug ?? '');
+if (!projeto) {
+  return Astro.rewrite('/404');
+}
+
+let erros: string[] = [];
+
+if (Astro.request.method === 'POST') {
+  const dados = await Astro.request.formData();
+  if (dados.get('acao') === 'apagar') {
+    await apagar('projetos', projeto.slug);
+    return Astro.redirect('/admin', 303);
+  }
+  const atualizado = await projetoDeFormulario(dados, projeto);
+  erros = validarProjeto(atualizado);
+  if (erros.length === 0) {
+    await guardarProjeto(atualizado);
+    return Astro.redirect('/admin', 303);
+  }
+  projeto = atualizado;
+}
+---
+
+<Admin title={`${projeto.titulo} — Gestão de conteúdos AMA`}>
+  <h1>Editar projeto</h1>
+  {erros.length > 0 && (
+    <div class="aviso">
+      {erros.map((e) => <p>{e}</p>)}
+    </div>
+  )}
+  <form class="admin-form" method="POST" enctype="multipart/form-data">
+    <CamposProjeto projeto={projeto} />
+    <div class="admin-acoes">
+      <button class="cta" type="submit">Guardar alterações</button>
+      <a class="botao-apagar" href={`/projetos/${projeto.slug}`} rel="noopener" target="_blank">
+        Ver no site
+      </a>
+    </div>
+  </form>
+
+  <!-- Apagar é um formulário separado com confirmação no browser -->
+  <form method="POST" data-confirmar="Apagar este projeto de forma definitiva?">
+    <input type="hidden" name="acao" value="apagar" />
+    <div class="admin-acoes">
+      <button class="botao-apagar" type="submit">Apagar projeto</button>
+    </div>
+  </form>
+</Admin>

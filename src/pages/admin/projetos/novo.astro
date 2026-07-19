@@ -1,0 +1,34 @@
+---
+import Admin from '../../../layouts/Admin.astro';
+import CamposProjeto from '../../../components/admin/CamposProjeto.astro';
+import { guardarProjeto } from '../../../lib/store';
+import { projetoDeFormulario, validarProjeto } from '../../../lib/forms';
+
+let erros: string[] = [];
+
+if (Astro.request.method === 'POST') {
+  const dados = await Astro.request.formData();
+  const projeto = await projetoDeFormulario(dados, null);
+  erros = validarProjeto(projeto);
+  if (erros.length === 0) {
+    await guardarProjeto(projeto);
+    return Astro.redirect('/admin', 303);
+  }
+}
+---
+
+<Admin title="Novo projeto — Gestão de conteúdos AMA">
+  <h1>Novo projeto</h1>
+  {erros.length > 0 && (
+    <div class="aviso">
+      {erros.map((e) => <p>{e}</p>)}
+    </div>
+  )}
+  <form class="admin-form" method="POST" enctype="multipart/form-data">
+    <CamposProjeto projeto={null} />
+    <div class="admin-acoes">
+      <button class="cta" type="submit">Publicar projeto</button>
+      <a class="botao-apagar" href="/admin">Cancelar</a>
+    </div>
+  </form>
+</Admin>

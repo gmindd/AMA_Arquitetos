@@ -1,79 +1,65 @@
 # AMA — André Melissa Arquitetos
 
-Website portfólio do gabinete de arquitetura AMA. Fonte de verdade do design e do copy: `AMA_contexto_website.md` (posicionamento, design system, regras duras).
+Website portfólio do gabinete de arquitetura AMA, com backoffice próprio. Fonte de verdade do design e do copy: `AMA_contexto_website.md` (posicionamento, design system, regras duras).
 
 ## Stack
 
-- **[Astro](https://astro.build)** — site estático, rápido, sem JavaScript desnecessário no cliente.
-- **Content Collections** — cada case study é um ficheiro Markdown com esquema validado (`src/content.config.ts`). Um projeto novo que não respeite a ficha técnica falha o build.
-- **[Decap CMS](https://decapcms.org)** — painel de administração em `/admin` para os administradores criarem projetos sem tocar em código. O design não é editável no painel: o conteúdo novo entra sempre nos mesmos templates.
+- **[Astro](https://astro.build) em modo servidor** (adaptador Node, standalone) — as páginas são geradas no servidor a partir do conteúdo em disco; sem rebuilds a cada alteração.
+- **Backoffice próprio em `/admin`** — os administradores criam, editam e apagam projetos e obras de reabilitação em formulários simples. O design não é editável no painel: o conteúdo novo entra sempre nos mesmos templates.
+- **Conteúdo no servidor, fora do git** — os registos (JSON) e as fotografias carregadas vivem no diretório `DATA_DIR` (por omissão `./data`), que em produção é um volume persistente do Coolify.
 
 ## Desenvolvimento
 
 ```bash
 npm install
-npm run dev        # servidor local em http://localhost:4321
-npm run build      # gera o site estático em dist/
+ADMIN_PASSWORD=uma-senha npm run dev    # http://localhost:4321 e /admin
+npm run build && ADMIN_PASSWORD=uma-senha npm start
 ```
 
-## Como adicionar um case study
+No primeiro arranque, se o `DATA_DIR` estiver vazio, é semeado com o conteúdo de exemplo em `./seed` (placeholders SVG a substituir no painel).
 
-### Opção A — painel de administração (recomendado para os administradores)
+## Backoffice
 
-1. Aceder a `/admin` no site publicado e iniciar sessão.
-2. Escolher **Projetos** (ou **Reabilitação**) → **Novo Projeto**.
-3. Preencher os campos: título, tipologia, local, área, ano, capa, galeria.
-4. Publicar. O site é reconstruído automaticamente no deploy.
+- `/admin` — entrada com a palavra-passe definida em `ADMIN_PASSWORD`.
+- **Projetos** — título, tipologia, local, área, ano (a ficha técnica de 4 linhas), fotografia de capa, galeria, variação do logótipo (A/MA · A/AM · MA/A), tinta clara ou escura, ordem na grelha e nota breve.
+- **Reabilitação** — título, local, ano, fotografias antes e depois, ordem e nota.
+- As fotografias carregadas ficam em `DATA_DIR/uploads` e são servidas em `/uploads/…` com cache longa.
+- Substituir um placeholder = editar o registo e carregar a fotografia real; o site reflete a alteração de imediato.
 
-> Requer, no serviço de alojamento, ativação do Netlify Identity + Git Gateway
-> (ou outro backend do Decap CMS — ajustar `public/admin/config.yml`).
+## Deploy no Coolify
 
-### Opção B — ficheiro Markdown
+1. Criar uma aplicação a partir deste repositório; o **Dockerfile** na raiz é detetado automaticamente.
+2. Definir a variável de ambiente **`ADMIN_PASSWORD`** (sem ela o backoffice fica desativado).
+3. Montar um **volume persistente em `/app/data`** — é aqui que ficam os projetos e as fotografias; sem o volume, o conteúdo criado no painel perde-se em cada redeploy.
+4. A aplicação escuta na porta **4321**.
 
-Criar um ficheiro em `src/content/projetos/o-meu-projeto.md`:
-
-```markdown
----
-titulo: Casa na Amorosa
-tipologia: Habitação unifamiliar
-local: Praia da Amorosa, Viana do Castelo
-area: 214 m²
-ano: 2024
-capa: /images/projetos/a-minha-capa.jpg
-galeria:
-  - /images/projetos/imagem-01.jpg
-variacaoLogo: A/MA        # A/MA · A/AM · MA/A — sobreposta na capa
-logoClaro: true           # true = logótipo branco (foto escura)
-ordem: 1                  # posição na grelha
----
-
-Nota breve opcional. Duas ou três frases. O projeto é o protagonista.
-```
-
-As imagens vivem em `public/images/`. As obras de reabilitação seguem o mesmo modelo em `src/content/reabilitacao/` com campos `antes` e `depois`.
+O `Astro.url` confia no `Host`/`X-Forwarded-Host` do proxy (ver `security.allowedDomains` em `astro.config.mjs`); a proteção contra POST de outras origens continua ativa, juntamente com o cookie de sessão `SameSite=Lax`.
 
 ## Estrutura
 
 ```
+seed/                   → conteúdo inicial (copiado para o volume no 1.º arranque)
 src/
-├── content/            → case studies em Markdown (geríveis por admins)
-├── content.config.ts   → esquema validado das coleções
-├── layouts/Base.astro  → documento base (meta, cabeçalho, rodapé)
-├── components/         → Header, Footer, ProjectCard, BeforeAfter
+├── lib/store.ts        → leitura/escrita do conteúdo no DATA_DIR + uploads
+├── lib/auth.ts         → sessão do backoffice (ADMIN_PASSWORD)
+├── lib/forms.ts        → formulários → registos validados
+├── middleware.ts       → proteção das rotas /admin
+├── layouts/            → Base (site) e Admin (backoffice)
+├── components/         → Header, Footer, ProjectCard, BeforeAfter, admin/…
 ├── pages/              → Projetos (home) · projeto · Reabilitação · Sobre · Contactos
-├── scripts/            → animações (revelação, parallax, menu, antes/depois)
-└── styles/global.css   → design system: 3 cores, 1 família, 2 pesos
-public/
-├── admin/              → Decap CMS (painel de administração)
-└── images/             → fotografia dos projetos
+│   ├── admin/          → painel, entrar/sair, formulários
+│   └── uploads/        → serve as fotografias do volume
+├── scripts/            → animações do site + confirmações do backoffice
+└── styles/             → global.css (design system) e admin.css
+Dockerfile              → imagem de produção para o Coolify
 ```
 
 ## Antes de publicar (pendências do brief)
 
-1. Substituir os **placeholders SVG** por fotografia real (6–10 projetos + 2–3 reabilitações antes/depois). Os projetos atuais são exemplos.
+1. Substituir os **placeholders SVG** por fotografia real no `/admin` (6–10 projetos + 2–3 reabilitações antes/depois). Os projetos atuais são exemplos.
 2. Confirmar a **fonte licenciada** com a designer (Margarida Olo) e substituir a pilha de sistema em `--font-sans` (`src/styles/global.css`).
-3. Foto real dos fundadores em `public/images/sobre/`.
-4. Ligar o **formulário de orçamento**: em Netlify funciona sem alterações (`data-netlify`); noutro alojamento, apontar o `action` para um serviço de formulários.
+3. Foto real dos fundadores (página Sobre usa `public/images/sobre/`).
+4. Ligar o **formulário de orçamento** a um serviço de envio (o atributo Netlify não se aplica no Coolify — apontar o `action` para um serviço de formulários ou pedir um endpoint próprio).
 5. Validação final do copy pelo André e pela Melissa.
 
 ## Regras duras respeitadas

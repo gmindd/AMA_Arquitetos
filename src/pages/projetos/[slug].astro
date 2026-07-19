@@ -1,60 +1,53 @@
 ---
-import { getCollection, render } from 'astro:content';
+import { listarProjetos } from '../../lib/store';
 import Base from '../../layouts/Base.astro';
 
-export async function getStaticPaths() {
-  const projetos = (await getCollection('projetos')).sort(
-    (a, b) => a.data.ordem - b.data.ordem || b.data.ano - a.data.ano
-  );
-  return projetos.map((projeto, i) => ({
-    params: { slug: projeto.id },
-    props: {
-      projeto,
-      anterior: projetos[i - 1] ?? null,
-      seguinte: projetos[i + 1] ?? null,
-    },
-  }));
+const projetos = await listarProjetos();
+const indice = projetos.findIndex((p) => p.slug === Astro.params.slug);
+
+if (indice === -1) {
+  return Astro.rewrite('/404');
 }
 
-const { projeto, anterior, seguinte } = Astro.props;
-const { Content } = await render(projeto);
-const d = projeto.data;
-const temNota = projeto.body && projeto.body.trim().length > 0;
+const projeto = projetos[indice];
+const anterior = projetos[indice - 1] ?? null;
+const seguinte = projetos[indice + 1] ?? null;
+const nota = projeto.nota?.trim() ?? '';
 ---
 
 <Base
-  title={`${d.titulo} — AMA | André Melissa Arquitetos`}
-  description={`${d.tipologia}. ${d.local}. ${d.area}. ${d.ano}.`}
+  title={`${projeto.titulo} — AMA | André Melissa Arquitetos`}
+  description={`${projeto.tipologia}. ${projeto.local}. ${projeto.area}. ${projeto.ano}.`}
 >
   <article>
     <header class="projeto-topo wrap">
-      <h1 data-reveal>{d.titulo}</h1>
+      <h1 data-reveal>{projeto.titulo}</h1>
 
       <!-- Ficha técnica: Tipologia · Local · Área · Ano -->
       <dl class="ficha" data-reveal>
-        <div><dt>Tipologia</dt><dd>{d.tipologia}</dd></div>
-        <div><dt>Local</dt><dd>{d.local}</dd></div>
-        <div><dt>Área</dt><dd>{d.area}</dd></div>
-        <div><dt>Ano</dt><dd>{d.ano}</dd></div>
+        <div><dt>Tipologia</dt><dd>{projeto.tipologia}</dd></div>
+        <div><dt>Local</dt><dd>{projeto.local}</dd></div>
+        <div><dt>Área</dt><dd>{projeto.area}</dd></div>
+        <div><dt>Ano</dt><dd>{projeto.ano}</dd></div>
       </dl>
     </header>
 
     <figure class="projeto-hero" data-reveal>
-      <img src={d.capa} alt={`${d.titulo} — ${d.tipologia}`} data-parallax />
+      <img src={projeto.capa} alt={`${projeto.titulo} — ${projeto.tipologia}`} data-parallax />
     </figure>
 
     <div class="projeto-corpo wrap">
-      {temNota && (
+      {nota.length > 0 && (
         <div class="nota" data-reveal>
-          <Content />
+          <p>{nota}</p>
         </div>
       )}
 
-      {d.galeria.length > 0 && (
+      {projeto.galeria.length > 0 && (
         <div class="galeria">
-          {d.galeria.map((imagem, i) => (
+          {projeto.galeria.map((imagem, i) => (
             <figure data-reveal>
-              <img src={imagem} alt={`${d.titulo} — imagem ${i + 1}`} loading="lazy" />
+              <img src={imagem} alt={`${projeto.titulo} — imagem ${i + 1}`} loading="lazy" />
             </figure>
           ))}
         </div>
@@ -63,15 +56,15 @@ const temNota = projeto.body && projeto.body.trim().length > 0;
 
     <nav class="projeto-nav wrap" aria-label="Outros projetos">
       {anterior && (
-        <a href={`/projetos/${anterior.id}`} data-sentido="anterior">
+        <a href={`/projetos/${anterior.slug}`} data-sentido="anterior">
           <span class="rotulo">Anterior</span>
-          <strong>{anterior.data.titulo}</strong>
+          <strong>{anterior.titulo}</strong>
         </a>
       )}
       {seguinte && (
-        <a href={`/projetos/${seguinte.id}`} data-sentido="seguinte">
+        <a href={`/projetos/${seguinte.slug}`} data-sentido="seguinte">
           <span class="rotulo">Seguinte</span>
-          <strong>{seguinte.data.titulo}</strong>
+          <strong>{seguinte.titulo}</strong>
         </a>
       )}
     </nav>

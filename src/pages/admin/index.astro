@@ -1,0 +1,49 @@
+---
+import Admin from '../../layouts/Admin.astro';
+import { listarProjetos, listarObras } from '../../lib/store';
+
+const projetos = await listarProjetos();
+const obras = await listarObras();
+---
+
+<Admin>
+  <h1>Conteúdos</h1>
+
+  <h2>Projetos</h2>
+  <p class="dica">
+    A ficha técnica de cada projeto tem sempre 4 linhas: tipologia, local, área e ano.
+  </p>
+  <div class="admin-lista">
+    {projetos.map((p) => (
+      <div class="admin-lista__linha">
+        <img src={p.capa} alt="" />
+        <div>
+          <strong>{p.titulo}</strong><br />
+          <span class="meta">{p.tipologia} · {p.ano} · ordem {p.ordem}</span>
+        </div>
+        <a class="acao" href={`/admin/projetos/${p.slug}`}>Editar</a>
+      </div>
+    ))}
+  </div>
+  <div class="admin-acoes">
+    <a class="cta" href="/admin/projetos/novo">Novo projeto</a>
+  </div>
+
+  <h2>Reabilitação</h2>
+  <p class="dica">Registo documental antes e depois, executado pela equipa própria.</p>
+  <div class="admin-lista">
+    {obras.map((o) => (
+      <div class="admin-lista__linha">
+        <img src={o.depois} alt="" />
+        <div>
+          <strong>{o.titulo}</strong><br />
+          <span class="meta">{o.local} · {o.ano} · ordem {o.ordem}</span>
+        </div>
+        <a class="acao" href={`/admin/reabilitacao/${o.slug}`}>Editar</a>
+      </div>
+    ))}
+  </div>
+  <div class="admin-acoes">
+    <a class="cta" href="/admin/reabilitacao/novo">Nova obra de reabilitação</a>
+  </div>
+</Admin>

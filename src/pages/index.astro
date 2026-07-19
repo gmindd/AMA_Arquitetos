@@ -1,12 +1,10 @@
 ---
-import { getCollection } from 'astro:content';
+import { listarProjetos } from '../lib/store';
 import Base from '../layouts/Base.astro';
 import ProjectCard from '../components/ProjectCard.astro';
 
 // Home = grelha de projetos, sem texto de abertura. Logótipo e menu bastam.
-const projetos = (await getCollection('projetos')).sort(
-  (a, b) => a.data.ordem - b.data.ordem || b.data.ano - a.data.ano
-);
+const projetos = await listarProjetos();
 ---
 
 <Base>
@@ -17,17 +15,17 @@ const projetos = (await getCollection('projetos')).sort(
     {projetos.map((p, i) => (
       <a
         class={`hero__slide${i === 0 ? ' ativo' : ''}`}
-        href={`/projetos/${p.id}`}
+        href={`/projetos/${p.slug}`}
         data-hero-slide
         tabindex={i === 0 ? undefined : -1}
         aria-hidden={i === 0 ? undefined : 'true'}
       >
         <img
-          src={p.data.capa}
-          alt={`${p.data.titulo} — ${p.data.tipologia}`}
+          src={p.capa}
+          alt={`${p.titulo} — ${p.tipologia}`}
           loading={i === 0 ? 'eager' : 'lazy'}
         />
-        <p class="hero__legenda">{p.data.titulo} — {p.data.local}, {p.data.ano}</p>
+        <p class="hero__legenda">{p.titulo} — {p.local}, {p.ano}</p>
       </a>
     ))}
     <button class="hero__seta" type="button" data-hero-seta aria-label="Ver todos os projetos">
@@ -38,13 +36,13 @@ const projetos = (await getCollection('projetos')).sort(
   <section class="grelha-projetos" id="projetos" aria-label="Projetos">
     {projetos.map((p, i) => (
       <ProjectCard
-        href={`/projetos/${p.id}`}
-        titulo={p.data.titulo}
-        tipologia={p.data.tipologia}
-        ano={p.data.ano}
-        capa={p.data.capa}
-        variacaoLogo={p.data.variacaoLogo}
-        logoClaro={p.data.logoClaro}
+        href={`/projetos/${p.slug}`}
+        titulo={p.titulo}
+        tipologia={p.tipologia}
+        ano={p.ano}
+        capa={p.capa}
+        variacaoLogo={p.variacaoLogo}
+        logoClaro={p.logoClaro}
         indice={i}
       />
     ))}

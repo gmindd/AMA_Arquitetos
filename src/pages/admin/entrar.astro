@@ -1,0 +1,43 @@
+---
+import Admin from '../../layouts/Admin.astro';
+import { backofficeAtivo, senhaCorreta, iniciarSessao, sessaoValida, pedidoSeguro } from '../../lib/auth';
+
+// Já com sessão iniciada: seguir para o painel
+if (sessaoValida(Astro.cookies)) {
+  return Astro.redirect('/admin');
+}
+
+let erro = '';
+
+if (Astro.request.method === 'POST') {
+  const dados = await Astro.request.formData();
+  const senha = String(dados.get('senha') ?? '');
+  if (senhaCorreta(senha)) {
+    iniciarSessao(Astro.cookies, pedidoSeguro(Astro.url, Astro.request));
+    return Astro.redirect('/admin');
+  }
+  erro = 'Palavra-passe incorreta.';
+}
+---
+
+<Admin title="Entrar — Gestão de conteúdos AMA" comSessao={false}>
+  <div class="admin-entrar">
+    <h1>Entrar</h1>
+    {!backofficeAtivo() && (
+      <p class="aviso">
+        O backoffice está desativado: falta definir a variável de ambiente
+        ADMIN_PASSWORD no servidor.
+      </p>
+    )}
+    {erro && <p class="aviso">{erro}</p>}
+    <form class="admin-form" method="POST">
+      <div class="campo">
+        <label for="senha">Palavra-passe</label>
+        <input id="senha" name="senha" type="password" autocomplete="current-password" required />
+      </div>
+      <div class="admin-acoes">
+        <button class="cta" type="submit">Entrar</button>
+      </div>
+    </form>
+  </div>
+</Admin>
