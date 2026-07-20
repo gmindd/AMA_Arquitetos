@@ -16,7 +16,7 @@ const nota = projeto.nota?.trim() ?? '';
 ---
 
 <Base
-  title={`${projeto.titulo} — AMA | André Melissa Arquitetos`}
+  title={`${projeto.titulo} · AMA André Melissa Arquitetos`}
   description={`${projeto.tipologia}. ${projeto.local}. ${projeto.area}. ${projeto.ano}.`}
 >
   <article>
@@ -33,7 +33,7 @@ const nota = projeto.nota?.trim() ?? '';
     </header>
 
     <figure class="projeto-hero" data-reveal>
-      <img src={projeto.capa} alt={`${projeto.titulo} — ${projeto.tipologia}`} data-parallax />
+      <img src={projeto.capa} alt={`${projeto.titulo}, ${projeto.tipologia}`} data-parallax />
     </figure>
 
     <div class="projeto-corpo wrap">
@@ -47,7 +47,7 @@ const nota = projeto.nota?.trim() ?? '';
         <div class="galeria">
           {projeto.galeria.map((imagem, i) => (
             <figure data-reveal>
-              <img src={imagem} alt={`${projeto.titulo} — imagem ${i + 1}`} loading="lazy" />
+              <img src={imagem} alt={`${projeto.titulo}, imagem ${i + 1}`} loading="lazy" />
             </figure>
           ))}
         </div>

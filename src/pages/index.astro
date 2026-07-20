@@ -12,7 +12,7 @@ const variante = (v: 'A/MA' | 'A/AM' | 'MA/A') => logos[chaveVariante(v)];
 ---
 
 <Base>
-  <h1 class="oculto">Projetos — AMA, André Melissa Arquitetos</h1>
+  <h1 class="oculto">Projetos · AMA André Melissa Arquitetos</h1>
 
   <!-- Abertura a ecrã inteiro: os projetos em rotação lenta, sem texto de abertura -->
   <section class="hero" data-hero aria-label="Projetos em destaque">
@@ -26,10 +26,10 @@ const variante = (v: 'A/MA' | 'A/AM' | 'MA/A') => logos[chaveVariante(v)];
       >
         <img
           src={p.capa}
-          alt={`${p.titulo} — ${p.tipologia}`}
+          alt={`${p.titulo}, ${p.tipologia}`}
           loading={i === 0 ? 'eager' : 'lazy'}
         />
-        <p class="hero__legenda">{p.titulo} — {p.local}, {p.ano}</p>
+        <p class="hero__legenda">{p.titulo} · {p.local}, {p.ano}</p>
       </a>
     ))}
     <button class="hero__seta" type="button" data-hero-seta aria-label="Ver todos os projetos">

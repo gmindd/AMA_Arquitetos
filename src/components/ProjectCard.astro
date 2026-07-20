@@ -22,7 +22,7 @@ const [linha1, linha2] = variacaoLogo.split('/');
 <a class={`cartao ${logoClaro ? '' : 'cartao--tinta-escura'}`} href={href} data-reveal>
   <figure class="cartao__media">
     <!-- Substituir pelo ficheiro real do projeto via /admin ou public/images -->
-    <img src={capa} alt={`${titulo} — ${tipologia}`} loading={indice < 2 ? 'eager' : 'lazy'} />
+    <img src={capa} alt={`${titulo}, ${tipologia}`} loading={indice < 2 ? 'eager' : 'lazy'} />
     {varImg ? (
       <span
         class="cartao__marca cartao__marca--img"
@@ -32,6 +32,6 @@ const [linha1, linha2] = variacaoLogo.split('/');
     ) : (
       <span class="cartao__marca" aria-hidden="true">{linha1}<br />{linha2}</span>
     )}
-    <span class="cartao__legenda">{titulo} — {ano}</span>
+    <span class="cartao__legenda">{titulo} · {ano}</span>
   </figure>
 </a>

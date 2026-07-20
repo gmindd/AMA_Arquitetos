@@ -11,8 +11,8 @@ const { titulo, antes, depois } = Astro.props;
 ---
 
 <div class="ba" data-ba>
-  <img src={antes} alt={`${titulo} — antes da intervenção`} loading="lazy" />
-  <img class="ba__img--depois" src={depois} alt={`${titulo} — depois da intervenção`} loading="lazy" />
+  <img src={antes} alt={`${titulo}, antes da intervenção`} loading="lazy" />
+  <img class="ba__img--depois" src={depois} alt={`${titulo}, depois da intervenção`} loading="lazy" />
   <div class="ba__linha" aria-hidden="true"></div>
   <span class="ba__etiqueta ba__etiqueta--antes" aria-hidden="true">Antes</span>
   <span class="ba__etiqueta ba__etiqueta--depois" aria-hidden="true">Depois</span>
@@ -22,6 +22,6 @@ const { titulo, antes, depois } = Astro.props;
     min="0"
     max="100"
     value="50"
-    aria-label={`Comparar antes e depois — ${titulo}`}
+    aria-label={`Comparar antes e depois de ${titulo}`}
   />
 </div>
