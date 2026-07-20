@@ -44,7 +44,7 @@ if (Astro.request.method === 'POST') {
         logos[slot.chave] = await guardarUpload(ficheiro);
       }
     }
-    await guardarDefinicoes({ logos });
+    await guardarDefinicoes({ ...atual, logos });
     return Astro.redirect('/admin/marca?ok=1', 303);
   } catch (e) {
     if (e instanceof ErroUpload) erro = e.message;

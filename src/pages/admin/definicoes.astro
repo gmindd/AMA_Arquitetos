@@ -1,0 +1,58 @@
+---
+import Admin from '../../layouts/Admin.astro';
+import { obterDefinicoes, guardarDefinicoes } from '../../lib/store';
+import { smtpConfigurado } from '../../lib/email';
+
+let guardado = Astro.url.searchParams.has('ok');
+
+if (Astro.request.method === 'POST') {
+  const dados = await Astro.request.formData();
+  const atual = await obterDefinicoes();
+  const emailDestino = String(dados.get('emailDestino') ?? '').trim();
+  await guardarDefinicoes({ ...atual, emailDestino: emailDestino || undefined });
+  return Astro.redirect('/admin/definicoes?ok=1', 303);
+}
+
+const definicoes = await obterDefinicoes();
+const smtp = smtpConfigurado();
+---
+
+<Admin title="Definições · Gestão de conteúdos AMA">
+  <h1>Definições</h1>
+
+  {guardado && <div class="aviso">Alterações guardadas.</div>}
+
+  <h2>Pedidos de orçamento</h2>
+  <p class="dica" style="max-width:46rem">
+    Escolha o email para onde seguem os pedidos enviados no formulário de
+    contactos. O envio é feito a partir de uma conta dedicada, configurada no
+    servidor. Se o envio falhar, o pedido fica guardado no servidor para não
+    se perder.
+  </p>
+
+  <form class="admin-form" method="POST">
+    <div class="campo">
+      <label for="emailDestino">Email de destino</label>
+      <input
+        id="emailDestino"
+        name="emailDestino"
+        type="email"
+        placeholder="andremelissaarquitetos@gmail.com"
+        value={definicoes.emailDestino ?? ''}
+      />
+      <span class="dica">Deixe em branco para desativar o envio por email.</span>
+    </div>
+
+    <div class="aviso" style="max-width:46rem">
+      <strong>Estado do envio:</strong>
+      {smtp
+        ? ' conta de envio configurada no servidor.'
+        : ' conta de envio ainda não configurada no servidor (variáveis SMTP). Até lá, os pedidos ficam guardados no servidor.'}
+    </div>
+
+    <div class="admin-acoes">
+      <button class="cta" type="submit">Guardar</button>
+      <a class="botao-apagar" href="/admin">Voltar</a>
+    </div>
+  </form>
+</Admin>

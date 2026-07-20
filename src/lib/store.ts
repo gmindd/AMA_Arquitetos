@@ -57,6 +57,18 @@ export type ChaveLogo = 'principal' | 'icone' | 'varAMA' | 'varAAM' | 'varMAA';
 
 export interface Definicoes {
   logos: Partial<Record<ChaveLogo, string>>;
+  // Email para onde seguem os pedidos de orçamento (escolhido no backoffice)
+  emailDestino?: string;
+}
+
+// Pedido de orçamento submetido no formulário de contactos
+export interface PedidoOrcamento {
+  nome: string;
+  contacto: string;
+  tipo: string;
+  localizacao: string;
+  mensagem: string;
+  data: string;
 }
 
 // Mapeia a variação escolhida num projeto para a chave do logótipo
@@ -192,10 +204,22 @@ export async function obterDefinicoes(): Promise<Definicoes> {
   await garantirDataDir();
   try {
     const bruto = JSON.parse(await fs.readFile(path.join(DATA_DIR, 'definicoes.json'), 'utf8'));
-    return { logos: { ...(bruto?.logos ?? {}) } };
+    return {
+      logos: { ...(bruto?.logos ?? {}) },
+      emailDestino: typeof bruto?.emailDestino === 'string' ? bruto.emailDestino : undefined,
+    };
   } catch {
     return { logos: {} };
   }
+}
+
+// Guarda um pedido de orçamento em disco (rede de segurança: usado quando o
+// envio por email falha ou ainda não está configurado, para não perder o lead).
+export async function guardarMensagem(pedido: PedidoOrcamento): Promise<void> {
+  const dir = path.join(DATA_DIR, 'mensagens');
+  await fs.mkdir(dir, { recursive: true });
+  const nome = `${Date.now()}-${slugificar(pedido.nome).slice(0, 40)}.json`;
+  await fs.writeFile(path.join(dir, nome), JSON.stringify(pedido, null, 2), 'utf8');
 }
 
 export async function guardarDefinicoes(d: Definicoes): Promise<void> {

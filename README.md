@@ -26,6 +26,7 @@ No primeiro arranque, se o `DATA_DIR` estiver vazio, é semeado com o conteúdo 
 - **Ocultar / mostrar** — cada projeto e obra tem um interruptor de visibilidade (e um botão rápido Ocultar/Mostrar na lista). Ocultar remove o item do site (grelha, hero e página própria dão 404) sem o apagar — é assim que se reduz ou aumenta o número de projetos visíveis.
 - **Marca e logótipos** (`/admin/marca`) — carregar os logótipos reais (lockup principal, ícone/favicon e variações compostas A/MA · A/AM · MA/A). Passam a ser usados em todo o site — cabeçalho, rodapé, favicon e capas dos projetos — com recuo ao lettering tipográfico quando não há ficheiro. Use SVG ou PNG com fundo transparente: cada logótipo é recolorido automaticamente para branco ou preto conforme o fundo.
 - **Compressão automática** — cada imagem carregada é reduzida no servidor até, no máximo, **1 MB** (fotografia convertida para WebP com dimensão/qualidade decrescentes; logótipos SVG/PNG mantêm nitidez e transparência).
+- **Definições** (`/admin/definicoes`) — escolher o **email de destino** dos pedidos de orçamento. O envio é feito por SMTP a partir de uma conta dedicada configurada no servidor (ver deploy). Se o envio falhar ou ainda não estiver configurado, cada pedido é guardado em `DATA_DIR/mensagens` para não se perder.
 - As fotografias e logótipos ficam em `DATA_DIR/uploads` e são servidos em `/uploads/…` com cache longa; as definições da marca em `DATA_DIR/definicoes.json`.
 - Substituir um placeholder = editar o registo e carregar a fotografia real; o site reflete a alteração de imediato.
 
@@ -33,8 +34,21 @@ No primeiro arranque, se o `DATA_DIR` estiver vazio, é semeado com o conteúdo 
 
 1. Criar uma aplicação a partir deste repositório; o **Dockerfile** na raiz é detetado automaticamente.
 2. Definir a variável de ambiente **`ADMIN_PASSWORD`** (sem ela o backoffice fica desativado).
-3. Montar um **volume persistente em `/app/data`** — é aqui que ficam os projetos e as fotografias; sem o volume, o conteúdo criado no painel perde-se em cada redeploy.
+3. Montar um **volume persistente em `/app/data`** — é aqui que ficam os projetos, as fotografias e os pedidos de orçamento; sem o volume, o conteúdo criado no painel perde-se em cada redeploy.
 4. A aplicação escuta na porta **4321**.
+
+### Envio de email (formulário de orçamento)
+
+Para o formulário enviar por email, definir as variáveis SMTP de uma conta de envio dedicada (o destino escolhe-se em `/admin/definicoes`):
+
+- `SMTP_HOST` — servidor SMTP (ex.: `smtp.gmail.com`)
+- `SMTP_PORT` — `587` (STARTTLS) ou `465` (SSL); por omissão `587`
+- `SMTP_USER` — endereço da conta de envio
+- `SMTP_PASS` — palavra-passe de aplicação da conta de envio
+- `SMTP_FROM` — opcional, remetente a apresentar (por omissão, `SMTP_USER`)
+- `SMTP_SECURE` — opcional, `true` para porta 465
+
+Sem estas variáveis (ou se o envio falhar), os pedidos ficam guardados em `DATA_DIR/mensagens`.
 
 O `Astro.url` confia no `Host`/`X-Forwarded-Host` do proxy (ver `security.allowedDomains` em `astro.config.mjs`); a proteção contra POST de outras origens continua ativa, juntamente com o cookie de sessão `SameSite=Lax`.
 

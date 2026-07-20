@@ -230,6 +230,12 @@
   margin-bottom: 0;
 }
 
+.admin-cabecalho__acoes {
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
 /* Estado e ações rápidas de cada linha */
 .admin-lista__linha--oculto {
   opacity: 0.55;

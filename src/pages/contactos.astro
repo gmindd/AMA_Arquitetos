@@ -1,5 +1,65 @@
 ---
 import Base from '../layouts/Base.astro';
+import { obterDefinicoes, guardarMensagem, type PedidoOrcamento } from '../lib/store';
+import { smtpConfigurado, enviarPedido } from '../lib/email';
+
+const definicoes = await obterDefinicoes();
+
+const TIPOS = ['Projeto de arquitetura', 'Reabilitação', 'Ambos'];
+
+let erros: string[] = [];
+let enviado = Astro.url.searchParams.has('enviado');
+let valores = { nome: '', contacto: '', tipo: TIPOS[0], localizacao: '', mensagem: '' };
+
+if (Astro.request.method === 'POST') {
+  const dados = await Astro.request.formData();
+
+  // Honeypot: se o campo escondido vier preenchido, é um bot — finge sucesso
+  if (String(dados.get('empresa') ?? '').trim() !== '') {
+    return Astro.redirect('/contactos?enviado=1', 303);
+  }
+
+  valores = {
+    nome: String(dados.get('nome') ?? '').trim(),
+    contacto: String(dados.get('contacto') ?? '').trim(),
+    tipo: TIPOS.includes(String(dados.get('tipo'))) ? String(dados.get('tipo')) : TIPOS[0],
+    localizacao: String(dados.get('localizacao') ?? '').trim(),
+    mensagem: String(dados.get('mensagem') ?? '').trim(),
+  };
+
+  if (!valores.nome) erros.push('Indique o nome.');
+  if (!valores.contacto) erros.push('Indique um contacto.');
+  if (!valores.localizacao) erros.push('Indique a localização.');
+  if (!valores.mensagem) erros.push('Escreva uma mensagem.');
+
+  if (erros.length === 0) {
+    const pedido: PedidoOrcamento = { ...valores, data: new Date().toISOString() };
+    let ok = false;
+
+    // Primeiro tenta enviar por email para o destino escolhido no backoffice
+    if (definicoes.emailDestino && smtpConfigurado()) {
+      try {
+        await enviarPedido(pedido, definicoes.emailDestino);
+        ok = true;
+      } catch (e) {
+        console.error('Falha no envio do pedido por email:', e);
+      }
+    }
+
+    // Rede de segurança: se não foi enviado, guarda em disco para não se perder
+    if (!ok) {
+      try {
+        await guardarMensagem(pedido);
+        ok = true;
+      } catch (e) {
+        console.error('Falha ao guardar o pedido em disco:', e);
+      }
+    }
+
+    if (ok) return Astro.redirect('/contactos?enviado=1', 303);
+    erros.push('Não foi possível enviar agora. Contacte-nos por email ou telefone.');
+  }
+}
 ---
 
 <Base title="Contactos · AMA André Melissa Arquitetos">
@@ -32,44 +92,48 @@ import Base from '../layouts/Base.astro';
       </div>
     </div>
 
-    <!-- Formulário de orçamento: 5 campos, nem mais um -->
-    <form
-      class="formulario"
-      name="orcamento"
-      method="POST"
-      data-netlify="true"
-      netlify-honeypot="empresa"
-      data-reveal
-    >
-      <p class="oculto">
-        <label>Não preencher: <input name="empresa" /></label>
-      </p>
-      <div class="campo">
-        <label for="nome">Nome</label>
-        <input id="nome" name="nome" type="text" autocomplete="name" required />
+    {enviado ? (
+      <div class="formulario" data-reveal>
+        <p class="form-sucesso">Pedido recebido. Respondemos em 24 a 48h úteis.</p>
+        <p class="prazo"><a href="/contactos">Enviar outro pedido</a></p>
       </div>
-      <div class="campo">
-        <label for="contacto">Contacto</label>
-        <input id="contacto" name="contacto" type="text" autocomplete="tel" required />
-      </div>
-      <div class="campo">
-        <label for="tipo">Tipo</label>
-        <select id="tipo" name="tipo" required>
-          <option value="Projeto de arquitetura">Projeto de arquitetura</option>
-          <option value="Reabilitação">Reabilitação</option>
-          <option value="Ambos">Ambos</option>
-        </select>
-      </div>
-      <div class="campo">
-        <label for="localizacao">Localização</label>
-        <input id="localizacao" name="localizacao" type="text" required />
-      </div>
-      <div class="campo">
-        <label for="mensagem">Mensagem</label>
-        <textarea id="mensagem" name="mensagem" required></textarea>
-      </div>
-      <button class="cta" type="submit">Pedir orçamento</button>
-      <p class="prazo">Respondemos em 24 a 48h úteis.</p>
-    </form>
+    ) : (
+      <!-- Formulário de orçamento: 5 campos, nem mais um -->
+      <form class="formulario" name="orcamento" method="POST" data-reveal>
+        {erros.length > 0 && (
+          <div class="form-erro">
+            {erros.map((e) => <p>{e}</p>)}
+          </div>
+        )}
+
+        <p class="oculto" aria-hidden="true">
+          <label>Não preencher: <input name="empresa" tabindex="-1" autocomplete="off" /></label>
+        </p>
+        <div class="campo">
+          <label for="nome">Nome</label>
+          <input id="nome" name="nome" type="text" autocomplete="name" value={valores.nome} required />
+        </div>
+        <div class="campo">
+          <label for="contacto">Contacto</label>
+          <input id="contacto" name="contacto" type="text" autocomplete="tel" value={valores.contacto} required />
+        </div>
+        <div class="campo">
+          <label for="tipo">Tipo</label>
+          <select id="tipo" name="tipo" required>
+            {TIPOS.map((t) => <option value={t} selected={valores.tipo === t}>{t}</option>)}
+          </select>
+        </div>
+        <div class="campo">
+          <label for="localizacao">Localização</label>
+          <input id="localizacao" name="localizacao" type="text" value={valores.localizacao} required />
+        </div>
+        <div class="campo">
+          <label for="mensagem">Mensagem</label>
+          <textarea id="mensagem" name="mensagem" required>{valores.mensagem}</textarea>
+        </div>
+        <button class="cta" type="submit">Pedir orçamento</button>
+        <p class="prazo">Respondemos em 24 a 48h úteis.</p>
+      </form>
+    )}
   </section>
 </Base>
