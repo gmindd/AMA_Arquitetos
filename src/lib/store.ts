@@ -55,10 +55,20 @@ export class ErroUpload extends Error {}
 // varAMA/varAAM/varMAA = variações compostas usadas sobre fotografia.
 export type ChaveLogo = 'principal' | 'icone' | 'varAMA' | 'varAAM' | 'varMAA';
 
+// Conta de envio ligada por OAuth (Google/Gmail) a partir do backoffice
+export interface Envio {
+  provedor: 'google';
+  email: string;
+  refreshToken: string;
+  ligadoEm: string;
+}
+
 export interface Definicoes {
   logos: Partial<Record<ChaveLogo, string>>;
   // Email para onde seguem os pedidos de orçamento (escolhido no backoffice)
   emailDestino?: string;
+  // Conta que envia os alertas, ligada por OAuth no backoffice
+  envio?: Envio;
 }
 
 // Pedido de orçamento submetido no formulário de contactos
@@ -207,6 +217,8 @@ export async function obterDefinicoes(): Promise<Definicoes> {
     return {
       logos: { ...(bruto?.logos ?? {}) },
       emailDestino: typeof bruto?.emailDestino === 'string' ? bruto.emailDestino : undefined,
+      envio:
+        bruto?.envio && typeof bruto.envio.refreshToken === 'string' ? bruto.envio : undefined,
     };
   } catch {
     return { logos: {} };

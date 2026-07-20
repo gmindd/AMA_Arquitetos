@@ -1,31 +1,67 @@
-// Envio dos pedidos de orçamento por email, a partir de uma conta dedicada.
-// As credenciais SMTP vêm de variáveis de ambiente (Coolify), nunca do
-// backoffice — o backoffice só define o email de destino.
-//
-// Variáveis: SMTP_HOST, SMTP_PORT (587), SMTP_USER, SMTP_PASS,
-//            SMTP_FROM (opcional), SMTP_SECURE (opcional, 'true' para 465).
+// Envio dos pedidos de orçamento por email.
+// Método principal: conta Gmail ligada por OAuth no backoffice (nodemailer
+// trata da renovação do token de acesso a partir do refresh token guardado).
+// Alternativa: SMTP por variáveis de ambiente, se existir.
 
 import nodemailer from 'nodemailer';
-import type { PedidoOrcamento } from './store';
+import type { Definicoes, PedidoOrcamento } from './store';
+import { oauthConfigurado } from './oauth';
 
-// O envio só está disponível quando as credenciais essenciais existem
+// Envio por SMTP disponível via variáveis de ambiente?
 export function smtpConfigurado(): boolean {
   return Boolean(process.env.SMTP_HOST && process.env.SMTP_USER && process.env.SMTP_PASS);
 }
 
+// Há algum método de envio pronto a usar para estas definições?
+export function envioDisponivel(definicoes: Definicoes): boolean {
+  return Boolean(definicoes.envio && oauthConfigurado()) || smtpConfigurado();
+}
+
 const EMAIL_RE = /^[^@\s]+@[^@\s]+\.[^@\s]+$/;
 
-// Envia um pedido de orçamento para o email de destino escolhido no backoffice
-export async function enviarPedido(pedido: PedidoOrcamento, destino: string): Promise<void> {
-  const porta = Number(process.env.SMTP_PORT ?? 587);
-  const transporte = nodemailer.createTransport({
-    host: process.env.SMTP_HOST,
-    port: porta,
-    secure: process.env.SMTP_SECURE === 'true' || porta === 465,
-    auth: { user: process.env.SMTP_USER, pass: process.env.SMTP_PASS },
-  });
+// Constrói o transporte de acordo com o método disponível
+function construirTransporte(definicoes: Definicoes) {
+  if (definicoes.envio && oauthConfigurado()) {
+    return {
+      transporte: nodemailer.createTransport({
+        service: 'gmail',
+        auth: {
+          type: 'OAuth2' as const,
+          user: definicoes.envio.email,
+          clientId: process.env.GOOGLE_CLIENT_ID,
+          clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+          refreshToken: definicoes.envio.refreshToken,
+        },
+      }),
+      de: definicoes.envio.email,
+    };
+  }
 
-  const de = process.env.SMTP_FROM || process.env.SMTP_USER;
+  if (smtpConfigurado()) {
+    const porta = Number(process.env.SMTP_PORT ?? 587);
+    return {
+      transporte: nodemailer.createTransport({
+        host: process.env.SMTP_HOST,
+        port: porta,
+        secure: process.env.SMTP_SECURE === 'true' || porta === 465,
+        auth: { user: process.env.SMTP_USER, pass: process.env.SMTP_PASS },
+      }),
+      de: process.env.SMTP_FROM || process.env.SMTP_USER || '',
+    };
+  }
+
+  return null;
+}
+
+// Envia um pedido de orçamento. O destino é o email escolhido no backoffice;
+// se estiver vazio, segue para a própria conta ligada.
+export async function enviarPedido(pedido: PedidoOrcamento, definicoes: Definicoes): Promise<void> {
+  const config = construirTransporte(definicoes);
+  if (!config) throw new Error('Nenhum método de envio configurado.');
+
+  const destino = definicoes.emailDestino || config.de;
+  if (!destino) throw new Error('Sem email de destino.');
+
   const corpo = [
     `Nome: ${pedido.nome}`,
     `Contacto: ${pedido.contacto}`,
@@ -37,11 +73,10 @@ export async function enviarPedido(pedido: PedidoOrcamento, destino: string): Pr
     `Recebido em ${new Date(pedido.data).toLocaleString('pt-PT')}`,
   ].join('\n');
 
-  // Se o contacto for um email, permite responder diretamente ao cliente
   const responderA = EMAIL_RE.test(pedido.contacto) ? pedido.contacto : undefined;
 
-  await transporte.sendMail({
-    from: `AMA (site) <${de}>`,
+  await config.transporte.sendMail({
+    from: `AMA (site) <${config.de}>`,
     to: destino,
     replyTo: responderA,
     subject: `Novo pedido de orçamento (${pedido.tipo})`,

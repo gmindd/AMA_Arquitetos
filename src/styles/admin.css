@@ -257,6 +257,25 @@
   vertical-align: middle;
 }
 
+/* Etiqueta preenchida para estados positivos (conta ligada) */
+.etiqueta-ok {
+  display: inline-block;
+  margin-left: 0.6rem;
+  font-size: var(--text-xs);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  background: var(--black);
+  color: var(--bone);
+  padding: 0.05rem 0.4rem;
+  vertical-align: middle;
+}
+
+.envio-estado {
+  border-top: 1px solid var(--hairline);
+  margin-bottom: 1.5rem;
+}
+
 .admin-lista__acoes {
   margin-left: auto;
   display: flex;

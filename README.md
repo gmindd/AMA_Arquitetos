@@ -39,16 +39,23 @@ No primeiro arranque, se o `DATA_DIR` estiver vazio, é semeado com o conteúdo 
 
 ### Envio de email (formulário de orçamento)
 
-Para o formulário enviar por email, definir as variáveis SMTP de uma conta de envio dedicada (o destino escolhe-se em `/admin/definicoes`):
+O formulário envia os pedidos a partir de uma conta Gmail ligada **num clique** no backoffice (`/admin/definicoes` → **Ligar conta Gmail**). Para isso, é preciso registar a aplicação OAuth uma única vez e definir duas variáveis de ambiente.
 
-- `SMTP_HOST` — servidor SMTP (ex.: `smtp.gmail.com`)
-- `SMTP_PORT` — `587` (STARTTLS) ou `465` (SSL); por omissão `587`
-- `SMTP_USER` — endereço da conta de envio
-- `SMTP_PASS` — palavra-passe de aplicação da conta de envio
-- `SMTP_FROM` — opcional, remetente a apresentar (por omissão, `SMTP_USER`)
-- `SMTP_SECURE` — opcional, `true` para porta 465
+**Configuração única da aplicação OAuth (Google Cloud):**
 
-Sem estas variáveis (ou se o envio falhar), os pedidos ficam guardados em `DATA_DIR/mensagens`.
+1. Em [console.cloud.google.com](https://console.cloud.google.com), criar um projeto.
+2. **APIs e serviços → Ecrã de consentimento OAuth**: tipo **Externo**; adicionar o âmbito `https://www.googleapis.com/auth/gmail.send`; **publicar a app em Produção** (importante: em modo de teste os tokens expiram ao fim de 7 dias).
+3. **Credenciais → Criar credenciais → ID de cliente OAuth**, tipo **Aplicação Web**. Em *URIs de redireccionamento autorizados*, adicionar:
+   `https://<o-vosso-dominio>/admin/oauth/google/callback`
+4. Copiar o **Client ID** e o **Client Secret** para as variáveis de ambiente:
+   - `GOOGLE_CLIENT_ID`
+   - `GOOGLE_CLIENT_SECRET`
+
+Depois, no backoffice, clicar **Ligar conta Gmail** e autorizar a conta de envio. Na primeira autorização a Google mostra um ecrã de *app não verificada* (Avançado → continuar) enquanto a app não for verificada pela Google. A ligação é reconfigurável a qualquer momento (**Voltar a ligar** / **Desligar**). O **email de destino** dos alertas escolhe-se também em `/admin/definicoes` (em branco, seguem para a própria conta ligada).
+
+Sem conta ligada (ou se o envio falhar), os pedidos ficam guardados em `DATA_DIR/mensagens` para não se perderem.
+
+> Alternativa: em vez do OAuth, o envio também funciona por SMTP via variáveis de ambiente `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASS` (e opcionais `SMTP_FROM`, `SMTP_SECURE`).
 
 O `Astro.url` confia no `Host`/`X-Forwarded-Host` do proxy (ver `security.allowedDomains` em `astro.config.mjs`); a proteção contra POST de outras origens continua ativa, juntamente com o cookie de sessão `SameSite=Lax`.
 

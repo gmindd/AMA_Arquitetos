@@ -1,7 +1,7 @@
 ---
 import Base from '../layouts/Base.astro';
 import { obterDefinicoes, guardarMensagem, type PedidoOrcamento } from '../lib/store';
-import { smtpConfigurado, enviarPedido } from '../lib/email';
+import { envioDisponivel, enviarPedido } from '../lib/email';
 
 const definicoes = await obterDefinicoes();
 
@@ -36,10 +36,10 @@ if (Astro.request.method === 'POST') {
     const pedido: PedidoOrcamento = { ...valores, data: new Date().toISOString() };
     let ok = false;
 
-    // Primeiro tenta enviar por email para o destino escolhido no backoffice
-    if (definicoes.emailDestino && smtpConfigurado()) {
+    // Primeiro tenta enviar por email (conta ligada por OAuth ou SMTP)
+    if (envioDisponivel(definicoes)) {
       try {
-        await enviarPedido(pedido, definicoes.emailDestino);
+        await enviarPedido(pedido, definicoes);
         ok = true;
       } catch (e) {
         console.error('Falha no envio do pedido por email:', e);

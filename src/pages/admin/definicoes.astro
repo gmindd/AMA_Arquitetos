@@ -1,9 +1,8 @@
 ---
 import Admin from '../../layouts/Admin.astro';
 import { obterDefinicoes, guardarDefinicoes } from '../../lib/store';
-import { smtpConfigurado } from '../../lib/email';
-
-let guardado = Astro.url.searchParams.has('ok');
+import { oauthConfigurado } from '../../lib/oauth';
+import { envioDisponivel } from '../../lib/email';
 
 if (Astro.request.method === 'POST') {
   const dados = await Astro.request.formData();
@@ -14,20 +13,73 @@ if (Astro.request.method === 'POST') {
 }
 
 const definicoes = await obterDefinicoes();
-const smtp = smtpConfigurado();
+const temOAuth = oauthConfigurado();
+const pronto = envioDisponivel(definicoes);
+
+const params = Astro.url.searchParams;
+const guardado = params.has('ok');
+
+const ERROS: Record<string, string> = {
+  config: 'Falta configurar a aplicação OAuth no servidor (GOOGLE_CLIENT_ID e GOOGLE_CLIENT_SECRET).',
+  negado: 'Autorização cancelada na Google.',
+  estado: 'A sessão de autorização expirou ou é inválida. Tente ligar de novo.',
+  token: 'A Google não devolveu autorização de envio. Tente ligar de novo.',
+  troca: 'Não foi possível concluir a ligação. Tente de novo.',
+};
+const erro = params.get('erro');
+const mensagemErro = erro ? (ERROS[erro] ?? 'Ocorreu um erro na ligação.') : '';
 ---
 
 <Admin title="Definições · Gestão de conteúdos AMA">
   <h1>Definições</h1>
 
   {guardado && <div class="aviso">Alterações guardadas.</div>}
+  {params.has('ligado') && <div class="aviso">Conta de envio ligada.</div>}
+  {params.has('desligado') && <div class="aviso">Conta de envio desligada.</div>}
+  {mensagemErro && <div class="aviso">{mensagemErro}</div>}
 
-  <h2>Pedidos de orçamento</h2>
+  <h2>Conta de envio</h2>
   <p class="dica" style="max-width:46rem">
-    Escolha o email para onde seguem os pedidos enviados no formulário de
-    contactos. O envio é feito a partir de uma conta dedicada, configurada no
-    servidor. Se o envio falhar, o pedido fica guardado no servidor para não
-    se perder.
+    Ligue a conta Gmail que envia os alertas dos pedidos de orçamento. É só
+    autorizar uma vez; pode voltar a ligar ou desligar quando quiser.
+  </p>
+
+  {definicoes.envio ? (
+    <div class="envio-estado">
+      <div class="admin-lista__linha">
+        <div>
+          <strong>Ligada</strong>
+          <span class="etiqueta-ok">Gmail</span>
+          <br />
+          <span class="meta">{definicoes.envio.email}</span>
+        </div>
+        <div class="admin-lista__acoes">
+          <a class="acao acao--secundaria" href="/admin/oauth/google/iniciar">Voltar a ligar</a>
+          <form
+            method="POST"
+            action="/admin/oauth/google/desligar"
+            data-confirmar="Desligar a conta de envio?"
+          >
+            <button class="acao" type="submit">Desligar</button>
+          </form>
+        </div>
+      </div>
+    </div>
+  ) : temOAuth ? (
+    <div class="admin-acoes">
+      <a class="cta" href="/admin/oauth/google/iniciar">Ligar conta Gmail</a>
+    </div>
+  ) : (
+    <div class="aviso" style="max-width:46rem">
+      Para ativar a ligação com um clique, é preciso configurar a aplicação OAuth
+      no servidor (variáveis GOOGLE_CLIENT_ID e GOOGLE_CLIENT_SECRET). Ver o README.
+    </div>
+  )}
+
+  <h2>Email de destino</h2>
+  <p class="dica" style="max-width:46rem">
+    Para onde seguem os pedidos. Se ficar em branco, os pedidos vão para a
+    própria conta ligada acima.
   </p>
 
   <form class="admin-form" method="POST">
@@ -37,17 +89,14 @@ const smtp = smtpConfigurado();
         id="emailDestino"
         name="emailDestino"
         type="email"
-        placeholder="andremelissaarquitetos@gmail.com"
+        placeholder={definicoes.envio?.email ?? 'andremelissaarquitetos@gmail.com'}
         value={definicoes.emailDestino ?? ''}
       />
-      <span class="dica">Deixe em branco para desativar o envio por email.</span>
     </div>
 
     <div class="aviso" style="max-width:46rem">
       <strong>Estado do envio:</strong>
-      {smtp
-        ? ' conta de envio configurada no servidor.'
-        : ' conta de envio ainda não configurada no servidor (variáveis SMTP). Até lá, os pedidos ficam guardados no servidor.'}
+      {pronto ? ' pronto a enviar.' : ' ainda não configurado — os pedidos ficam guardados no servidor.'}
     </div>
 
     <div class="admin-acoes">
