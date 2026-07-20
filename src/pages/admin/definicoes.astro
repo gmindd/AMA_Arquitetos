@@ -1,7 +1,7 @@
 ---
 import Admin from '../../layouts/Admin.astro';
 import { obterDefinicoes, guardarDefinicoes } from '../../lib/store';
-import { oauthConfigurado } from '../../lib/oauth';
+import { oauthConfigurado, redirectUri } from '../../lib/oauth';
 import { envioDisponivel } from '../../lib/email';
 
 if (Astro.request.method === 'POST') {
@@ -71,8 +71,15 @@ const mensagemErro = erro ? (ERROS[erro] ?? 'Ocorreu um erro na ligação.') : '
     </div>
   ) : (
     <div class="aviso" style="max-width:46rem">
-      Para ativar a ligação com um clique, é preciso configurar a aplicação OAuth
-      no servidor (variáveis GOOGLE_CLIENT_ID e GOOGLE_CLIENT_SECRET). Ver o README.
+      <p>
+        Para ativar a ligação com um clique, é preciso registar a aplicação OAuth
+        na Google (uma vez) e definir no servidor as variáveis
+        <strong>GOOGLE_CLIENT_ID</strong> e <strong>GOOGLE_CLIENT_SECRET</strong>.
+      </p>
+      <p style="margin-top:0.6rem">
+        No registo da Google, usar este URI de redireccionamento:
+      </p>
+      <p><code class="uri-copiar">{redirectUri(Astro.url.origin)}</code></p>
     </div>
   )}
 

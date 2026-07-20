@@ -276,6 +276,17 @@
   margin-bottom: 1.5rem;
 }
 
+/* Endereço de redireccionamento OAuth, fácil de copiar */
+.uri-copiar {
+  display: inline-block;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: var(--text-sm);
+  background: var(--white);
+  border: 1px solid var(--black);
+  padding: 0.35rem 0.6rem;
+  word-break: break-all;
+}
+
 .admin-lista__acoes {
   margin-left: auto;
   display: flex;
