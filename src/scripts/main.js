@@ -10,6 +10,10 @@ const movimentoReduzido = window.matchMedia('(prefers-reduced-motion: reduce)');
 let alvosParallax = [];
 let cabecalhoAtual = null;
 
+// Direção do scroll do cabeçalho (histerese para evitar tremura)
+let ultimoScrollY = 0;
+let direcaoScroll = 'cima';
+
 // Revela os elementos [data-reveal] à medida que entram no viewport,
 // com um pequeno atraso escalonado entre elementos do mesmo lote
 function initReveal() {
@@ -36,22 +40,46 @@ function initReveal() {
   elementos.forEach((el) => observador.observe(el));
 }
 
-// Marca o cabeçalho como "rolado" depois de passar o topo da página
+// Prepara o cabeçalho e o estado de scroll da página atual
 function initCabecalho() {
   cabecalhoAtual = document.querySelector('[data-cabecalho]');
+  ultimoScrollY = window.scrollY;
+  direcaoScroll = 'cima';
   atualizarCabecalho();
 }
 
-// Aplica o estado do cabeçalho consoante a posição de scroll.
-// Sobre o hero da home, o cabeçalho só ganha fundo depois de o hero sair.
+// Escolhe o fundo do cabeçalho conforme a posição e a direção do scroll:
+// - topo da página ou a subir  -> translúcido (fosco, legível, deixa ver as imagens)
+// - a descer sobre o hero      -> difuso (transparente, mistura por diferença)
+// - a descer passado o hero    -> sólido (como estava)
 function atualizarCabecalho() {
   if (!cabecalhoAtual) return;
-  let limite = 24;
-  if (cabecalhoAtual.classList.contains('cabecalho--difusao')) {
+  const y = window.scrollY;
+
+  // Limite a partir do qual se considera que o hero saiu do ecrã
+  const temHero = cabecalhoAtual.classList.contains('cabecalho--difusao');
+  let limiteHero = 24;
+  if (temHero) {
     const hero = document.querySelector('[data-hero]');
-    if (hero) limite = hero.offsetHeight - cabecalhoAtual.offsetHeight;
+    if (hero) limiteHero = hero.offsetHeight - cabecalhoAtual.offsetHeight;
   }
-  cabecalhoAtual.classList.toggle('rolado', window.scrollY > limite);
+
+  // Direção com histerese de 4px para não trocar de estado em micro-scrolls
+  const delta = y - ultimoScrollY;
+  if (delta > 4) direcaoScroll = 'baixo';
+  else if (delta < -4) direcaoScroll = 'cima';
+  ultimoScrollY = y;
+
+  let modo;
+  if (y <= 4 || direcaoScroll === 'cima') {
+    modo = 'translucido';
+  } else {
+    modo = temHero && y <= limiteHero ? 'difuso' : 'solido';
+  }
+
+  cabecalhoAtual.classList.toggle('modo-translucido', modo === 'translucido');
+  cabecalhoAtual.classList.toggle('modo-difuso', modo === 'difuso');
+  cabecalhoAtual.classList.toggle('modo-solido', modo === 'solido');
 }
 
 // Abre e fecha o menu de ecrã inteiro, mantendo aria-expanded coerente

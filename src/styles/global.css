@@ -153,9 +153,18 @@ main {
   transition: background-color 0.45s var(--ease), box-shadow 0.45s var(--ease);
 }
 
-.cabecalho.rolado {
+/* Modo sólido: fundo quase opaco — ao descer, passado o hero (estado atual) */
+.cabecalho.modo-solido {
   background: color-mix(in srgb, var(--bone) 92%, transparent);
   backdrop-filter: blur(10px);
+  box-shadow: 0 1px 0 var(--hairline);
+}
+
+/* Modo translúcido: fundo fosco semi-transparente — ao entrar na página e ao
+   subir. Deixa as imagens passar por trás sem esconder, mas facilita a leitura. */
+.cabecalho.modo-translucido {
+  background: color-mix(in srgb, var(--bone) 58%, transparent);
+  backdrop-filter: blur(16px) saturate(1.2);
   box-shadow: 0 1px 0 var(--hairline);
 }
 
@@ -259,30 +268,36 @@ main {
 
 /* Sobre o hero da home, o cabeçalho flutua em mistura por diferença:
    legível sobre qualquer fotografia, sem fundos nem gradientes */
-.cabecalho--difusao:not(.rolado) {
+/* Modo difuso: transparente com mistura por diferença — ao descer sobre o
+   hero (estado atual), o cromo desaparece e as imagens dominam. */
+.cabecalho.modo-difuso {
   mix-blend-mode: difference;
   color: var(--white);
 }
 
-.cabecalho--difusao:not(.rolado) .nav-principal a::after {
+.cabecalho.modo-difuso .nav-principal a::after {
   background: currentColor;
 }
 
-.cabecalho--difusao:not(.rolado) .cta {
+.cabecalho.modo-difuso .cta {
   border-color: currentColor;
 }
 
-.cabecalho--difusao:not(.rolado) .cta:hover {
+.cabecalho.modo-difuso .cta:hover {
   background: var(--white);
   color: var(--black);
 }
 
-.cabecalho--difusao:not(.rolado) .botao-menu span {
+.cabecalho.modo-difuso .botao-menu span {
   background: currentColor;
 }
 
+/* Com o menu de ecrã inteiro aberto, o cabeçalho funde-se no fundo preto */
 body.menu-aberto .cabecalho {
   mix-blend-mode: normal;
+  background: transparent;
+  backdrop-filter: none;
+  box-shadow: none;
 }
 
 /* Botão do menu móvel: duas linhas que rodam em X */
