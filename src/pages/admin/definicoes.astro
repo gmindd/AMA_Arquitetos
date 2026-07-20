@@ -1,107 +1,109 @@
 ---
 import Admin from '../../layouts/Admin.astro';
-import { obterDefinicoes, guardarDefinicoes } from '../../lib/store';
-import { oauthConfigurado, redirectUri } from '../../lib/oauth';
+import { obterDefinicoes, guardarDefinicoes, type Envio } from '../../lib/store';
 import { envioDisponivel } from '../../lib/email';
 
 if (Astro.request.method === 'POST') {
   const dados = await Astro.request.formData();
   const atual = await obterDefinicoes();
+
   const emailDestino = String(dados.get('emailDestino') ?? '').trim();
-  await guardarDefinicoes({ ...atual, emailDestino: emailDestino || undefined });
+  const remetente = String(dados.get('remetente') ?? '').trim();
+  const novaChave = String(dados.get('resendApiKey') ?? '').trim();
+  const removerChave = dados.get('remover_chave') === 'on';
+
+  // Determina a configuração de envio (Resend)
+  let envio: Envio | undefined = atual.envio;
+  if (removerChave) {
+    envio = undefined;
+  } else if (novaChave) {
+    envio = { provedor: 'resend', apiKey: novaChave, remetente: remetente || undefined };
+  } else if (envio) {
+    envio = { ...envio, remetente: remetente || undefined };
+  }
+
+  await guardarDefinicoes({
+    ...atual,
+    emailDestino: emailDestino || undefined,
+    envio,
+  });
   return Astro.redirect('/admin/definicoes?ok=1', 303);
 }
 
 const definicoes = await obterDefinicoes();
-const temOAuth = oauthConfigurado();
+const configurado = Boolean(definicoes.envio?.apiKey);
 const pronto = envioDisponivel(definicoes);
-
-const params = Astro.url.searchParams;
-const guardado = params.has('ok');
-
-const ERROS: Record<string, string> = {
-  config: 'Falta configurar a aplicação OAuth no servidor (GOOGLE_CLIENT_ID e GOOGLE_CLIENT_SECRET).',
-  negado: 'Autorização cancelada na Google.',
-  estado: 'A sessão de autorização expirou ou é inválida. Tente ligar de novo.',
-  token: 'A Google não devolveu autorização de envio. Tente ligar de novo.',
-  troca: 'Não foi possível concluir a ligação. Tente de novo.',
-};
-const erro = params.get('erro');
-const mensagemErro = erro ? (ERROS[erro] ?? 'Ocorreu um erro na ligação.') : '';
+const guardado = Astro.url.searchParams.has('ok');
 ---
 
 <Admin title="Definições · Gestão de conteúdos AMA">
   <h1>Definições</h1>
 
   {guardado && <div class="aviso">Alterações guardadas.</div>}
-  {params.has('ligado') && <div class="aviso">Conta de envio ligada.</div>}
-  {params.has('desligado') && <div class="aviso">Conta de envio desligada.</div>}
-  {mensagemErro && <div class="aviso">{mensagemErro}</div>}
 
-  <h2>Conta de envio</h2>
-  <p class="dica" style="max-width:46rem">
-    Ligue a conta Gmail que envia os alertas dos pedidos de orçamento. É só
-    autorizar uma vez; pode voltar a ligar ou desligar quando quiser.
-  </p>
-
-  {definicoes.envio ? (
-    <div class="envio-estado">
-      <div class="admin-lista__linha">
-        <div>
-          <strong>Ligada</strong>
-          <span class="etiqueta-ok">Gmail</span>
-          <br />
-          <span class="meta">{definicoes.envio.email}</span>
-        </div>
-        <div class="admin-lista__acoes">
-          <a class="acao acao--secundaria" href="/admin/oauth/google/iniciar">Voltar a ligar</a>
-          <form
-            method="POST"
-            action="/admin/oauth/google/desligar"
-            data-confirmar="Desligar a conta de envio?"
-          >
-            <button class="acao" type="submit">Desligar</button>
-          </form>
-        </div>
-      </div>
-    </div>
-  ) : temOAuth ? (
-    <div class="admin-acoes">
-      <a class="cta" href="/admin/oauth/google/iniciar">Ligar conta Gmail</a>
-    </div>
-  ) : (
-    <div class="aviso" style="max-width:46rem">
-      <p>
-        Para ativar a ligação com um clique, é preciso registar a aplicação OAuth
-        na Google (uma vez) e definir no servidor as variáveis
-        <strong>GOOGLE_CLIENT_ID</strong> e <strong>GOOGLE_CLIENT_SECRET</strong>.
-      </p>
-      <p style="margin-top:0.6rem">
-        No registo da Google, usar este URI de redireccionamento:
-      </p>
-      <p><code class="uri-copiar">{redirectUri(Astro.url.origin)}</code></p>
-    </div>
-  )}
-
-  <h2>Email de destino</h2>
-  <p class="dica" style="max-width:46rem">
-    Para onde seguem os pedidos. Se ficar em branco, os pedidos vão para a
-    própria conta ligada acima.
+  <h2>Envio de alertas (Resend)</h2>
+  <p class="dica" style="max-width:48rem">
+    Os pedidos do formulário são enviados por email através do Resend. Cria uma
+    conta gratuita em <a href="https://resend.com" rel="noopener" target="_blank">resend.com</a>,
+    gera uma chave de API e cola-a abaixo. Podes reconfigurar quando quiseres.
   </p>
 
   <form class="admin-form" method="POST">
+    <div class="campo">
+      <label for="resendApiKey">Chave de API do Resend</label>
+      <input
+        id="resendApiKey"
+        name="resendApiKey"
+        type="password"
+        autocomplete="off"
+        placeholder={configurado ? '•••••••• (configurada)' : 're_...'}
+      />
+      <span class="dica">
+        {configurado
+          ? 'Deixa em branco para manter a chave atual.'
+          : 'Cola aqui a chave gerada no Resend (começa por re_).'}
+      </span>
+    </div>
+
+    {configurado && (
+      <div class="campo">
+        <label>
+          <input type="checkbox" name="remover_chave" /> Remover a chave (desativa o envio)
+        </label>
+      </div>
+    )}
+
+    <div class="campo">
+      <label for="remetente">Remetente (opcional)</label>
+      <input
+        id="remetente"
+        name="remetente"
+        type="text"
+        value={definicoes.envio?.remetente ?? ''}
+        placeholder="AMA <onboarding@resend.dev>"
+      />
+      <span class="dica">
+        Enquanto não verificarem um domínio no Resend, deixem em branco (usa
+        onboarding@resend.dev). Depois de verificarem, ex.: AMA &lt;obras@andremelissaarquitetos.pt&gt;.
+      </span>
+    </div>
+
     <div class="campo">
       <label for="emailDestino">Email de destino</label>
       <input
         id="emailDestino"
         name="emailDestino"
         type="email"
-        placeholder={definicoes.envio?.email ?? 'andremelissaarquitetos@gmail.com'}
         value={definicoes.emailDestino ?? ''}
+        placeholder="andremelissaarquitetos@gmail.com"
       />
+      <span class="dica">
+        Para onde seguem os pedidos. Com o remetente de teste do Resend, tem de
+        ser o email usado para criar a conta Resend.
+      </span>
     </div>
 
-    <div class="aviso" style="max-width:46rem">
+    <div class="aviso" style="max-width:48rem">
       <strong>Estado do envio:</strong>
       {pronto ? ' pronto a enviar.' : ' ainda não configurado — os pedidos ficam guardados no servidor.'}
     </div>

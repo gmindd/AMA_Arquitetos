@@ -1,11 +1,15 @@
 // Envio dos pedidos de orçamento por email.
-// Método principal: conta Gmail ligada por OAuth no backoffice (nodemailer
-// trata da renovação do token de acesso a partir do refresh token guardado).
+// Método principal: Resend (chave API colada no backoffice).
 // Alternativa: SMTP por variáveis de ambiente, se existir.
 
 import nodemailer from 'nodemailer';
 import type { Definicoes, PedidoOrcamento } from './store';
-import { oauthConfigurado } from './oauth';
+
+// Endpoint do Resend (sobreponível em testes via RESEND_API_URL)
+const RESEND_URL = process.env.RESEND_API_URL || 'https://api.resend.com/emails';
+// Remetente de teste do Resend, usável antes de verificar um domínio próprio
+const REMETENTE_PADRAO = 'AMA <onboarding@resend.dev>';
+const EMAIL_RE = /^[^@\s]+@[^@\s]+\.[^@\s]+$/;
 
 // Envio por SMTP disponível via variáveis de ambiente?
 export function smtpConfigurado(): boolean {
@@ -14,55 +18,12 @@ export function smtpConfigurado(): boolean {
 
 // Há algum método de envio pronto a usar para estas definições?
 export function envioDisponivel(definicoes: Definicoes): boolean {
-  return Boolean(definicoes.envio && oauthConfigurado()) || smtpConfigurado();
+  return Boolean(definicoes.envio?.apiKey) || smtpConfigurado();
 }
 
-const EMAIL_RE = /^[^@\s]+@[^@\s]+\.[^@\s]+$/;
-
-// Constrói o transporte de acordo com o método disponível
-function construirTransporte(definicoes: Definicoes) {
-  if (definicoes.envio && oauthConfigurado()) {
-    return {
-      transporte: nodemailer.createTransport({
-        service: 'gmail',
-        auth: {
-          type: 'OAuth2' as const,
-          user: definicoes.envio.email,
-          clientId: process.env.GOOGLE_CLIENT_ID,
-          clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-          refreshToken: definicoes.envio.refreshToken,
-        },
-      }),
-      de: definicoes.envio.email,
-    };
-  }
-
-  if (smtpConfigurado()) {
-    const porta = Number(process.env.SMTP_PORT ?? 587);
-    return {
-      transporte: nodemailer.createTransport({
-        host: process.env.SMTP_HOST,
-        port: porta,
-        secure: process.env.SMTP_SECURE === 'true' || porta === 465,
-        auth: { user: process.env.SMTP_USER, pass: process.env.SMTP_PASS },
-      }),
-      de: process.env.SMTP_FROM || process.env.SMTP_USER || '',
-    };
-  }
-
-  return null;
-}
-
-// Envia um pedido de orçamento. O destino é o email escolhido no backoffice;
-// se estiver vazio, segue para a própria conta ligada.
-export async function enviarPedido(pedido: PedidoOrcamento, definicoes: Definicoes): Promise<void> {
-  const config = construirTransporte(definicoes);
-  if (!config) throw new Error('Nenhum método de envio configurado.');
-
-  const destino = definicoes.emailDestino || config.de;
-  if (!destino) throw new Error('Sem email de destino.');
-
-  const corpo = [
+// Monta o corpo de texto do email a partir do pedido
+function corpoDoPedido(pedido: PedidoOrcamento): string {
+  return [
     `Nome: ${pedido.nome}`,
     `Contacto: ${pedido.contacto}`,
     `Tipo: ${pedido.tipo}`,
@@ -72,14 +33,61 @@ export async function enviarPedido(pedido: PedidoOrcamento, definicoes: Definico
     '',
     `Recebido em ${new Date(pedido.data).toLocaleString('pt-PT')}`,
   ].join('\n');
+}
 
+// Envia um pedido de orçamento. O destino é o email escolhido no backoffice.
+export async function enviarPedido(pedido: PedidoOrcamento, definicoes: Definicoes): Promise<void> {
+  const assunto = `Novo pedido de orçamento (${pedido.tipo})`;
+  const corpo = corpoDoPedido(pedido);
   const responderA = EMAIL_RE.test(pedido.contacto) ? pedido.contacto : undefined;
 
-  await config.transporte.sendMail({
-    from: `AMA (site) <${config.de}>`,
-    to: destino,
-    replyTo: responderA,
-    subject: `Novo pedido de orçamento (${pedido.tipo})`,
-    text: corpo,
-  });
+  // --- Resend ---
+  if (definicoes.envio?.apiKey) {
+    if (!definicoes.emailDestino) throw new Error('Sem email de destino.');
+    const remetente = definicoes.envio.remetente?.trim() || REMETENTE_PADRAO;
+    const resposta = await fetch(RESEND_URL, {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${definicoes.envio.apiKey}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        from: remetente,
+        to: [definicoes.emailDestino],
+        reply_to: responderA,
+        subject: assunto,
+        text: corpo,
+      }),
+      signal: AbortSignal.timeout(10000),
+    });
+    if (!resposta.ok) {
+      const detalhe = await resposta.text().catch(() => '');
+      throw new Error(`Resend ${resposta.status}: ${detalhe}`);
+    }
+    return;
+  }
+
+  // --- SMTP (alternativa por variáveis de ambiente) ---
+  if (smtpConfigurado()) {
+    const porta = Number(process.env.SMTP_PORT ?? 587);
+    const de = process.env.SMTP_FROM || process.env.SMTP_USER || '';
+    const destino = definicoes.emailDestino || de;
+    if (!destino) throw new Error('Sem email de destino.');
+    const transporte = nodemailer.createTransport({
+      host: process.env.SMTP_HOST,
+      port: porta,
+      secure: process.env.SMTP_SECURE === 'true' || porta === 465,
+      auth: { user: process.env.SMTP_USER, pass: process.env.SMTP_PASS },
+    });
+    await transporte.sendMail({
+      from: `AMA (site) <${de}>`,
+      to: destino,
+      replyTo: responderA,
+      subject: assunto,
+      text: corpo,
+    });
+    return;
+  }
+
+  throw new Error('Nenhum método de envio configurado.');
 }

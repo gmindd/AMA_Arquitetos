@@ -26,7 +26,7 @@ No primeiro arranque, se o `DATA_DIR` estiver vazio, é semeado com o conteúdo 
 - **Ocultar / mostrar** — cada projeto e obra tem um interruptor de visibilidade (e um botão rápido Ocultar/Mostrar na lista). Ocultar remove o item do site (grelha, hero e página própria dão 404) sem o apagar — é assim que se reduz ou aumenta o número de projetos visíveis.
 - **Marca e logótipos** (`/admin/marca`) — carregar os logótipos reais (lockup principal, ícone/favicon e variações compostas A/MA · A/AM · MA/A). Passam a ser usados em todo o site — cabeçalho, rodapé, favicon e capas dos projetos — com recuo ao lettering tipográfico quando não há ficheiro. Use SVG ou PNG com fundo transparente: cada logótipo é recolorido automaticamente para branco ou preto conforme o fundo.
 - **Compressão automática** — cada imagem carregada é reduzida no servidor até, no máximo, **1 MB** (fotografia convertida para WebP com dimensão/qualidade decrescentes; logótipos SVG/PNG mantêm nitidez e transparência).
-- **Definições** (`/admin/definicoes`) — escolher o **email de destino** dos pedidos de orçamento. O envio é feito por SMTP a partir de uma conta dedicada configurada no servidor (ver deploy). Se o envio falhar ou ainda não estiver configurado, cada pedido é guardado em `DATA_DIR/mensagens` para não se perder.
+- **Definições** (`/admin/definicoes`) — configurar o envio dos pedidos de orçamento: colar a **chave de API do Resend**, o **remetente** (opcional) e o **email de destino**. Reconfigurável a qualquer momento. Se o envio falhar ou ainda não estiver configurado, cada pedido é guardado em `DATA_DIR/mensagens` para não se perder.
 - As fotografias e logótipos ficam em `DATA_DIR/uploads` e são servidos em `/uploads/…` com cache longa; as definições da marca em `DATA_DIR/definicoes.json`.
 - Substituir um placeholder = editar o registo e carregar a fotografia real; o site reflete a alteração de imediato.
 
@@ -39,23 +39,17 @@ No primeiro arranque, se o `DATA_DIR` estiver vazio, é semeado com o conteúdo 
 
 ### Envio de email (formulário de orçamento)
 
-O formulário envia os pedidos a partir de uma conta Gmail ligada **num clique** no backoffice (`/admin/definicoes` → **Ligar conta Gmail**). Para isso, é preciso registar a aplicação OAuth uma única vez e definir duas variáveis de ambiente.
+O formulário envia os pedidos por email através do **[Resend](https://resend.com)**, configurado no backoffice (`/admin/definicoes`) — sem variáveis de ambiente nem apps OAuth.
 
-**Configuração única da aplicação OAuth (Google Cloud):**
+1. Criar uma conta gratuita em [resend.com](https://resend.com) (o plano gratuito chega bem para um portfólio).
+2. Em **API Keys**, criar uma chave (começa por `re_`) e copiá-la.
+3. No backoffice, em **Definições**, colar a chave, definir o **email de destino** e Guardar.
 
-1. Em [console.cloud.google.com](https://console.cloud.google.com), criar um projeto.
-2. **APIs e serviços → Ecrã de consentimento OAuth**: tipo **Externo**; adicionar o âmbito `https://www.googleapis.com/auth/gmail.send`; **publicar a app em Produção** (importante: em modo de teste os tokens expiram ao fim de 7 dias).
-3. **Credenciais → Criar credenciais → ID de cliente OAuth**, tipo **Aplicação Web**. Em *URIs de redireccionamento autorizados*, adicionar:
-   `https://<o-vosso-dominio>/admin/oauth/google/callback`
-4. Copiar o **Client ID** e o **Client Secret** para as variáveis de ambiente:
-   - `GOOGLE_CLIENT_ID`
-   - `GOOGLE_CLIENT_SECRET`
+Remetente: enquanto não verificarem um domínio no Resend, deixar o remetente em branco (usa `onboarding@resend.dev`) — nesse caso o **email de destino tem de ser o email usado para criar a conta Resend**. Para enviar de qualquer endereço e para qualquer destino (ex.: `obras@andremelissaarquitetos.pt`), verificar o domínio no Resend (adicionar os registos DNS) e indicar esse remetente.
 
-Depois, no backoffice, clicar **Ligar conta Gmail** e autorizar a conta de envio. Na primeira autorização a Google mostra um ecrã de *app não verificada* (Avançado → continuar) enquanto a app não for verificada pela Google. A ligação é reconfigurável a qualquer momento (**Voltar a ligar** / **Desligar**). O **email de destino** dos alertas escolhe-se também em `/admin/definicoes` (em branco, seguem para a própria conta ligada).
+Sem chave configurada (ou se o envio falhar), os pedidos ficam guardados em `DATA_DIR/mensagens` para não se perderem.
 
-Sem conta ligada (ou se o envio falhar), os pedidos ficam guardados em `DATA_DIR/mensagens` para não se perderem.
-
-> Alternativa: em vez do OAuth, o envio também funciona por SMTP via variáveis de ambiente `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASS` (e opcionais `SMTP_FROM`, `SMTP_SECURE`).
+> Alternativa: o envio também funciona por SMTP via variáveis de ambiente `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASS` (e opcionais `SMTP_FROM`, `SMTP_SECURE`).
 
 O `Astro.url` confia no `Host`/`X-Forwarded-Host` do proxy (ver `security.allowedDomains` em `astro.config.mjs`); a proteção contra POST de outras origens continua ativa, juntamente com o cookie de sessão `SameSite=Lax`.
 
