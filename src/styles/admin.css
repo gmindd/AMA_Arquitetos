@@ -216,3 +216,133 @@
   align-content: center;
   max-width: 26rem;
 }
+
+/* Cabeçalho da lista com ação à direita */
+.admin-cabecalho {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1.5rem;
+  flex-wrap: wrap;
+}
+
+.admin-cabecalho h1 {
+  margin-bottom: 0;
+}
+
+/* Estado e ações rápidas de cada linha */
+.admin-lista__linha--oculto {
+  opacity: 0.55;
+}
+
+.admin-lista__linha--oculto img {
+  filter: grayscale(1);
+}
+
+.etiqueta-oculto {
+  display: inline-block;
+  margin-left: 0.6rem;
+  font-size: var(--text-xs);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  border: 1px solid var(--black);
+  padding: 0.05rem 0.4rem;
+  vertical-align: middle;
+}
+
+.admin-lista__acoes {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+}
+
+.acao--secundaria {
+  font-weight: 400;
+  opacity: 0.75;
+}
+
+.acao--secundaria:hover {
+  opacity: 1;
+}
+
+/* Slots de logótipo na página Marca */
+.marca-slot {
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: 1fr;
+  align-items: center;
+  padding-block: 1.5rem;
+  border-bottom: 1px solid var(--hairline);
+}
+
+.marca-slot__info strong {
+  display: block;
+  font-size: var(--text-md);
+}
+
+.marca-slot__previa {
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+/* Amostras: o mesmo logótipo em tinta clara e escura, como no site */
+.marca-previa {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 11rem;
+  height: 4.5rem;
+  padding: 0.75rem 1rem;
+  border: 1px solid var(--hairline);
+}
+
+.marca-previa--clara {
+  background: var(--bone);
+  color: var(--black);
+}
+
+.marca-previa--escura {
+  background: var(--black);
+  color: var(--bone);
+}
+
+.marca-previa img {
+  max-width: 100%;
+  max-height: 100%;
+  width: auto;
+  height: auto;
+  object-fit: contain;
+}
+
+.marca-previa__mark {
+  width: 100%;
+  height: 100%;
+}
+
+.marca-slot__campos {
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+  flex-wrap: wrap;
+}
+
+.marca-slot__remover {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: var(--text-sm);
+}
+
+@media (min-width: 760px) {
+  .marca-slot {
+    grid-template-columns: 15rem auto 1fr;
+    gap: 1.75rem;
+  }
+
+  .marca-slot__campos {
+    justify-content: flex-end;
+  }
+}

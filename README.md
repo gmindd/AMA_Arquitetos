@@ -21,9 +21,12 @@ No primeiro arranque, se o `DATA_DIR` estiver vazio, é semeado com o conteúdo 
 ## Backoffice
 
 - `/admin` — entrada com a palavra-passe definida em `ADMIN_PASSWORD`.
-- **Projetos** — título, tipologia, local, área, ano (a ficha técnica de 4 linhas), fotografia de capa, galeria, variação do logótipo (A/MA · A/AM · MA/A), tinta clara ou escura, ordem na grelha e nota breve.
-- **Reabilitação** — título, local, ano, fotografias antes e depois, ordem e nota.
-- As fotografias carregadas ficam em `DATA_DIR/uploads` e são servidas em `/uploads/…` com cache longa.
+- **Projetos** — título, tipologia, local, área, ano (a ficha técnica de 4 linhas), fotografia de capa, galeria, variação do logótipo (A/MA · A/AM · MA/A), tinta clara ou escura, ordem na grelha, visibilidade e nota breve.
+- **Reabilitação** — título, local, ano, fotografias antes e depois, ordem, visibilidade e nota.
+- **Ocultar / mostrar** — cada projeto e obra tem um interruptor de visibilidade (e um botão rápido Ocultar/Mostrar na lista). Ocultar remove o item do site (grelha, hero e página própria dão 404) sem o apagar — é assim que se reduz ou aumenta o número de projetos visíveis.
+- **Marca e logótipos** (`/admin/marca`) — carregar os logótipos reais (lockup principal, ícone/favicon e variações compostas A/MA · A/AM · MA/A). Passam a ser usados em todo o site — cabeçalho, rodapé, favicon e capas dos projetos — com recuo ao lettering tipográfico quando não há ficheiro. Use SVG ou PNG com fundo transparente: cada logótipo é recolorido automaticamente para branco ou preto conforme o fundo.
+- **Compressão automática** — cada imagem carregada é reduzida no servidor até, no máximo, **1 MB** (fotografia convertida para WebP com dimensão/qualidade decrescentes; logótipos SVG/PNG mantêm nitidez e transparência).
+- As fotografias e logótipos ficam em `DATA_DIR/uploads` e são servidos em `/uploads/…` com cache longa; as definições da marca em `DATA_DIR/definicoes.json`.
 - Substituir um placeholder = editar o registo e carregar a fotografia real; o site reflete a alteração de imediato.
 
 ## Deploy no Coolify

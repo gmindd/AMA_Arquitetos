@@ -1,0 +1,26 @@
+---
+// Marca recolorida por máscara: o logótipo carregado no backoffice é usado
+// como silhueta e pintado com a cor de texto atual — assim um único ficheiro
+// serve fundos claros e escuros, dentro da paleta da marca. Sem logótipo,
+// mostra o conteúdo alternativo (o lettering tipográfico atual).
+interface Props {
+  url?: string;
+  rotulo: string;
+  classe?: string;
+}
+
+const { url, rotulo, classe = '' } = Astro.props;
+---
+
+{
+  url ? (
+    <span
+      class={`logo-mask ${classe}`}
+      role="img"
+      aria-label={rotulo}
+      style={`--logo:url('${url}')`}
+    />
+  ) : (
+    <slot />
+  )
+}

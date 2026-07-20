@@ -1,10 +1,20 @@
 ---
 // Rodapé: sigla grande, morada, contactos, navegação e bio
+import LogoMarca from './LogoMarca.astro';
+import type { Definicoes } from '../lib/store';
+
+interface Props {
+  logos: Definicoes['logos'];
+}
+
+const { logos } = Astro.props;
 const ano = new Date().getFullYear();
 ---
 
 <footer class="rodape wrap">
-  <p class="rodape__sigla" aria-hidden="true">AMA</p>
+  <LogoMarca url={logos.principal} rotulo="AMA — André Melissa Arquitetos" classe="rodape__logo">
+    <p class="rodape__sigla" aria-hidden="true">AMA</p>
+  </LogoMarca>
 
   <div class="rodape__colunas">
     <div>

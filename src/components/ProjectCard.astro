@@ -10,9 +10,10 @@ interface Props {
   variacaoLogo: 'A/MA' | 'A/AM' | 'MA/A';
   logoClaro: boolean;
   indice: number;
+  varImg?: string;
 }
 
-const { href, titulo, tipologia, ano, capa, variacaoLogo, logoClaro, indice } = Astro.props;
+const { href, titulo, tipologia, ano, capa, variacaoLogo, logoClaro, indice, varImg } = Astro.props;
 
 // A variação composta divide-se em duas linhas empilhadas (ex.: A / MA)
 const [linha1, linha2] = variacaoLogo.split('/');
@@ -22,7 +23,15 @@ const [linha1, linha2] = variacaoLogo.split('/');
   <figure class="cartao__media">
     <!-- Substituir pelo ficheiro real do projeto via /admin ou public/images -->
     <img src={capa} alt={`${titulo} — ${tipologia}`} loading={indice < 2 ? 'eager' : 'lazy'} />
-    <span class="cartao__marca" aria-hidden="true">{linha1}<br />{linha2}</span>
+    {varImg ? (
+      <span
+        class="cartao__marca cartao__marca--img"
+        style={`--logo:url('${varImg}')`}
+        aria-hidden="true"
+      />
+    ) : (
+      <span class="cartao__marca" aria-hidden="true">{linha1}<br />{linha2}</span>
+    )}
     <span class="cartao__legenda">{titulo} — {ano}</span>
   </figure>
 </a>

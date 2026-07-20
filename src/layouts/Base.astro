@@ -2,6 +2,7 @@
 import { ClientRouter } from 'astro:transitions';
 import Header from '../components/Header.astro';
 import Footer from '../components/Footer.astro';
+import { obterDefinicoes } from '../lib/store';
 import '../styles/global.css';
 
 interface Props {
@@ -13,6 +14,10 @@ const {
   title = 'AMA — André Melissa Arquitetos | Gabinete de arquitetura, Viana do Castelo',
   description = 'Gabinete de arquitetura em Viana do Castelo. Habitação, interiores e reconversão de espaços. Reabilitações e tratamento de fachadas com equipa própria.',
 } = Astro.props;
+
+// Logótipos geridos no backoffice — influenciam cabeçalho, rodapé e favicon.
+const definicoes = await obterDefinicoes();
+const favicon = definicoes.logos.icone ?? '/favicon.svg';
 ---
 
 <!doctype html>
@@ -22,7 +27,7 @@ const {
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>{title}</title>
     <meta name="description" content={description} />
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="icon" href={favicon} />
     <ClientRouter />
     <script>
       import '../scripts/main.js';
@@ -30,10 +35,10 @@ const {
   </head>
   <body>
     <a class="salto-conteudo" href="#conteudo">Saltar para o conteúdo</a>
-    <Header />
+    <Header logos={definicoes.logos} />
     <main id="conteudo">
       <slot />
     </main>
-    <Footer />
+    <Footer logos={definicoes.logos} />
   </body>
 </html>

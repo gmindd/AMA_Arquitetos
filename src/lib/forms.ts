@@ -58,6 +58,7 @@ export async function projetoDeFormulario(
       : 'A/MA',
     logoClaro: dados.get('logoClaro') === 'on',
     ordem: numero(dados, 'ordem', 0),
+    visivel: dados.get('visivel') === 'on',
     nota: texto(dados, 'nota'),
   };
 }
@@ -72,6 +73,7 @@ export async function obraDeFormulario(dados: FormData, existente: Obra | null):
     antes: await ficheiroOuAtual(dados, 'antes', existente?.antes ?? ''),
     depois: await ficheiroOuAtual(dados, 'depois', existente?.depois ?? ''),
     ordem: numero(dados, 'ordem', 0),
+    visivel: dados.get('visivel') === 'on',
     nota: texto(dados, 'nota'),
   };
 }

@@ -1,8 +1,8 @@
 ---
-import { listarProjetos } from '../../lib/store';
+import { listarProjetosPublicos } from '../../lib/store';
 import Base from '../../layouts/Base.astro';
 
-const projetos = await listarProjetos();
+const projetos = await listarProjetosPublicos();
 const indice = projetos.findIndex((p) => p.slug === Astro.params.slug);
 
 if (indice === -1) {

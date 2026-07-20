@@ -4,24 +4,41 @@ import { listarProjetos, listarObras } from '../../lib/store';
 
 const projetos = await listarProjetos();
 const obras = await listarObras();
+
+const visivel = (v?: boolean) => v !== false;
 ---
 
 <Admin>
-  <h1>Conteúdos</h1>
+  <div class="admin-cabecalho">
+    <h1>Conteúdos</h1>
+    <a class="cta" href="/admin/marca">Marca e logótipos</a>
+  </div>
 
   <h2>Projetos</h2>
   <p class="dica">
     A ficha técnica de cada projeto tem sempre 4 linhas: tipologia, local, área e ano.
+    Ocultar reduz o número de projetos visíveis no site sem os apagar.
   </p>
   <div class="admin-lista">
     {projetos.map((p) => (
-      <div class="admin-lista__linha">
+      <div class={`admin-lista__linha${visivel(p.visivel) ? '' : ' admin-lista__linha--oculto'}`}>
         <img src={p.capa} alt="" />
         <div>
-          <strong>{p.titulo}</strong><br />
+          <strong>{p.titulo}</strong>
+          {!visivel(p.visivel) && <span class="etiqueta-oculto">Oculto</span>}
+          <br />
           <span class="meta">{p.tipologia} · {p.ano} · ordem {p.ordem}</span>
         </div>
-        <a class="acao" href={`/admin/projetos/${p.slug}`}>Editar</a>
+        <div class="admin-lista__acoes">
+          <form method="POST" action="/admin/visibilidade">
+            <input type="hidden" name="colecao" value="projetos" />
+            <input type="hidden" name="slug" value={p.slug} />
+            <button class="acao acao--secundaria" type="submit">
+              {visivel(p.visivel) ? 'Ocultar' : 'Mostrar'}
+            </button>
+          </form>
+          <a class="acao" href={`/admin/projetos/${p.slug}`}>Editar</a>
+        </div>
       </div>
     ))}
   </div>
@@ -33,13 +50,24 @@ const obras = await listarObras();
   <p class="dica">Registo documental antes e depois, executado pela equipa própria.</p>
   <div class="admin-lista">
     {obras.map((o) => (
-      <div class="admin-lista__linha">
+      <div class={`admin-lista__linha${visivel(o.visivel) ? '' : ' admin-lista__linha--oculto'}`}>
         <img src={o.depois} alt="" />
         <div>
-          <strong>{o.titulo}</strong><br />
+          <strong>{o.titulo}</strong>
+          {!visivel(o.visivel) && <span class="etiqueta-oculto">Oculto</span>}
+          <br />
           <span class="meta">{o.local} · {o.ano} · ordem {o.ordem}</span>
         </div>
-        <a class="acao" href={`/admin/reabilitacao/${o.slug}`}>Editar</a>
+        <div class="admin-lista__acoes">
+          <form method="POST" action="/admin/visibilidade">
+            <input type="hidden" name="colecao" value="reabilitacao" />
+            <input type="hidden" name="slug" value={o.slug} />
+            <button class="acao acao--secundaria" type="submit">
+              {visivel(o.visivel) ? 'Ocultar' : 'Mostrar'}
+            </button>
+          </form>
+          <a class="acao" href={`/admin/reabilitacao/${o.slug}`}>Editar</a>
+        </div>
       </div>
     ))}
   </div>

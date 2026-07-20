@@ -179,6 +179,23 @@ main {
   letter-spacing: 0.16em;
 }
 
+/* Logótipo carregado no backoffice, recolorido pela cor de texto atual.
+   Um único ficheiro (silhueta em PNG/SVG transparente) serve claro e
+   escuro; herda o comportamento de mistura por diferença do cabeçalho. */
+.logo-mask {
+  display: inline-block;
+  background-color: currentColor;
+  -webkit-mask: var(--logo) no-repeat center / contain;
+  mask: var(--logo) no-repeat center / contain;
+}
+
+.marca__logo {
+  width: clamp(7rem, 16vw, 9.5rem);
+  height: 2.1rem;
+  -webkit-mask-position: left center;
+  mask-position: left center;
+}
+
 .nav-principal {
   display: none;
 }
@@ -492,6 +509,15 @@ body.menu-aberto .menu-total__pe {
 
 .cartao:hover .cartao__marca {
   transform: translateY(-4px);
+}
+
+/* Variante composta carregada: silhueta recolorida pela cor da tinta */
+.cartao__marca--img {
+  width: clamp(4rem, 9vw, 7rem);
+  height: clamp(4rem, 9vw, 7rem);
+  background-color: currentColor;
+  -webkit-mask: var(--logo) no-repeat left bottom / contain;
+  mask: var(--logo) no-repeat left bottom / contain;
 }
 
 /* Legenda mínima sobre a fotografia, ao estilo documental */
@@ -885,6 +911,16 @@ body.menu-aberto .menu-total__pe {
   line-height: 0.9;
   letter-spacing: -0.02em;
   margin-bottom: clamp(2rem, 6vh, 4rem);
+}
+
+/* Logótipo carregado no rodapé, em tinta clara sobre fundo escuro */
+.rodape__logo {
+  display: block;
+  width: min(100%, 32rem);
+  height: clamp(4rem, 14vw, 10rem);
+  margin-bottom: clamp(2rem, 6vh, 4rem);
+  -webkit-mask-position: left center;
+  mask-position: left center;
 }
 
 .rodape__colunas {

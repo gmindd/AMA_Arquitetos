@@ -1,18 +1,23 @@
 ---
 import Admin from '../../../layouts/Admin.astro';
 import CamposProjeto from '../../../components/admin/CamposProjeto.astro';
-import { guardarProjeto } from '../../../lib/store';
+import { guardarProjeto, ErroUpload } from '../../../lib/store';
 import { projetoDeFormulario, validarProjeto } from '../../../lib/forms';
 
 let erros: string[] = [];
 
 if (Astro.request.method === 'POST') {
-  const dados = await Astro.request.formData();
-  const projeto = await projetoDeFormulario(dados, null);
-  erros = validarProjeto(projeto);
-  if (erros.length === 0) {
-    await guardarProjeto(projeto);
-    return Astro.redirect('/admin', 303);
+  try {
+    const dados = await Astro.request.formData();
+    const projeto = await projetoDeFormulario(dados, null);
+    erros = validarProjeto(projeto);
+    if (erros.length === 0) {
+      await guardarProjeto(projeto);
+      return Astro.redirect('/admin', 303);
+    }
+  } catch (e) {
+    if (e instanceof ErroUpload) erros = [e.message];
+    else throw e;
   }
 }
 ---

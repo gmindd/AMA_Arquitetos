@@ -53,6 +53,14 @@ const { obra } = Astro.props;
 </div>
 
 <div class="campo">
+  <label>
+    <input type="checkbox" name="visivel" checked={obra?.visivel ?? true} />
+    Visível no site
+  </label>
+  <span class="dica">Desligar oculta a obra do site sem a apagar.</span>
+</div>
+
+<div class="campo">
   <label for="nota">Nota breve (opcional)</label>
   <textarea id="nota" name="nota">{obra?.nota ?? ''}</textarea>
 </div>

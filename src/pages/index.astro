@@ -1,10 +1,14 @@
 ---
-import { listarProjetos } from '../lib/store';
+import { listarProjetosPublicos, obterDefinicoes, chaveVariante } from '../lib/store';
 import Base from '../layouts/Base.astro';
 import ProjectCard from '../components/ProjectCard.astro';
 
-// Home = grelha de projetos, sem texto de abertura. Logótipo e menu bastam.
-const projetos = await listarProjetos();
+// Home = grelha de projetos visíveis, sem texto de abertura.
+const projetos = await listarProjetosPublicos();
+const { logos } = await obterDefinicoes();
+
+// Variante de logótipo a sobrepor na capa de cada projeto (se carregada)
+const variante = (v: 'A/MA' | 'A/AM' | 'MA/A') => logos[chaveVariante(v)];
 ---
 
 <Base>
@@ -44,6 +48,7 @@ const projetos = await listarProjetos();
         variacaoLogo={p.variacaoLogo}
         logoClaro={p.logoClaro}
         indice={i}
+        varImg={variante(p.variacaoLogo)}
       />
     ))}
   </section>

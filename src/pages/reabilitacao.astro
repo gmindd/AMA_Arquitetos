@@ -1,9 +1,9 @@
 ---
-import { listarObras } from '../lib/store';
+import { listarObrasPublicas } from '../lib/store';
 import Base from '../layouts/Base.astro';
 import BeforeAfter from '../components/BeforeAfter.astro';
 
-const obras = await listarObras();
+const obras = await listarObrasPublicas();
 ---
 
 <Base

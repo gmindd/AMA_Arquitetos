@@ -1,5 +1,13 @@
 ---
 // Cabeçalho fixo: logótipo, navegação, CTA e menu de ecrã inteiro (móvel)
+import LogoMarca from './LogoMarca.astro';
+import type { Definicoes } from '../lib/store';
+
+interface Props {
+  logos: Definicoes['logos'];
+}
+
+const { logos } = Astro.props;
 const path = Astro.url.pathname;
 
 // Na home o cabeçalho flutua sobre a fotografia a ecrã inteiro:
@@ -16,8 +24,10 @@ const ligacoes = [
 
 <header class={`cabecalho${sobreHero ? ' cabecalho--difusao' : ''}`} data-cabecalho>
   <a class="marca" href="/" aria-label="AMA — página inicial">
-    <span class="marca__sigla">AMA</span>
-    <span class="marca__nome">André Melissa<br />Arquitetos</span>
+    <LogoMarca url={logos.principal} rotulo="AMA — André Melissa Arquitetos" classe="marca__logo">
+      <span class="marca__sigla">AMA</span>
+      <span class="marca__nome">André Melissa<br />Arquitetos</span>
+    </LogoMarca>
   </a>
 
   <nav class="nav-principal" aria-label="Navegação principal">

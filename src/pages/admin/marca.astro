@@ -1,0 +1,121 @@
+---
+import Admin from '../../layouts/Admin.astro';
+import {
+  obterDefinicoes,
+  guardarDefinicoes,
+  guardarUpload,
+  ErroUpload,
+  type ChaveLogo,
+} from '../../lib/store';
+
+// Slots de logótipo geríveis. Cada um influencia áreas concretas do site.
+const SLOTS: { chave: ChaveLogo; titulo: string; onde: string; icone?: boolean }[] = [
+  {
+    chave: 'principal',
+    titulo: 'Logótipo principal',
+    onde: 'Cabeçalho e rodapé. Lockup AMA + designação.',
+  },
+  {
+    chave: 'icone',
+    titulo: 'Ícone circular',
+    onde: 'Favicon do separador do browser e avatares.',
+    icone: true,
+  },
+  { chave: 'varAMA', titulo: 'Variação A/MA', onde: 'Capas de projeto com variação A/MA.' },
+  { chave: 'varAAM', titulo: 'Variação A/AM', onde: 'Capas de projeto com variação A/AM.' },
+  { chave: 'varMAA', titulo: 'Variação MA/A', onde: 'Capas de projeto com variação MA/A.' },
+];
+
+let erro = '';
+let guardado = Astro.url.searchParams.has('ok');
+
+if (Astro.request.method === 'POST') {
+  try {
+    const dados = await Astro.request.formData();
+    const atual = await obterDefinicoes();
+    const logos = { ...atual.logos };
+    for (const slot of SLOTS) {
+      if (dados.get(`remover_${slot.chave}`) === 'on') {
+        delete logos[slot.chave];
+        continue;
+      }
+      const ficheiro = dados.get(`logo_${slot.chave}`);
+      if (ficheiro instanceof File && ficheiro.size > 0) {
+        logos[slot.chave] = await guardarUpload(ficheiro);
+      }
+    }
+    await guardarDefinicoes({ logos });
+    return Astro.redirect('/admin/marca?ok=1', 303);
+  } catch (e) {
+    if (e instanceof ErroUpload) erro = e.message;
+    else throw e;
+  }
+}
+
+const { logos } = await obterDefinicoes();
+---
+
+<Admin title="Marca e logótipos — Gestão de conteúdos AMA">
+  <h1>Marca e logótipos</h1>
+  <p class="dica" style="max-width:46rem">
+    Os logótipos carregados aqui substituem o lettering em todo o site — cabeçalho,
+    rodapé, favicon e capas dos projetos. Use ficheiros SVG ou PNG com fundo
+    transparente: cada logótipo é recolorido automaticamente para branco ou preto
+    conforme o fundo, dentro da paleta da marca.
+  </p>
+
+  {guardado && <div class="aviso">Alterações guardadas.</div>}
+  {erro && <div class="aviso">{erro}</div>}
+
+  <form class="admin-form" method="POST" enctype="multipart/form-data">
+    {SLOTS.map((slot) => (
+      <div class="marca-slot">
+        <div class="marca-slot__info">
+          <strong>{slot.titulo}</strong>
+          <span class="dica">{slot.onde}</span>
+        </div>
+
+        <div class="marca-slot__previa">
+          {logos[slot.chave] ? (
+            slot.icone ? (
+              <>
+                <span class="marca-previa marca-previa--clara">
+                  <img src={logos[slot.chave]} alt="" />
+                </span>
+                <span class="marca-previa marca-previa--escura">
+                  <img src={logos[slot.chave]} alt="" />
+                </span>
+              </>
+            ) : (
+              <>
+                <span class="marca-previa marca-previa--clara">
+                  <span class="logo-mask marca-previa__mark" style={`--logo:url('${logos[slot.chave]}')`} />
+                </span>
+                <span class="marca-previa marca-previa--escura">
+                  <span class="logo-mask marca-previa__mark" style={`--logo:url('${logos[slot.chave]}')`} />
+                </span>
+              </>
+            )
+          ) : (
+            <span class="dica">Sem logótipo — usa o lettering tipográfico.</span>
+          )}
+        </div>
+
+        <div class="marca-slot__campos">
+          <input type="file" name={`logo_${slot.chave}`} accept="image/*" />
+          {logos[slot.chave] && (
+            <label class="marca-slot__remover">
+              <input type="checkbox" name={`remover_${slot.chave}`} />
+              Remover
+            </label>
+          )}
+        </div>
+      </div>
+    ))}
+
+    <div class="admin-acoes">
+      <button class="cta" type="submit">Guardar logótipos</button>
+      <a class="botao-apagar" href="/admin">Voltar</a>
+    </div>
+  </form>
+</Admin>
