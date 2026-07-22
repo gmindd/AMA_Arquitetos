@@ -10,6 +10,7 @@
 import { promises as fs } from 'node:fs';
 import path from 'node:path';
 import sharp from 'sharp';
+import { traduzir, type CampoTraduzido, type Locale } from './i18n';
 
 const DATA_DIR = process.env.DATA_DIR ?? path.resolve('./data');
 const SEED_DIR = path.resolve('./seed');
@@ -19,12 +20,14 @@ const MAX_SAIDA = 1024 * 1024;
 // Guarda de entrada: recusa ficheiros manifestamente grandes antes de processar.
 const MAX_ENTRADA = 30 * 1024 * 1024;
 
+// Campos textuais podem ser uma string (PT legado) ou um objecto por idioma.
+// A camada de leitura (i18n.traduzir) resolve o valor a mostrar.
 export interface Projeto {
   slug: string;
-  titulo: string;
-  tipologia: string;
-  local: string;
-  area: string;
+  titulo: CampoTraduzido;
+  tipologia: CampoTraduzido;
+  local: CampoTraduzido;
+  area: CampoTraduzido;
   ano: number;
   capa: string;
   galeria: string[];
@@ -32,19 +35,19 @@ export interface Projeto {
   logoClaro: boolean;
   ordem: number;
   visivel: boolean;
-  nota?: string;
+  nota?: CampoTraduzido;
 }
 
 export interface Obra {
   slug: string;
-  titulo: string;
-  local: string;
+  titulo: CampoTraduzido;
+  local: CampoTraduzido;
   ano: number;
   antes: string;
   depois: string;
   ordem: number;
   visivel: boolean;
-  nota?: string;
+  nota?: CampoTraduzido;
 }
 
 // Erro amigável quando o upload de uma imagem falha (formato inválido, etc.)
@@ -103,6 +106,43 @@ export const ROTULO_VARIACAO: Record<Projeto['variacaoLogo'], string> = {
   'A/AM': 'Canto superior direito',
   'MA/A': 'Canto inferior esquerdo',
 };
+
+// Snapshot de um Projeto/Obra com os campos textuais já resolvidos para
+// strings no idioma pedido — as páginas públicas usam este tipo em vez
+// de ter de invocar traduzir() em cada acesso.
+export type ProjetoResolvido = Omit<Projeto, 'titulo' | 'tipologia' | 'local' | 'area' | 'nota'> & {
+  titulo: string;
+  tipologia: string;
+  local: string;
+  area: string;
+  nota: string;
+};
+
+export type ObraResolvida = Omit<Obra, 'titulo' | 'local' | 'nota'> & {
+  titulo: string;
+  local: string;
+  nota: string;
+};
+
+export function resolverProjeto(p: Projeto, locale: Locale | undefined): ProjetoResolvido {
+  return {
+    ...p,
+    titulo: traduzir(p.titulo, locale),
+    tipologia: traduzir(p.tipologia, locale),
+    local: traduzir(p.local, locale),
+    area: traduzir(p.area, locale),
+    nota: traduzir(p.nota, locale),
+  };
+}
+
+export function resolverObra(o: Obra, locale: Locale | undefined): ObraResolvida {
+  return {
+    ...o,
+    titulo: traduzir(o.titulo, locale),
+    local: traduzir(o.local, locale),
+    nota: traduzir(o.nota, locale),
+  };
+}
 
 // Garante o diretório de dados e a pasta de uploads
 async function garantirDataDir(): Promise<void> {

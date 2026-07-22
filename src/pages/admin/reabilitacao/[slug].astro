@@ -3,6 +3,7 @@ import Admin from '../../../layouts/Admin.astro';
 import CamposObra from '../../../components/admin/CamposObra.astro';
 import { obterObra, guardarObra, apagar, ErroUpload } from '../../../lib/store';
 import { obraDeFormulario, validarObra } from '../../../lib/forms';
+import { traduzir } from '../../../lib/i18n';
 
 let obra = await obterObra(Astro.params.slug ?? '');
 if (!obra) {
@@ -32,7 +33,7 @@ if (Astro.request.method === 'POST') {
 }
 ---
 
-<Admin title={`${obra.titulo} — Gestão de conteúdos AMA`}>
+<Admin title={`${traduzir(obra.titulo, 'pt')} — Gestão de conteúdos AMA`}>
   <h1>Editar obra de reabilitação</h1>
   {erros.length > 0 && (
     <div class="aviso">

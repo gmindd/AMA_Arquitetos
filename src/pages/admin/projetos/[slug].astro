@@ -3,6 +3,7 @@ import Admin from '../../../layouts/Admin.astro';
 import CamposProjeto from '../../../components/admin/CamposProjeto.astro';
 import { obterProjeto, guardarProjeto, apagar, ErroUpload } from '../../../lib/store';
 import { projetoDeFormulario, validarProjeto } from '../../../lib/forms';
+import { traduzir } from '../../../lib/i18n';
 
 let projeto = await obterProjeto(Astro.params.slug ?? '');
 if (!projeto) {
@@ -32,7 +33,7 @@ if (Astro.request.method === 'POST') {
 }
 ---
 
-<Admin title={`${projeto.titulo} — Gestão de conteúdos AMA`}>
+<Admin title={`${traduzir(projeto.titulo, 'pt')} — Gestão de conteúdos AMA`}>
   <h1>Editar projeto</h1>
   {erros.length > 0 && (
     <div class="aviso">

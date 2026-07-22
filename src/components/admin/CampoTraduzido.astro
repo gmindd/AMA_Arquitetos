@@ -1,0 +1,50 @@
+---
+// Campo de texto traduzível com uma linha por idioma (PT / EN / FR).
+// Valor pode ser uma string (legado, tratada como PT) ou um objecto por
+// idioma. O submit envia como titulo_pt / titulo_en / titulo_fr etc.,
+// e o parser em lib/forms.ts recompõe o objecto CampoTraduzido.
+import { LOCALES, NOME_LOCALE, type CampoTraduzido } from '../../lib/i18n';
+
+interface Props {
+  campo: string;
+  rotulo: string;
+  valor?: CampoTraduzido;
+  tipo?: 'input' | 'textarea';
+  dica?: string;
+  obrigatorioPt?: boolean;
+}
+
+const { campo, rotulo, valor, tipo = 'input', dica, obrigatorioPt = false } = Astro.props;
+
+function valorNoIdioma(v: CampoTraduzido | undefined, l: string): string {
+  if (v == null) return '';
+  if (typeof v === 'string') return l === 'pt' ? v : '';
+  return (v as Record<string, string>)[l] ?? '';
+}
+---
+
+<fieldset class="campo campo-traduzido">
+  <legend>{rotulo}</legend>
+  {LOCALES.map((l) => {
+    const id = `${campo}_${l}`;
+    const name = `${campo}_${l}`;
+    const v = valorNoIdioma(valor, l);
+    return (
+      <div class="campo-traduzido__linha">
+        <label for={id}>{NOME_LOCALE[l]}</label>
+        {tipo === 'textarea' ? (
+          <textarea id={id} name={name} rows="3">{v}</textarea>
+        ) : (
+          <input
+            id={id}
+            name={name}
+            type="text"
+            value={v}
+            required={obrigatorioPt && l === 'pt'}
+          />
+        )}
+      </div>
+    );
+  })}
+  {dica && <span class="dica">{dica}</span>}
+</fieldset>

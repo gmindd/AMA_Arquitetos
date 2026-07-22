@@ -1,6 +1,7 @@
 ---
 // Campos do formulário de obra de reabilitação, partilhados entre criar e editar.
 import type { Obra } from '../../lib/store';
+import CampoTraduzido from './CampoTraduzido.astro';
 
 interface Props {
   obra: Obra | null;
@@ -9,16 +10,17 @@ interface Props {
 const { obra } = Astro.props;
 ---
 
-<div class="campo">
-  <label for="titulo">Título</label>
-  <input id="titulo" name="titulo" type="text" value={obra?.titulo ?? ''} required />
-  <span class="dica">Ex.: Tratamento de fachada de prédio</span>
-</div>
+<CampoTraduzido
+  campo="titulo"
+  rotulo="Título"
+  valor={obra?.titulo}
+  obrigatorioPt
+  dica="Ex.: Tratamento de fachada de prédio"
+/>
 
 <div class="par">
-  <div class="campo">
-    <label for="local">Local</label>
-    <input id="local" name="local" type="text" value={obra?.local ?? ''} required />
+  <div>
+    <CampoTraduzido campo="local" rotulo="Local" valor={obra?.local} obrigatorioPt />
   </div>
   <div class="campo">
     <label for="ano">Ano</label>
@@ -60,7 +62,4 @@ const { obra } = Astro.props;
   <span class="dica">Desligar oculta a obra do site sem a apagar.</span>
 </div>
 
-<div class="campo">
-  <label for="nota">Nota breve (opcional)</label>
-  <textarea id="nota" name="nota">{obra?.nota ?? ''}</textarea>
-</div>
+<CampoTraduzido campo="nota" rotulo="Nota breve (opcional)" valor={obra?.nota} tipo="textarea" />

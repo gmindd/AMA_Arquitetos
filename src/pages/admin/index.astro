@@ -1,11 +1,15 @@
 ---
 import Admin from '../../layouts/Admin.astro';
 import { listarProjetos, listarObras } from '../../lib/store';
+import { traduzir } from '../../lib/i18n';
 
 const projetos = await listarProjetos();
 const obras = await listarObras();
 
 const visivel = (v?: boolean) => v !== false;
+
+// No backoffice mostramos a versão PT dos campos traduzíveis
+const pt = (c: unknown) => traduzir(c as never, 'pt');
 ---
 
 <Admin>
@@ -27,10 +31,10 @@ const visivel = (v?: boolean) => v !== false;
       <div class={`admin-lista__linha${visivel(p.visivel) ? '' : ' admin-lista__linha--oculto'}`}>
         <img src={p.capa} alt="" />
         <div>
-          <strong>{p.titulo}</strong>
+          <strong>{pt(p.titulo)}</strong>
           {!visivel(p.visivel) && <span class="etiqueta-oculto">Oculto</span>}
           <br />
-          <span class="meta">{p.tipologia} · {p.ano} · ordem {p.ordem}</span>
+          <span class="meta">{pt(p.tipologia)} · {p.ano} · ordem {p.ordem}</span>
         </div>
         <div class="admin-lista__acoes">
           <form method="POST" action="/admin/visibilidade">
@@ -56,10 +60,10 @@ const visivel = (v?: boolean) => v !== false;
       <div class={`admin-lista__linha${visivel(o.visivel) ? '' : ' admin-lista__linha--oculto'}`}>
         <img src={o.depois} alt="" />
         <div>
-          <strong>{o.titulo}</strong>
+          <strong>{pt(o.titulo)}</strong>
           {!visivel(o.visivel) && <span class="etiqueta-oculto">Oculto</span>}
           <br />
-          <span class="meta">{o.local} · {o.ano} · ordem {o.ordem}</span>
+          <span class="meta">{pt(o.local)} · {o.ano} · ordem {o.ordem}</span>
         </div>
         <div class="admin-lista__acoes">
           <form method="POST" action="/admin/visibilidade">

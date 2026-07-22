@@ -1,13 +1,15 @@
 ---
 // Rodapé: sigla grande, morada, contactos, navegação e bio
 import LogoMarca from './LogoMarca.astro';
+import { t, hrefLocale, type Locale } from '../lib/i18n';
 import type { Definicoes } from '../lib/store';
 
 interface Props {
   logos: Definicoes['logos'];
+  locale: Locale;
 }
 
-const { logos } = Astro.props;
+const { logos, locale } = Astro.props;
 const ano = new Date().getFullYear();
 ---
 
@@ -18,7 +20,7 @@ const ano = new Date().getFullYear();
 
   <div class="rodape__colunas">
     <div>
-      <span class="rotulo">Morada</span>
+      <span class="rotulo">{t('rodape.morada', locale)}</span>
       <p>
         Avenida do Atlântico 221, loja 10<br />
         4935-580 Chafé<br />
@@ -26,7 +28,7 @@ const ano = new Date().getFullYear();
       </p>
     </div>
     <div>
-      <span class="rotulo">Contactos</span>
+      <span class="rotulo">{t('rodape.contactos', locale)}</span>
       <p>
         André Machado · <a href="tel:+351917091338">917 091 338</a><br />
         Melissa Fazendeiro · <a href="tel:+351918133120">918 133 120</a><br />
@@ -35,27 +37,23 @@ const ano = new Date().getFullYear();
       </p>
     </div>
     <div>
-      <span class="rotulo">Navegação</span>
+      <span class="rotulo">{t('rodape.navegacao', locale)}</span>
       <p>
-        <a href="/">Projetos</a><br />
-        <a href="/reabilitacao">Reabilitação</a><br />
-        <a href="/sobre">Sobre</a><br />
-        <a href="/contactos">Contactos</a>
+        <a href={hrefLocale('/', locale)}>{t('nav.projetos', locale)}</a><br />
+        <a href={hrefLocale('/reabilitacao', locale)}>{t('nav.reabilitacao', locale)}</a><br />
+        <a href={hrefLocale('/sobre', locale)}>{t('nav.sobre', locale)}</a><br />
+        <a href={hrefLocale('/contactos', locale)}>{t('nav.contactos', locale)}</a>
       </p>
     </div>
     <div>
-      <span class="rotulo">AMA</span>
-      <p class="rodape__bio">
-        Gabinete de arquitetura em Viana do Castelo. Habitação, interiores e
-        reconversão de espaços. Reabilitações e tratamento de fachadas com
-        equipa própria. Um só interlocutor, do projeto à obra.
-      </p>
+      <span class="rotulo">{t('rodape.ama', locale)}</span>
+      <p class="rodape__bio">{t('rodape.bio', locale)}</p>
     </div>
   </div>
 
   <div class="rodape__base">
-    <span>© {ano} AMA André Melissa Arquitetos</span>
-    <span>41.6448° N, 8.8236° O · Praia da Amorosa</span>
-    <a href="https://www.pereiragabriel.com/" rel="noopener" target="_blank">crafted by pereiragabriel</a>
+    <span>{t('rodape.copyright', locale).replace('{ano}', String(ano))}</span>
+    <span>{t('rodape.coords', locale)}</span>
+    <a href="https://www.pereiragabriel.com/" rel="noopener" target="_blank">{t('rodape.crafted', locale)}</a>
   </div>
 </footer>

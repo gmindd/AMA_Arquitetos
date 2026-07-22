@@ -4,24 +4,36 @@
 // tornaria o cabeçalho num bloco contentor e ancoraria este menu ao topo.
 // O menu usa sempre mistura por diferença: fica legível sobre qualquer
 // fundo — fotografia clara, fotografia escura ou o bone da página —
-// sem precisar de qualquer cromo (fundo, contorno, plaqueta).
-const path = Astro.url.pathname;
+// sem precisar de qualquer cromo. As bandeiras são um irmão fora do
+// bloco com blend para não ficarem invertidas.
+import Bandeiras from './Bandeiras.astro';
+import { t, hrefLocale, extrairLocale, type Locale } from '../lib/i18n';
+
+interface Props {
+  locale: Locale;
+}
+
+const { locale } = Astro.props;
+const { pathSemLocale } = extrairLocale(Astro.url.pathname);
 
 const ligacoes = [
-  { rotulo: 'Projetos', href: '/', ativo: path === '/' || path.startsWith('/projetos') },
-  { rotulo: 'Reabilitação', href: '/reabilitacao', ativo: path.startsWith('/reabilitacao') },
-  { rotulo: 'Sobre', href: '/sobre', ativo: path.startsWith('/sobre') },
-  { rotulo: 'Contactos', href: '/contactos', ativo: path.startsWith('/contactos') },
+  { chave: 'nav.projetos', href: '/', ativo: pathSemLocale === '/' || pathSemLocale.startsWith('/projetos') },
+  { chave: 'nav.reabilitacao', href: '/reabilitacao', ativo: pathSemLocale.startsWith('/reabilitacao') },
+  { chave: 'nav.sobre', href: '/sobre', ativo: pathSemLocale.startsWith('/sobre') },
+  { chave: 'nav.contactos', href: '/contactos', ativo: pathSemLocale.startsWith('/contactos') },
 ];
 ---
 
-<nav class="nav-lateral" aria-label="Navegação principal">
-  {ligacoes.map((l) => (
-    <a href={l.href} aria-current={l.ativo ? 'page' : undefined}>{l.rotulo}</a>
-  ))}
-  <a
-    class="nav-lateral__cta"
-    href="/contactos"
-    aria-current={path.startsWith('/contactos') ? 'page' : undefined}
-  >Enviar mensagem</a>
-</nav>
+<div class="canto-lateral">
+  <nav class="nav-lateral" aria-label={t('nav.projetos', locale)}>
+    {ligacoes.map((l) => (
+      <a href={hrefLocale(l.href, locale)} aria-current={l.ativo ? 'page' : undefined}>{t(l.chave, locale)}</a>
+    ))}
+    <a
+      class="nav-lateral__cta"
+      href={hrefLocale('/contactos', locale)}
+      aria-current={pathSemLocale.startsWith('/contactos') ? 'page' : undefined}
+    >{t('nav.enviarMensagem', locale)}</a>
+  </nav>
+  <Bandeiras locale={locale} extra="bandeiras--lateral" />
+</div>

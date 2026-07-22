@@ -140,6 +140,54 @@ main {
   border-bottom: 1px solid var(--hairline);
 }
 
+/* ---------- Bandeiras / seletor de idioma ---------- */
+.bandeiras {
+  display: flex;
+  gap: 0.55rem;
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  align-items: center;
+}
+
+.bandeira {
+  display: inline-block;
+  width: 1.85rem;
+  height: 1.25rem;
+  overflow: hidden;
+  border: 1px solid var(--hairline);
+  opacity: 0.55;
+  transition: opacity 0.3s var(--ease), transform 0.3s var(--ease);
+}
+
+.bandeira svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.bandeira:hover,
+.bandeira:focus-visible {
+  opacity: 1;
+  transform: translateY(-1px);
+}
+
+.bandeira--activa {
+  opacity: 1;
+  outline: 1px solid var(--black);
+  outline-offset: 1px;
+}
+
+/* No menu ecrã inteiro em mobile, as bandeiras ficam sobre o preto:
+   inverte-se a cor de contorno para se manter subtil. */
+.menu-total .bandeira {
+  border-color: color-mix(in srgb, var(--bone) 40%, transparent);
+}
+
+.menu-total .bandeira--activa {
+  outline-color: var(--bone);
+}
+
 /* ---------- Splash inicial ----------
    Ecrã inteiro com o lockup AMA em cima do fundo bone. Aparece na
    primeira visita da sessão (ver script is:inline no Base.astro) e sai
@@ -1155,11 +1203,20 @@ body.menu-aberto .menu-total__pe {
      Ateliers Jean Nouvel. A identidade vem do splash inicial; a
      navegação vive no canto inferior direito, com "Enviar mensagem"
      como último item. */
-  .nav-lateral {
+  /* Wrapper fixo no canto inferior direito: agrupa o menu (com blend)
+     e as bandeiras (sem blend) para se moverem em conjunto. */
+  .canto-lateral {
     position: fixed;
     right: var(--gutter);
     bottom: clamp(1.75rem, 4vh, 3rem);
     z-index: 105;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 1.1rem;
+  }
+
+  .nav-lateral {
     display: flex;
     flex-direction: column;
     align-items: flex-end;
@@ -1215,9 +1272,10 @@ body.menu-aberto .menu-total__pe {
     content: none !important;
   }
 
+
   /* Enquanto o menu ecrã inteiro estiver aberto (não deve estar em desktop,
      mas para segurança se o botão for tornado visível) escondemos a lateral. */
-  body.menu-aberto .nav-lateral {
+  body.menu-aberto .canto-lateral {
     visibility: hidden;
   }
 
@@ -1247,6 +1305,20 @@ body.menu-aberto .menu-total a.menu-total__cta {
   opacity: 1;
   transform: none;
   transition-delay: 0.38s;
+}
+
+/* Bandeiras no menu ecrã inteiro em mobile: entram a seguir ao CTA */
+.menu-total .bandeiras--menu-total {
+  margin-top: 1.5rem;
+  opacity: 0;
+  transform: translateY(1.5rem);
+  transition: opacity 0.6s var(--ease), transform 0.6s var(--ease);
+}
+
+body.menu-aberto .menu-total .bandeiras--menu-total {
+  opacity: 1;
+  transform: none;
+  transition-delay: 0.45s;
 }
 
 /* Movimento reduzido: sem animações, conteúdo imediato */

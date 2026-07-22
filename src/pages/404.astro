@@ -1,11 +1,14 @@
 ---
 import Base from '../layouts/Base.astro';
+import { t, LOCALE_DEFAULT, hrefLocale, type Locale } from '../lib/i18n';
+
+const locale: Locale = (Astro.locals as { locale?: Locale }).locale ?? LOCALE_DEFAULT;
 ---
 
-<Base title="Página não encontrada · AMA André Melissa Arquitetos">
+<Base title={`${t('404.titulo', locale)} · AMA`}>
   <section class="erro wrap">
-    <h1>404</h1>
-    <p>Esta página não existe.</p>
-    <p><a class="cta" href="/">Ver projetos</a></p>
+    <h1>{t('404.titulo', locale)}</h1>
+    <p>{t('404.descricao', locale)}</p>
+    <p><a class="cta" href={hrefLocale('/', locale)}>{t('404.voltar', locale)}</a></p>
   </section>
 </Base>

@@ -1,6 +1,8 @@
 ---
 // Campos do formulário de projeto, partilhados entre criar e editar.
+// Cada campo textual traduzível tem uma linha por idioma (PT/EN/FR).
 import type { Projeto } from '../../lib/store';
+import CampoTraduzido from './CampoTraduzido.astro';
 
 interface Props {
   projeto: Projeto | null;
@@ -9,35 +11,32 @@ interface Props {
 const { projeto } = Astro.props;
 ---
 
-<div class="campo">
-  <label for="titulo">Título</label>
-  <input id="titulo" name="titulo" type="text" value={projeto?.titulo ?? ''} required />
-</div>
+<CampoTraduzido campo="titulo" rotulo="Título" valor={projeto?.titulo} obrigatorioPt />
 
 <div class="par">
-  <div class="campo">
-    <label for="tipologia">Tipologia</label>
-    <input
-      id="tipologia"
-      name="tipologia"
-      type="text"
-      value={projeto?.tipologia ?? ''}
-      required
+  <div>
+    <CampoTraduzido
+      campo="tipologia"
+      rotulo="Tipologia"
+      valor={projeto?.tipologia}
+      obrigatorioPt
+      dica="Ex.: Habitação unifamiliar, Reabilitação, Reconversão de espaço"
     />
-    <span class="dica">Ex.: Habitação unifamiliar, Reabilitação, Reconversão de espaço</span>
   </div>
-  <div class="campo">
-    <label for="local">Local</label>
-    <input id="local" name="local" type="text" value={projeto?.local ?? ''} required />
-    <span class="dica">Ex.: Chafé, Viana do Castelo</span>
+  <div>
+    <CampoTraduzido
+      campo="local"
+      rotulo="Local"
+      valor={projeto?.local}
+      obrigatorioPt
+      dica="Ex.: Chafé, Viana do Castelo"
+    />
   </div>
 </div>
 
 <div class="par">
-  <div class="campo">
-    <label for="area">Área</label>
-    <input id="area" name="area" type="text" value={projeto?.area ?? ''} required />
-    <span class="dica">Ex.: 84 m²</span>
+  <div>
+    <CampoTraduzido campo="area" rotulo="Área" valor={projeto?.area} obrigatorioPt dica="Ex.: 84 m²" />
   </div>
   <div class="campo">
     <label for="ano">Ano</label>
@@ -118,8 +117,10 @@ const { projeto } = Astro.props;
   <span class="dica">Desligar oculta o projeto do site sem o apagar.</span>
 </div>
 
-<div class="campo">
-  <label for="nota">Nota breve (opcional)</label>
-  <textarea id="nota" name="nota">{projeto?.nota ?? ''}</textarea>
-  <span class="dica">Duas ou três frases curtas. O projeto é o protagonista.</span>
-</div>
+<CampoTraduzido
+  campo="nota"
+  rotulo="Nota breve (opcional)"
+  valor={projeto?.nota}
+  tipo="textarea"
+  dica="Duas ou três frases curtas. O projeto é o protagonista."
+/>

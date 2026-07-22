@@ -1,10 +1,14 @@
 ---
-import { listarProjetosPublicos, obterDefinicoes, chaveVariante } from '../lib/store';
+import { listarProjetosPublicos, obterDefinicoes, chaveVariante, resolverProjeto } from '../lib/store';
+import { LOCALE_DEFAULT, hrefLocale, type Locale } from '../lib/i18n';
 import Base from '../layouts/Base.astro';
 import ProjectCard from '../components/ProjectCard.astro';
 
+const locale: Locale = (Astro.locals as { locale?: Locale }).locale ?? LOCALE_DEFAULT;
+
 // Home = grelha de projetos visíveis, sem texto de abertura.
-const projetos = await listarProjetosPublicos();
+const projetosRaw = await listarProjetosPublicos();
+const projetos = projetosRaw.map((p) => resolverProjeto(p, locale));
 const { logos } = await obterDefinicoes();
 
 // Variante de logótipo a sobrepor na capa de cada projeto (se carregada)
@@ -12,14 +16,14 @@ const variante = (v: 'A/MA' | 'A/AM' | 'MA/A') => logos[chaveVariante(v)];
 ---
 
 <Base>
-  <h1 class="oculto">Projetos · AMA André Melissa Arquitetos</h1>
+  <h1 class="oculto">AMA André Melissa Arquitetos</h1>
 
   <!-- Abertura a ecrã inteiro: os projetos em rotação lenta, sem texto de abertura -->
-  <section class="hero" data-hero aria-label="Projetos em destaque">
+  <section class="hero" data-hero aria-label="Projetos">
     {projetos.map((p, i) => (
       <a
         class={`hero__slide${i === 0 ? ' ativo' : ''}`}
-        href={`/projetos/${p.slug}`}
+        href={hrefLocale(`/projetos/${p.slug}`, locale)}
         data-hero-slide
         tabindex={i === 0 ? undefined : -1}
         aria-hidden={i === 0 ? undefined : 'true'}
@@ -32,15 +36,15 @@ const variante = (v: 'A/MA' | 'A/AM' | 'MA/A') => logos[chaveVariante(v)];
         <p class="hero__legenda">{p.titulo} · {p.local}, {p.ano}</p>
       </a>
     ))}
-    <button class="hero__seta" type="button" data-hero-seta aria-label="Ver todos os projetos">
+    <button class="hero__seta" type="button" data-hero-seta aria-label="↓">
       ↓
     </button>
   </section>
 
-  <section class="grelha-projetos" id="projetos" aria-label="Projetos">
+  <section class="grelha-projetos" id="projetos">
     {projetos.map((p, i) => (
       <ProjectCard
-        href={`/projetos/${p.slug}`}
+        href={hrefLocale(`/projetos/${p.slug}`, locale)}
         titulo={p.titulo}
         tipologia={p.tipologia}
         ano={p.ano}

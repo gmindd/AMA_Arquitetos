@@ -138,6 +138,44 @@
   resize: vertical;
 }
 
+/* Campo traduzível: uma linha por idioma (PT / EN / FR) agrupadas
+   sob a mesma legenda. O admin deixa PT como obrigatório; EN/FR são
+   opcionais e caem para PT se ficarem em branco. */
+.admin-form fieldset.campo-traduzido {
+  border: 1px solid var(--hairline);
+  padding: 0.85rem 1rem 1rem;
+  display: grid;
+  gap: 0.5rem;
+}
+
+.admin-form fieldset.campo-traduzido legend {
+  padding: 0 0.35rem;
+  font-size: var(--text-xs);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+}
+
+.admin-form .campo-traduzido__linha {
+  display: grid;
+  grid-template-columns: 5.5rem 1fr;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.admin-form .campo-traduzido__linha label {
+  font-size: var(--text-xs);
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  opacity: 0.7;
+  font-weight: 500;
+}
+
+.admin-form .campo-traduzido__linha input,
+.admin-form .campo-traduzido__linha textarea {
+  width: 100%;
+}
+
 .admin-form input:focus,
 .admin-form select:focus,
 .admin-form textarea:focus {

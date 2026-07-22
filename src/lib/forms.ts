@@ -7,6 +7,7 @@ import {
   type Projeto,
   type Obra,
 } from './store';
+import { LOCALES, traduzir, type CampoTraduzido } from './i18n';
 
 const VARIACOES = ['A/MA', 'A/AM', 'MA/A'] as const;
 
@@ -17,6 +18,20 @@ function texto(dados: FormData, campo: string): string {
 function numero(dados: FormData, campo: string, defeito: number): number {
   const valor = parseInt(texto(dados, campo), 10);
   return Number.isFinite(valor) ? valor : defeito;
+}
+
+// Recompõe um campo traduzível a partir de titulo_pt / titulo_en / titulo_fr.
+// Se só houver PT, guarda como string simples (compatível com dados antigos).
+function textoTraduzido(dados: FormData, campo: string): CampoTraduzido {
+  const valores: Partial<Record<'pt' | 'en' | 'fr', string>> = {};
+  for (const l of LOCALES) {
+    const v = texto(dados, `${campo}_${l}`);
+    if (v) valores[l] = v;
+  }
+  const chaves = Object.keys(valores) as ('pt' | 'en' | 'fr')[];
+  if (chaves.length === 0) return '';
+  if (chaves.length === 1 && chaves[0] === 'pt') return valores.pt ?? '';
+  return valores;
 }
 
 // Guarda um ficheiro do formulário, se foi enviado; senão devolve o atual
@@ -32,7 +47,8 @@ export async function projetoDeFormulario(
   dados: FormData,
   existente: Projeto | null
 ): Promise<Projeto> {
-  const titulo = texto(dados, 'titulo');
+  const titulo = textoTraduzido(dados, 'titulo');
+  const tituloPt = traduzir(titulo, 'pt');
   const variacao = texto(dados, 'variacaoLogo');
 
   // Galeria: mantém as imagens não marcadas para remoção e junta as novas
@@ -45,11 +61,11 @@ export async function projetoDeFormulario(
   }
 
   return {
-    slug: existente?.slug ?? (await slugUnico('projetos', titulo)),
+    slug: existente?.slug ?? (await slugUnico('projetos', tituloPt)),
     titulo,
-    tipologia: texto(dados, 'tipologia'),
-    local: texto(dados, 'local'),
-    area: texto(dados, 'area'),
+    tipologia: textoTraduzido(dados, 'tipologia'),
+    local: textoTraduzido(dados, 'local'),
+    area: textoTraduzido(dados, 'area'),
     ano: numero(dados, 'ano', new Date().getFullYear()),
     capa: await ficheiroOuAtual(dados, 'capa', existente?.capa ?? ''),
     galeria,
@@ -59,40 +75,41 @@ export async function projetoDeFormulario(
     logoClaro: dados.get('logoClaro') === 'on',
     ordem: numero(dados, 'ordem', 0),
     visivel: dados.get('visivel') === 'on',
-    nota: texto(dados, 'nota'),
+    nota: textoTraduzido(dados, 'nota'),
   };
 }
 
 export async function obraDeFormulario(dados: FormData, existente: Obra | null): Promise<Obra> {
-  const titulo = texto(dados, 'titulo');
+  const titulo = textoTraduzido(dados, 'titulo');
+  const tituloPt = traduzir(titulo, 'pt');
   return {
-    slug: existente?.slug ?? (await slugUnico('reabilitacao', titulo)),
+    slug: existente?.slug ?? (await slugUnico('reabilitacao', tituloPt)),
     titulo,
-    local: texto(dados, 'local'),
+    local: textoTraduzido(dados, 'local'),
     ano: numero(dados, 'ano', new Date().getFullYear()),
     antes: await ficheiroOuAtual(dados, 'antes', existente?.antes ?? ''),
     depois: await ficheiroOuAtual(dados, 'depois', existente?.depois ?? ''),
     ordem: numero(dados, 'ordem', 0),
     visivel: dados.get('visivel') === 'on',
-    nota: texto(dados, 'nota'),
+    nota: textoTraduzido(dados, 'nota'),
   };
 }
 
 // Validação mínima antes de gravar; devolve a lista de problemas
 export function validarProjeto(p: Projeto): string[] {
   const erros: string[] = [];
-  if (!p.titulo) erros.push('O título é obrigatório.');
-  if (!p.tipologia) erros.push('A tipologia é obrigatória.');
-  if (!p.local) erros.push('O local é obrigatório.');
-  if (!p.area) erros.push('A área é obrigatória.');
+  if (!traduzir(p.titulo, 'pt')) erros.push('O título é obrigatório (pelo menos em PT).');
+  if (!traduzir(p.tipologia, 'pt')) erros.push('A tipologia é obrigatória (pelo menos em PT).');
+  if (!traduzir(p.local, 'pt')) erros.push('O local é obrigatório (pelo menos em PT).');
+  if (!traduzir(p.area, 'pt')) erros.push('A área é obrigatória (pelo menos em PT).');
   if (!p.capa) erros.push('A fotografia de capa é obrigatória.');
   return erros;
 }
 
 export function validarObra(o: Obra): string[] {
   const erros: string[] = [];
-  if (!o.titulo) erros.push('O título é obrigatório.');
-  if (!o.local) erros.push('O local é obrigatório.');
+  if (!traduzir(o.titulo, 'pt')) erros.push('O título é obrigatório (pelo menos em PT).');
+  if (!traduzir(o.local, 'pt')) erros.push('O local é obrigatório (pelo menos em PT).');
   if (!o.antes) erros.push('A fotografia de antes é obrigatória.');
   if (!o.depois) erros.push('A fotografia de depois é obrigatória.');
   return erros;

@@ -1,0 +1,53 @@
+---
+// Seletor de idiomas por bandeiras.
+// Cada bandeira leva ao mesmo caminho no idioma escolhido, preservando o
+// resto do URL. A bandeira do idioma actual fica destacada.
+import { LOCALES, extrairLocale, hrefLocale, NOME_LOCALE, type Locale } from '../lib/i18n';
+
+interface Props {
+  locale: Locale;
+  extra?: string;
+}
+
+const { locale, extra = '' } = Astro.props;
+const { pathSemLocale } = extrairLocale(Astro.url.pathname);
+
+// SVGs mínimos das três bandeiras: proporção 3:2, sem texto, tons planos
+// dentro da restrição da paleta funcional das bandeiras nacionais.
+const BANDEIRAS: Record<Locale, string> = {
+  pt: `<svg viewBox="0 0 30 20" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+    <rect width="30" height="20" fill="#DA291C"/>
+    <rect width="12" height="20" fill="#046A38"/>
+    <circle cx="12" cy="10" r="3" fill="#FFD100" stroke="#0A0A0A" stroke-width="0.3"/>
+    <circle cx="12" cy="10" r="1.6" fill="#046A38" stroke="#FFF" stroke-width="0.3"/>
+  </svg>`,
+  en: `<svg viewBox="0 0 30 20" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+    <rect width="30" height="20" fill="#012169"/>
+    <path d="M0,0 L30,20 M30,0 L0,20" stroke="#FFF" stroke-width="3"/>
+    <path d="M0,0 L30,20 M30,0 L0,20" stroke="#C8102E" stroke-width="1.5"/>
+    <path d="M15,0 V20 M0,10 H30" stroke="#FFF" stroke-width="5"/>
+    <path d="M15,0 V20 M0,10 H30" stroke="#C8102E" stroke-width="3"/>
+  </svg>`,
+  fr: `<svg viewBox="0 0 30 20" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+    <rect width="10" height="20" fill="#0055A4"/>
+    <rect x="10" width="10" height="20" fill="#FFF"/>
+    <rect x="20" width="10" height="20" fill="#EF4135"/>
+  </svg>`,
+};
+---
+
+<ul class={`bandeiras ${extra}`} aria-label="Trocar de língua">
+  {LOCALES.map((l) => (
+    <li>
+      <a
+        href={hrefLocale(pathSemLocale, l)}
+        class={`bandeira ${l === locale ? 'bandeira--activa' : ''}`}
+        lang={l}
+        hreflang={l}
+        aria-label={NOME_LOCALE[l]}
+        aria-current={l === locale ? 'true' : undefined}
+        set:html={BANDEIRAS[l]}
+      />
+    </li>
+  ))}
+</ul>

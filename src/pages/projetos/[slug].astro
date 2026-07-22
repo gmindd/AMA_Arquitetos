@@ -1,18 +1,20 @@
 ---
-import { listarProjetosPublicos } from '../../lib/store';
+import { listarProjetosPublicos, resolverProjeto } from '../../lib/store';
 import Base from '../../layouts/Base.astro';
+import { t, LOCALE_DEFAULT, hrefLocale, type Locale } from '../../lib/i18n';
 
-const projetos = await listarProjetosPublicos();
-const indice = projetos.findIndex((p) => p.slug === Astro.params.slug);
+const locale: Locale = (Astro.locals as { locale?: Locale }).locale ?? LOCALE_DEFAULT;
+
+const projetosRaw = await listarProjetosPublicos();
+const indice = projetosRaw.findIndex((p) => p.slug === Astro.params.slug);
 
 if (indice === -1) {
   return Astro.rewrite('/404');
 }
 
-const projeto = projetos[indice];
-const anterior = projetos[indice - 1] ?? null;
-const seguinte = projetos[indice + 1] ?? null;
-const nota = projeto.nota?.trim() ?? '';
+const projeto = resolverProjeto(projetosRaw[indice], locale);
+const anterior = projetosRaw[indice - 1] ? resolverProjeto(projetosRaw[indice - 1], locale) : null;
+const seguinte = projetosRaw[indice + 1] ? resolverProjeto(projetosRaw[indice + 1], locale) : null;
 ---
 
 <Base
@@ -25,10 +27,10 @@ const nota = projeto.nota?.trim() ?? '';
 
       <!-- Ficha técnica: Tipologia · Local · Área · Ano -->
       <dl class="ficha" data-reveal>
-        <div><dt>Tipologia</dt><dd>{projeto.tipologia}</dd></div>
-        <div><dt>Local</dt><dd>{projeto.local}</dd></div>
-        <div><dt>Área</dt><dd>{projeto.area}</dd></div>
-        <div><dt>Ano</dt><dd>{projeto.ano}</dd></div>
+        <div><dt>{t('projeto.tipologia', locale)}</dt><dd>{projeto.tipologia}</dd></div>
+        <div><dt>{t('projeto.local', locale)}</dt><dd>{projeto.local}</dd></div>
+        <div><dt>{t('projeto.area', locale)}</dt><dd>{projeto.area}</dd></div>
+        <div><dt>{t('projeto.ano', locale)}</dt><dd>{projeto.ano}</dd></div>
       </dl>
     </header>
 
@@ -37,9 +39,9 @@ const nota = projeto.nota?.trim() ?? '';
     </figure>
 
     <div class="projeto-corpo wrap">
-      {nota.length > 0 && (
+      {projeto.nota.length > 0 && (
         <div class="nota" data-reveal>
-          <p>{nota}</p>
+          <p>{projeto.nota}</p>
         </div>
       )}
 
@@ -47,23 +49,23 @@ const nota = projeto.nota?.trim() ?? '';
         <div class="galeria">
           {projeto.galeria.map((imagem, i) => (
             <figure data-reveal>
-              <img src={imagem} alt={`${projeto.titulo}, imagem ${i + 1}`} loading="lazy" />
+              <img src={imagem} alt={`${projeto.titulo}, ${t('projeto.imagemN', locale)} ${i + 1}`} loading="lazy" />
             </figure>
           ))}
         </div>
       )}
     </div>
 
-    <nav class="projeto-nav wrap" aria-label="Outros projetos">
+    <nav class="projeto-nav wrap" aria-label={t('projeto.outrosProjetos', locale)}>
       {anterior && (
-        <a href={`/projetos/${anterior.slug}`} data-sentido="anterior">
-          <span class="rotulo">Anterior</span>
+        <a href={hrefLocale(`/projetos/${anterior.slug}`, locale)} data-sentido="anterior">
+          <span class="rotulo">{t('projeto.anterior', locale)}</span>
           <strong>{anterior.titulo}</strong>
         </a>
       )}
       {seguinte && (
-        <a href={`/projetos/${seguinte.slug}`} data-sentido="seguinte">
-          <span class="rotulo">Seguinte</span>
+        <a href={hrefLocale(`/projetos/${seguinte.slug}`, locale)} data-sentido="seguinte">
+          <span class="rotulo">{t('projeto.seguinte', locale)}</span>
           <strong>{seguinte.titulo}</strong>
         </a>
       )}

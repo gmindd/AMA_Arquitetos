@@ -10,6 +10,16 @@ export default defineConfig({
   trailingSlash: 'ignore',
   output: 'server',
   adapter: node({ mode: 'standalone' }),
+  // Três idiomas em prefixos de URL: PT em / (default, sem prefixo),
+  // EN em /en/*, FR em /fr/*. Cada página não-default é um wrapper
+  // fino que delega no componente partilhado em src/paginas/.
+  i18n: {
+    defaultLocale: 'pt',
+    locales: ['pt', 'en', 'fr'],
+    routing: {
+      prefixDefaultLocale: false,
+    },
+  },
   security: {
     // Confia no Host/X-Forwarded-Host vindos do proxy (Coolify) para que
     // Astro.url reflita o domínio real; sem isto, todos os POST dos

@@ -2,41 +2,46 @@
 import Base from '../layouts/Base.astro';
 import { obterDefinicoes, guardarMensagem, type PedidoOrcamento } from '../lib/store';
 import { envioDisponivel, enviarPedido } from '../lib/email';
+import { t, LOCALE_DEFAULT, hrefLocale, type Locale } from '../lib/i18n';
 
+const locale: Locale = (Astro.locals as { locale?: Locale }).locale ?? LOCALE_DEFAULT;
 const definicoes = await obterDefinicoes();
 
-const TIPOS = ['Projeto de arquitetura', 'Reabilitação', 'Ambos'];
+const TIPOS: { chave: string; rotulo: string }[] = [
+  { chave: 'arquitetura', rotulo: t('contactos.form.tipo.arquitetura', locale) },
+  { chave: 'reabilitacao', rotulo: t('contactos.form.tipo.reabilitacao', locale) },
+  { chave: 'ambos', rotulo: t('contactos.form.tipo.ambos', locale) },
+];
 
 let erros: string[] = [];
 let enviado = Astro.url.searchParams.has('enviado');
-let valores = { nome: '', contacto: '', tipo: TIPOS[0], localizacao: '', mensagem: '' };
+let valores = { nome: '', contacto: '', tipo: TIPOS[0].rotulo, localizacao: '', mensagem: '' };
 
 if (Astro.request.method === 'POST') {
   const dados = await Astro.request.formData();
 
   // Honeypot: se o campo escondido vier preenchido, é um bot — finge sucesso
   if (String(dados.get('empresa') ?? '').trim() !== '') {
-    return Astro.redirect('/contactos?enviado=1', 303);
+    return Astro.redirect(hrefLocale('/contactos?enviado=1', locale), 303);
   }
 
   valores = {
     nome: String(dados.get('nome') ?? '').trim(),
     contacto: String(dados.get('contacto') ?? '').trim(),
-    tipo: TIPOS.includes(String(dados.get('tipo'))) ? String(dados.get('tipo')) : TIPOS[0],
+    tipo: TIPOS.map((t) => t.rotulo).includes(String(dados.get('tipo'))) ? String(dados.get('tipo')) : TIPOS[0].rotulo,
     localizacao: String(dados.get('localizacao') ?? '').trim(),
     mensagem: String(dados.get('mensagem') ?? '').trim(),
   };
 
-  if (!valores.nome) erros.push('Indique o nome.');
-  if (!valores.contacto) erros.push('Indique um contacto.');
-  if (!valores.localizacao) erros.push('Indique a localização.');
-  if (!valores.mensagem) erros.push('Escreva uma mensagem.');
+  if (!valores.nome) erros.push(t('contactos.erro.nome', locale));
+  if (!valores.contacto) erros.push(t('contactos.erro.contacto', locale));
+  if (!valores.localizacao) erros.push(t('contactos.erro.localizacao', locale));
+  if (!valores.mensagem) erros.push(t('contactos.erro.mensagem', locale));
 
   if (erros.length === 0) {
     const pedido: PedidoOrcamento = { ...valores, data: new Date().toISOString() };
     let ok = false;
 
-    // Primeiro tenta enviar por email (conta ligada por OAuth ou SMTP)
     if (envioDisponivel(definicoes)) {
       try {
         await enviarPedido(pedido, definicoes);
@@ -46,7 +51,6 @@ if (Astro.request.method === 'POST') {
       }
     }
 
-    // Rede de segurança: se não foi enviado, guarda em disco para não se perder
     if (!ok) {
       try {
         await guardarMensagem(pedido);
@@ -56,19 +60,19 @@ if (Astro.request.method === 'POST') {
       }
     }
 
-    if (ok) return Astro.redirect('/contactos?enviado=1', 303);
-    erros.push('Não foi possível enviar agora. Contacte-nos por email ou telefone.');
+    if (ok) return Astro.redirect(hrefLocale('/contactos?enviado=1', locale), 303);
+    erros.push(t('contactos.erro.envio', locale));
   }
 }
 ---
 
-<Base title="Contactos · AMA André Melissa Arquitetos">
-  <h1 class="titulo-pagina wrap" data-reveal>Contactos</h1>
+<Base title={t('contactos.tituloPagina', locale)}>
+  <h1 class="titulo-pagina wrap" data-reveal>{t('contactos.titulo', locale)}</h1>
 
   <section class="contactos wrap">
     <div class="contactos__dados">
       <div class="bloco" data-reveal>
-        <span class="rotulo">Morada</span>
+        <span class="rotulo">{t('contactos.morada', locale)}</span>
         <p>
           Avenida do Atlântico 221, loja 10<br />
           4935-580 Chafé<br />
@@ -76,29 +80,29 @@ if (Astro.request.method === 'POST') {
         </p>
       </div>
       <div class="bloco" data-reveal>
-        <span class="rotulo">Telefone</span>
+        <span class="rotulo">{t('contactos.telefone', locale)}</span>
         <p>
           André Machado · <a href="tel:+351917091338">917 091 338</a><br />
           Melissa Fazendeiro · <a href="tel:+351918133120">918 133 120</a>
         </p>
       </div>
       <div class="bloco" data-reveal>
-        <span class="rotulo">E-mail</span>
+        <span class="rotulo">{t('contactos.email', locale)}</span>
         <p><a href="mailto:andremelissaarquitetos@gmail.com">andremelissaarquitetos@gmail.com</a></p>
       </div>
       <div class="bloco" data-reveal>
-        <span class="rotulo">Instagram</span>
+        <span class="rotulo">{t('contactos.instagram', locale)}</span>
         <p><a href="https://www.instagram.com/andremelissaarquitetos" rel="noopener" target="_blank">@andremelissaarquitetos</a></p>
       </div>
     </div>
 
     {enviado ? (
       <div class="formulario" data-reveal>
-        <p class="form-sucesso">Pedido recebido. Respondemos em 24 a 48h úteis.</p>
-        <p class="prazo"><a href="/contactos">Enviar outro pedido</a></p>
+        <p class="form-sucesso">{t('contactos.form.sucesso', locale)}</p>
+        <p class="prazo"><a href={hrefLocale('/contactos', locale)}>{t('contactos.form.novo', locale)}</a></p>
       </div>
     ) : (
-      <!-- Formulário de orçamento: 5 campos, nem mais um -->
+      <!-- Formulário: 5 campos, nem mais um -->
       <form class="formulario" name="orcamento" method="POST" data-reveal>
         {erros.length > 0 && (
           <div class="form-erro">
@@ -107,32 +111,32 @@ if (Astro.request.method === 'POST') {
         )}
 
         <p class="oculto" aria-hidden="true">
-          <label>Não preencher: <input name="empresa" tabindex="-1" autocomplete="off" /></label>
+          <label>{t('contactos.form.honeypot', locale)}: <input name="empresa" tabindex="-1" autocomplete="off" /></label>
         </p>
         <div class="campo">
-          <label for="nome">Nome</label>
+          <label for="nome">{t('contactos.form.nome', locale)}</label>
           <input id="nome" name="nome" type="text" autocomplete="name" value={valores.nome} required />
         </div>
         <div class="campo">
-          <label for="contacto">Contacto</label>
+          <label for="contacto">{t('contactos.form.contacto', locale)}</label>
           <input id="contacto" name="contacto" type="text" autocomplete="tel" value={valores.contacto} required />
         </div>
         <div class="campo">
-          <label for="tipo">Tipo</label>
+          <label for="tipo">{t('contactos.form.tipo', locale)}</label>
           <select id="tipo" name="tipo" required>
-            {TIPOS.map((t) => <option value={t} selected={valores.tipo === t}>{t}</option>)}
+            {TIPOS.map((t) => <option value={t.rotulo} selected={valores.tipo === t.rotulo}>{t.rotulo}</option>)}
           </select>
         </div>
         <div class="campo">
-          <label for="localizacao">Localização</label>
+          <label for="localizacao">{t('contactos.form.localizacao', locale)}</label>
           <input id="localizacao" name="localizacao" type="text" value={valores.localizacao} required />
         </div>
         <div class="campo">
-          <label for="mensagem">Mensagem</label>
+          <label for="mensagem">{t('contactos.form.mensagem', locale)}</label>
           <textarea id="mensagem" name="mensagem" required>{valores.mensagem}</textarea>
         </div>
-        <button class="cta" type="submit">Pedir orçamento</button>
-        <p class="prazo">Respondemos em 24 a 48h úteis.</p>
+        <button class="cta" type="submit">{t('contactos.form.enviar', locale)}</button>
+        <p class="prazo">{t('contactos.form.prazo', locale)}</p>
       </form>
     )}
   </section>

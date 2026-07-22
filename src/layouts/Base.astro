@@ -5,6 +5,7 @@ import NavLateral from '../components/NavLateral.astro';
 import Splash from '../components/Splash.astro';
 import Footer from '../components/Footer.astro';
 import { obterDefinicoes } from '../lib/store';
+import { t, LOCALE_DEFAULT, type Locale } from '../lib/i18n';
 import '../styles/global.css';
 
 interface Props {
@@ -12,9 +13,10 @@ interface Props {
   description?: string;
 }
 
+const locale: Locale = (Astro.locals as { locale?: Locale }).locale ?? LOCALE_DEFAULT;
 const {
-  title = 'AMA André Melissa Arquitetos · Gabinete de arquitetura, Viana do Castelo',
-  description = 'Gabinete de arquitetura em Viana do Castelo. Habitação, interiores e reconversão de espaços. Reabilitações e tratamento de fachadas com equipa própria.',
+  title = t('site.tituloBase', locale),
+  description = t('site.descricaoBase', locale),
 } = Astro.props;
 
 // Logótipos geridos no backoffice — influenciam cabeçalho, rodapé e favicon.
@@ -35,7 +37,7 @@ const favicon = definicoes.logos.icone ?? '/favicon.svg';
 ---
 
 <!doctype html>
-<html lang="pt">
+<html lang={locale}>
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -58,13 +60,13 @@ const favicon = definicoes.logos.icone ?? '/favicon.svg';
     </script>
   </head>
   <body>
-    <a class="salto-conteudo" href="#conteudo">Saltar para o conteúdo</a>
+    <a class="salto-conteudo" href="#conteudo">{t('nav.saltarConteudo', locale)}</a>
     <Splash logo={logosRodape.principal} />
-    <Header logos={logosCabecalho} />
-    <NavLateral />
+    <Header logos={logosCabecalho} locale={locale} />
+    <NavLateral locale={locale} />
     <main id="conteudo">
       <slot />
     </main>
-    <Footer logos={logosRodape} />
+    <Footer logos={logosRodape} locale={locale} />
   </body>
 </html>

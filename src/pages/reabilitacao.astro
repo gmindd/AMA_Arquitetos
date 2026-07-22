@@ -1,32 +1,39 @@
 ---
-import { listarObrasPublicas } from '../lib/store';
+import { listarObrasPublicas, resolverObra } from '../lib/store';
 import Base from '../layouts/Base.astro';
 import BeforeAfter from '../components/BeforeAfter.astro';
+import { t, LOCALE_DEFAULT, hrefLocale, type Locale } from '../lib/i18n';
 
-const obras = await listarObrasPublicas();
+const locale: Locale = (Astro.locals as { locale?: Locale }).locale ?? LOCALE_DEFAULT;
+
+const obrasRaw = await listarObrasPublicas();
+const obras = obrasRaw.map((o) => resolverObra(o, locale));
 ---
 
 <Base
-  title="Reabilitação · AMA André Melissa Arquitetos"
-  description="Fachadas, condomínios e reabilitações executadas pela equipa de construção própria do gabinete. Registo antes e depois."
+  title={t('reabilitacao.tituloPagina', locale)}
+  description={t('reabilitacao.descricao', locale)}
 >
-  <h1 class="titulo-pagina wrap" data-reveal>Reabilitação</h1>
+  <h1 class="titulo-pagina wrap" data-reveal>{t('reabilitacao.titulo', locale)}</h1>
 
-  <p class="intro-seccao wrap" data-reveal>
-    Fachadas, condomínios e reabilitações executadas pela equipa de construção
-    própria do gabinete. Quem desenha é quem executa.
-  </p>
+  <p class="intro-seccao wrap" data-reveal>{t('reabilitacao.intro', locale)}</p>
 
-  <section class="lista-reabilitacao wrap" aria-label="Obras de reabilitação">
+  <section class="lista-reabilitacao wrap" aria-label={t('reabilitacao.titulo', locale)}>
     {obras.map((obra) => (
       <article data-reveal>
         <div class="obra__meta">
           <h2>{obra.titulo}</h2>
           <span>{obra.local} · {obra.ano}</span>
         </div>
-        <BeforeAfter titulo={obra.titulo} antes={obra.antes} depois={obra.depois} />
-        {(obra.nota?.trim().length ?? 0) > 0 && (
-          <p class="obra__nota">{obra.nota!.trim()}</p>
+        <BeforeAfter
+          titulo={obra.titulo}
+          antes={obra.antes}
+          depois={obra.depois}
+          rotuloAntes={t('reabilitacao.antes', locale)}
+          rotuloDepois={t('reabilitacao.depois', locale)}
+        />
+        {obra.nota.length > 0 && (
+          <p class="obra__nota">{obra.nota}</p>
         )}
       </article>
     ))}

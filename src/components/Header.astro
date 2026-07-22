@@ -1,24 +1,30 @@
 ---
-// Cabeçalho fixo: logótipo, navegação, CTA e menu de ecrã inteiro (móvel)
+// Cabeçalho fixo (só usado em mobile agora): logótipo à esquerda, botão
+// hamburger à direita e menu de ecrã inteiro. Em desktop o cabeçalho
+// está oculto — a identidade vem do splash e do menu lateral.
 import LogoMarca from './LogoMarca.astro';
+import Bandeiras from './Bandeiras.astro';
+import { t, hrefLocale, extrairLocale, type Locale } from '../lib/i18n';
 import type { Definicoes } from '../lib/store';
 
 interface Props {
   logos: Definicoes['logos'];
+  locale: Locale;
 }
 
-const { logos } = Astro.props;
+const { logos, locale } = Astro.props;
 const path = Astro.url.pathname;
+const { pathSemLocale } = extrairLocale(path);
 
 // Na home o cabeçalho flutua sobre a fotografia a ecrã inteiro:
 // mistura por diferença garante legibilidade sobre qualquer imagem.
-const sobreHero = path === '/';
+const sobreHero = pathSemLocale === '/';
 
 const ligacoes = [
-  { rotulo: 'Projetos', href: '/', ativo: path === '/' || path.startsWith('/projetos') },
-  { rotulo: 'Reabilitação', href: '/reabilitacao', ativo: path.startsWith('/reabilitacao') },
-  { rotulo: 'Sobre', href: '/sobre', ativo: path.startsWith('/sobre') },
-  { rotulo: 'Contactos', href: '/contactos', ativo: path.startsWith('/contactos') },
+  { chave: 'nav.projetos', href: '/', ativo: pathSemLocale === '/' || pathSemLocale.startsWith('/projetos') },
+  { chave: 'nav.reabilitacao', href: '/reabilitacao', ativo: pathSemLocale.startsWith('/reabilitacao') },
+  { chave: 'nav.sobre', href: '/sobre', ativo: pathSemLocale.startsWith('/sobre') },
+  { chave: 'nav.contactos', href: '/contactos', ativo: pathSemLocale.startsWith('/contactos') },
 ];
 ---
 
@@ -26,7 +32,7 @@ const ligacoes = [
   class={`cabecalho modo-translucido${sobreHero ? ' cabecalho--difusao' : ''}`}
   data-cabecalho
 >
-  <a class="marca" href="/" aria-label="AMA, página inicial">
+  <a class="marca" href={hrefLocale('/', locale)} aria-label={t('nav.paginaInicial', locale)}>
     <LogoMarca url={logos.principal} rotulo="AMA André Melissa Arquitetos" classe="marca__logo">
       <span class="marca__sigla">AMA</span>
       <span class="marca__nome">André Melissa<br />Arquitetos</span>
@@ -36,7 +42,7 @@ const ligacoes = [
   <button
     class="botao-menu"
     type="button"
-    aria-label="Abrir menu"
+    aria-label={t('nav.abrirMenu', locale)}
     aria-expanded="false"
     data-botao-menu
   >
@@ -44,11 +50,16 @@ const ligacoes = [
     <span></span>
   </button>
 
-  <nav class="menu-total" aria-label="Menu" data-menu>
+  <nav class="menu-total" aria-label={t('nav.projetos', locale)} data-menu>
     {ligacoes.map((l) => (
-      <a href={l.href} aria-current={l.ativo ? 'page' : undefined}>{l.rotulo}</a>
+      <a href={hrefLocale(l.href, locale)} aria-current={l.ativo ? 'page' : undefined}>{t(l.chave, locale)}</a>
     ))}
-    <a class="menu-total__cta" href="/contactos" aria-current={path.startsWith('/contactos') ? 'page' : undefined}>Enviar mensagem</a>
+    <a
+      class="menu-total__cta"
+      href={hrefLocale('/contactos', locale)}
+      aria-current={pathSemLocale.startsWith('/contactos') ? 'page' : undefined}
+    >{t('nav.enviarMensagem', locale)}</a>
+    <Bandeiras locale={locale} extra="bandeiras--menu-total" />
     <div class="menu-total__pe">
       <span>Praia da Amorosa, Viana do Castelo</span>
       <span>Gabinete de arquitetura</span>
