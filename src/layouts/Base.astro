@@ -1,6 +1,7 @@
 ---
 import { ClientRouter } from 'astro:transitions';
 import Header from '../components/Header.astro';
+import NavLateral from '../components/NavLateral.astro';
 import Footer from '../components/Footer.astro';
 import { obterDefinicoes } from '../lib/store';
 import '../styles/global.css';
@@ -16,7 +17,19 @@ const {
 } = Astro.props;
 
 // Logótipos geridos no backoffice — influenciam cabeçalho, rodapé e favicon.
+// Sem upload, usamos os SVG oficiais em /images/marca/:
+//  - ama-mark.svg   → só "AMA", compacto para o cabeçalho
+//  - ama-logo.svg   → lockup completo (AMA + subtítulo) para o rodapé
+// Quando é carregado um logótipo no backoffice, esse ficheiro assume ambos.
 const definicoes = await obterDefinicoes();
+const logosCabecalho = {
+  ...definicoes.logos,
+  principal: definicoes.logos.principal ?? '/images/marca/ama-mark.svg',
+};
+const logosRodape = {
+  ...definicoes.logos,
+  principal: definicoes.logos.principal ?? '/images/marca/ama-logo.svg',
+};
 const favicon = definicoes.logos.icone ?? '/favicon.svg';
 ---
 
@@ -35,10 +48,11 @@ const favicon = definicoes.logos.icone ?? '/favicon.svg';
   </head>
   <body>
     <a class="salto-conteudo" href="#conteudo">Saltar para o conteúdo</a>
-    <Header logos={definicoes.logos} />
+    <Header logos={logosCabecalho} />
+    <NavLateral />
     <main id="conteudo">
       <slot />
     </main>
-    <Footer logos={definicoes.logos} />
+    <Footer logos={logosRodape} />
   </body>
 </html>

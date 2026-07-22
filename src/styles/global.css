@@ -198,44 +198,19 @@ main {
   mask: var(--logo) no-repeat center / contain;
 }
 
+/* Marca compacta: só "AMA", ~1.85:1 (largura/altura) */
 .marca__logo {
-  width: clamp(7rem, 16vw, 9.5rem);
-  height: 2.1rem;
+  width: clamp(4rem, 6.5vw, 5.4rem);
+  height: clamp(2.1rem, 3.5vw, 2.9rem);
   -webkit-mask-position: left center;
   mask-position: left center;
 }
 
-.nav-principal {
+/* ---------- Navegação lateral (desktop) ----------
+   Coluna à direita, alinhada em baixo, inspirada em Ateliers Jean Nouvel:
+   texto vertical, sem cromo, mistura com o cabeçalho sobre o hero. */
+.nav-lateral {
   display: none;
-}
-
-.nav-principal a {
-  position: relative;
-  font-size: var(--text-sm);
-  padding-block: 0.35rem;
-}
-
-/* Sublinhado que cresce da esquerda — hierarquia sem cor */
-.nav-principal a::after {
-  content: '';
-  position: absolute;
-  left: 0;
-  bottom: 0;
-  width: 100%;
-  height: 1px;
-  background: var(--black);
-  transform: scaleX(0);
-  transform-origin: left;
-  transition: transform 0.45s var(--ease);
-}
-
-.nav-principal a:hover::after,
-.nav-principal a[aria-current='page']::after {
-  transform: scaleX(1);
-}
-
-.nav-principal a[aria-current='page'] {
-  font-weight: 700;
 }
 
 .cta {
@@ -262,10 +237,6 @@ main {
   color: var(--black);
 }
 
-.cabecalho .cta {
-  display: none;
-}
-
 /* Sobre o hero da home, o cabeçalho flutua em mistura por diferença:
    legível sobre qualquer fotografia, sem fundos nem gradientes */
 /* Modo difuso: transparente com mistura por diferença — ao descer sobre o
@@ -275,22 +246,10 @@ main {
   color: var(--white);
 }
 
-.cabecalho.modo-difuso .nav-principal a::after {
-  background: currentColor;
-}
-
-.cabecalho.modo-difuso .cta {
-  border-color: currentColor;
-}
-
-.cabecalho.modo-difuso .cta:hover {
-  background: var(--white);
-  color: var(--black);
-}
-
 .cabecalho.modo-difuso .botao-menu span {
   background: currentColor;
 }
+
 
 /* Com o menu de ecrã inteiro aberto, o cabeçalho funde-se no fundo preto */
 body.menu-aberto .cabecalho {
@@ -1095,18 +1054,112 @@ body.menu-aberto .menu-total__pe {
 }
 
 @media (min-width: 960px) {
-  .nav-principal {
+  /* Menu lateral em coluna à direita, alinhado em baixo — inspirado na
+     Ateliers Jean Nouvel. A marca fica no topo esquerdo, o menu no
+     canto inferior direito; o "Pedir orçamento" é o último item, com
+     o desenho de contorno que separa o CTA dos restantes. */
+  .nav-lateral {
+    position: fixed;
+    right: var(--gutter);
+    bottom: clamp(1.75rem, 4vh, 3rem);
+    z-index: 105;
     display: flex;
-    gap: 2.5rem;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 0.5rem;
+    text-align: right;
+    font-size: var(--text-md);
+    line-height: 1.15;
+    /* Mistura por diferença: o menu fica legível sobre qualquer fundo
+       (bone, preto, fotografia) sem cromo — tinta branca invertida. */
+    mix-blend-mode: difference;
+    color: var(--white);
   }
 
-  .cabecalho .cta {
-    display: inline-block;
+  .nav-lateral a {
+    position: relative;
+    padding: 0.1rem 0;
+  }
+
+  /* Sublinhado alinhado à direita, acompanha o texto */
+  .nav-lateral a::after {
+    content: '';
+    position: absolute;
+    right: 0;
+    bottom: 0;
+    width: 100%;
+    height: 1px;
+    background: currentColor;
+    transform: scaleX(0);
+    transform-origin: right;
+    transition: transform 0.45s var(--ease);
+  }
+
+  .nav-lateral a:hover::after,
+  .nav-lateral a[aria-current='page']::after {
+    transform: scaleX(1);
+  }
+
+  .nav-lateral a[aria-current='page'] {
+    font-weight: 700;
+  }
+
+  /* CTA "Pedir orçamento" no fim da lista, com contorno */
+  .nav-lateral__cta {
+    margin-top: 0.75rem;
+    font-size: var(--text-sm);
+    font-weight: 700;
+    border: 1px solid currentColor;
+    padding: 0.55rem 1.1rem;
+    transition: background-color 0.35s var(--ease), color 0.35s var(--ease);
+  }
+
+  .nav-lateral__cta::after {
+    content: none !important;
+  }
+
+  .nav-lateral__cta:hover {
+    background: var(--white);
+    color: var(--black);
+  }
+
+  /* Enquanto o menu ecrã inteiro estiver aberto (não deve estar em desktop,
+     mas para segurança se o botão for tornado visível) escondemos a lateral. */
+  body.menu-aberto .nav-lateral {
+    visibility: hidden;
   }
 
   .botao-menu {
     display: none;
   }
+}
+
+/* CTA dentro do menu ecrã inteiro (mobile): mesma tipografia dos itens
+   mas com contorno para se distinguir das ligações de navegação. */
+.menu-total a.menu-total__cta {
+  align-self: flex-start;
+  margin-top: 1.25rem;
+  font-size: clamp(1rem, 3.5vw, 1.35rem);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  padding: 0.7rem 1.4rem;
+  border: 1px solid var(--bone);
+  opacity: 0;
+  transform: translateY(1.5rem);
+  transition: opacity 0.6s var(--ease), transform 0.6s var(--ease),
+    background-color 0.35s var(--ease), color 0.35s var(--ease);
+}
+
+body.menu-aberto .menu-total a.menu-total__cta {
+  opacity: 1;
+  transform: none;
+  transition-delay: 0.38s;
+}
+
+.menu-total a.menu-total__cta:hover {
+  background: var(--bone);
+  color: var(--black);
 }
 
 /* Movimento reduzido: sem animações, conteúdo imediato */

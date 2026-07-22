@@ -33,14 +33,6 @@ const ligacoes = [
     </LogoMarca>
   </a>
 
-  <nav class="nav-principal" aria-label="Navegação principal">
-    {ligacoes.map((l) => (
-      <a href={l.href} aria-current={l.ativo ? 'page' : undefined}>{l.rotulo}</a>
-    ))}
-  </nav>
-
-  <a class="cta" href="/contactos">Pedir orçamento</a>
-
   <button
     class="botao-menu"
     type="button"
@@ -56,6 +48,7 @@ const ligacoes = [
     {ligacoes.map((l) => (
       <a href={l.href} aria-current={l.ativo ? 'page' : undefined}>{l.rotulo}</a>
     ))}
+    <a class="menu-total__cta" href="/contactos" aria-current={path.startsWith('/contactos') ? 'page' : undefined}>Pedir orçamento</a>
     <div class="menu-total__pe">
       <span>Praia da Amorosa, Viana do Castelo</span>
       <span>Gabinete de arquitetura</span>

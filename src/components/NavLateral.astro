@@ -1,0 +1,27 @@
+---
+// Menu lateral (só desktop): coluna vertical à direita, alinhada em baixo.
+// Fica fora do <header> para não herdar o backdrop-filter deste — que
+// tornaria o cabeçalho num bloco contentor e ancoraria este menu ao topo.
+// O menu usa sempre mistura por diferença: fica legível sobre qualquer
+// fundo — fotografia clara, fotografia escura ou o bone da página —
+// sem precisar de qualquer cromo (fundo, contorno, plaqueta).
+const path = Astro.url.pathname;
+
+const ligacoes = [
+  { rotulo: 'Projetos', href: '/', ativo: path === '/' || path.startsWith('/projetos') },
+  { rotulo: 'Reabilitação', href: '/reabilitacao', ativo: path.startsWith('/reabilitacao') },
+  { rotulo: 'Sobre', href: '/sobre', ativo: path.startsWith('/sobre') },
+  { rotulo: 'Contactos', href: '/contactos', ativo: path.startsWith('/contactos') },
+];
+---
+
+<nav class="nav-lateral" aria-label="Navegação principal">
+  {ligacoes.map((l) => (
+    <a href={l.href} aria-current={l.ativo ? 'page' : undefined}>{l.rotulo}</a>
+  ))}
+  <a
+    class="nav-lateral__cta"
+    href="/contactos"
+    aria-current={path.startsWith('/contactos') ? 'page' : undefined}
+  >Pedir orçamento</a>
+</nav>
