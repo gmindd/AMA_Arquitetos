@@ -2,6 +2,7 @@
 import { ClientRouter } from 'astro:transitions';
 import Header from '../components/Header.astro';
 import NavLateral from '../components/NavLateral.astro';
+import Splash from '../components/Splash.astro';
 import Footer from '../components/Footer.astro';
 import { obterDefinicoes } from '../lib/store';
 import '../styles/global.css';
@@ -42,12 +43,23 @@ const favicon = definicoes.logos.icone ?? '/favicon.svg';
     <meta name="description" content={description} />
     <link rel="icon" href={favicon} />
     <ClientRouter />
+    <script is:inline>
+      // Executa síncrono antes do <body> pintar: se o splash já foi visto
+      // nesta sessão, marca a raiz para que o CSS o esconda de imediato
+      // e não haja lampejo em navegações internas.
+      try {
+        if (sessionStorage.getItem('ama-splash-visto')) {
+          document.documentElement.classList.add('sem-splash');
+        }
+      } catch (_) {}
+    </script>
     <script>
       import '../scripts/main.js';
     </script>
   </head>
   <body>
     <a class="salto-conteudo" href="#conteudo">Saltar para o conteúdo</a>
+    <Splash logo={logosRodape.principal} />
     <Header logos={logosCabecalho} />
     <NavLateral />
     <main id="conteudo">

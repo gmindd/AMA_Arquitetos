@@ -1,0 +1,19 @@
+---
+// Splash inicial em ecrã inteiro: o lockup AMA sobre fundo bone, mostrado
+// durante 1.5 s em desktop / 1 s em mobile e depois a fazer crossfade com
+// o site que já está carregado por baixo. Só aparece na primeira página
+// da sessão — guardamos uma flag em sessionStorage.
+interface Props {
+  logo: string;
+}
+const { logo } = Astro.props;
+---
+
+<div class="splash" data-splash aria-hidden="true">
+  <span
+    class="splash__logo"
+    style={`--logo:url('${logo}')`}
+    role="img"
+    aria-label="AMA André Melissa Arquitetos"
+  ></span>
+</div>

@@ -189,8 +189,44 @@ document.addEventListener('keydown', (evento) => {
   }
 });
 
+// Splash inicial: aparece uma vez por sessão, com hold + crossfade.
+// 1.5 s hold em desktop, 1 s em mobile; 0.5 s de fusão para o site.
+function initSplash() {
+  const splash = document.querySelector('[data-splash]');
+  if (!splash) return;
+
+  let visto = false;
+  try {
+    visto = !!sessionStorage.getItem('ama-splash-visto');
+  } catch (_) {}
+
+  if (visto) {
+    splash.remove();
+    return;
+  }
+
+  const emMobile = window.matchMedia('(max-width: 959px)').matches;
+  const holdMs = emMobile ? 1000 : 1500;
+
+  document.body.classList.add('splash-ativo');
+
+  setTimeout(() => {
+    splash.classList.add('splash--saida');
+    // Depois do crossfade, retirar do DOM e libertar o scroll
+    setTimeout(() => {
+      splash.remove();
+      document.body.classList.remove('splash-ativo');
+    }, 600);
+    try {
+      sessionStorage.setItem('ama-splash-visto', '1');
+      document.documentElement.classList.add('sem-splash');
+    } catch (_) {}
+  }, holdMs);
+}
+
 // Inicializa tudo a cada carregamento de página (inclui navegações do Astro)
 function initPagina() {
+  initSplash();
   fecharMenu();
   initCabecalho();
   initMenu();

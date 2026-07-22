@@ -140,6 +140,53 @@ main {
   border-bottom: 1px solid var(--hairline);
 }
 
+/* ---------- Splash inicial ----------
+   Ecrã inteiro com o lockup AMA em cima do fundo bone. Aparece na
+   primeira visita da sessão (ver script is:inline no Base.astro) e sai
+   com crossfade para o site — que já está carregado por baixo. */
+.splash {
+  position: fixed;
+  inset: 0;
+  z-index: 999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--bone);
+  opacity: 1;
+  transition: opacity 0.5s var(--ease);
+  will-change: opacity;
+}
+
+.splash__logo {
+  display: block;
+  width: min(58vw, 30rem);
+  height: min(38vw, 20rem);
+  background-color: var(--black);
+  -webkit-mask: var(--logo) no-repeat center / contain;
+  mask: var(--logo) no-repeat center / contain;
+}
+
+.splash--saida {
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* Já visto nesta sessão — nem sequer aparece. */
+html.sem-splash .splash {
+  display: none;
+}
+
+/* Bloqueia o scroll enquanto o splash cobre o ecrã, para não haver salto */
+body.splash-ativo {
+  overflow: hidden;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .splash {
+    transition: opacity 0.01ms;
+  }
+}
+
 /* ---------- Cabeçalho ---------- */
 .cabecalho {
   position: fixed;
@@ -1093,10 +1140,21 @@ body.menu-aberto .menu-total__pe {
 }
 
 @media (min-width: 960px) {
+  /* Em desktop a barra de topo deixa de existir — a identidade AMA vem
+     do splash inicial e do menu lateral. O <main> já não precisa de
+     folgar para um cabeçalho, nem o hero de recuar com margem negativa. */
+  :root {
+    --header-h: 0px;
+  }
+
+  .cabecalho {
+    display: none;
+  }
+
   /* Menu lateral em coluna à direita, alinhado em baixo — inspirado na
-     Ateliers Jean Nouvel. A marca fica no topo esquerdo, o menu no
-     canto inferior direito; o "Pedir orçamento" é o último item, com
-     o desenho de contorno que separa o CTA dos restantes. */
+     Ateliers Jean Nouvel. A identidade vem do splash inicial; a
+     navegação vive no canto inferior direito, com "Enviar mensagem"
+     como último item. */
   .nav-lateral {
     position: fixed;
     right: var(--gutter);
