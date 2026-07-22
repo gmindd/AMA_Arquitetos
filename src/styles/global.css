@@ -468,11 +468,11 @@ body.menu-aberto .menu-total__pe {
   transform: scale(1.04);
 }
 
-/* Variação do logótipo sobre a fotografia da capa */
+/* Logótipo do projeto sobre a capa. A posição depende da variação escolhida
+   no backoffice — canto inferior direito (ID), superior direito (SD) ou
+   inferior esquerdo (IE) — e é definida pelo atributo data-canto. */
 .cartao__marca {
   position: absolute;
-  left: 1.25rem;
-  bottom: 1.1rem;
   font-weight: 700;
   font-size: clamp(1.6rem, 3vw, 2.2rem);
   line-height: 0.95;
@@ -481,28 +481,67 @@ body.menu-aberto .menu-total__pe {
   transition: transform 0.7s var(--ease);
 }
 
+.cartao__marca[data-canto='ID'] {
+  right: 1.25rem;
+  bottom: 1.1rem;
+}
+
+.cartao__marca[data-canto='SD'] {
+  right: 1.25rem;
+  top: 1.1rem;
+}
+
+.cartao__marca[data-canto='IE'] {
+  left: 1.25rem;
+  bottom: 1.1rem;
+}
+
 .cartao:hover .cartao__marca {
   transform: translateY(-4px);
 }
 
-/* Variante composta carregada: silhueta recolorida pela cor da tinta */
+/* Variante composta carregada: silhueta recolorida pela cor da tinta.
+   A âncora da máscara acompanha a posição do próprio elemento. */
 .cartao__marca--img {
   width: clamp(4rem, 9vw, 7rem);
   height: clamp(4rem, 9vw, 7rem);
   background-color: currentColor;
-  -webkit-mask: var(--logo) no-repeat left bottom / contain;
-  mask: var(--logo) no-repeat left bottom / contain;
+  -webkit-mask: var(--logo) no-repeat center / contain;
+  mask: var(--logo) no-repeat center / contain;
 }
 
-/* Legenda mínima sobre a fotografia, ao estilo documental */
+.cartao__marca--img[data-canto='ID'] {
+  -webkit-mask-position: right bottom;
+  mask-position: right bottom;
+}
+
+.cartao__marca--img[data-canto='SD'] {
+  -webkit-mask-position: right top;
+  mask-position: right top;
+}
+
+.cartao__marca--img[data-canto='IE'] {
+  -webkit-mask-position: left bottom;
+  mask-position: left bottom;
+}
+
+/* Legenda mínima sobre a fotografia, ao estilo documental.
+   Fica no canto oposto ao logótipo para não se sobreporem. */
 .cartao__legenda {
   position: absolute;
-  right: 1.25rem;
   bottom: 1.1rem;
+  right: 1.25rem;
   font-size: var(--text-xs);
   letter-spacing: 0.04em;
   color: var(--white);
   text-align: right;
+}
+
+/* Quando o logótipo está em baixo à direita, a legenda vai para a esquerda */
+.cartao[data-canto='ID'] .cartao__legenda {
+  right: auto;
+  left: 1.25rem;
+  text-align: left;
 }
 
 /* Sobre fotografias claras, a tinta passa a preto */

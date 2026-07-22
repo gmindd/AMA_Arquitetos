@@ -87,6 +87,23 @@ export function chaveVariante(v: Projeto['variacaoLogo']): ChaveLogo {
   return 'varAMA';
 }
 
+// Mapeia a variação para a posição do logótipo sobre a capa do cartão.
+// A/MA -> canto inferior direito
+// A/AM -> canto superior direito
+// MA/A -> canto inferior esquerdo
+export function cantoVariante(v: Projeto['variacaoLogo']): 'ID' | 'SD' | 'IE' {
+  if (v === 'A/AM') return 'SD';
+  if (v === 'MA/A') return 'IE';
+  return 'ID';
+}
+
+// Rótulos legíveis mostrados no backoffice
+export const ROTULO_VARIACAO: Record<Projeto['variacaoLogo'], string> = {
+  'A/MA': 'Canto inferior direito',
+  'A/AM': 'Canto superior direito',
+  'MA/A': 'Canto inferior esquerdo',
+};
+
 // Garante o diretório de dados e a pasta de uploads
 async function garantirDataDir(): Promise<void> {
   await fs.mkdir(path.join(DATA_DIR, 'uploads'), { recursive: true });

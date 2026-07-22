@@ -1,6 +1,8 @@
 ---
-// Cartão de projeto no mosaico: fotografia a sangrar, variação do logótipo
-// e legenda sobrepostas — o cromo desaparece, o projeto é o protagonista.
+// Cartão de projeto no mosaico: fotografia a sangrar, logótipo posicionado
+// no canto escolhido e legenda em baixo — o cromo desaparece, o projeto é o
+// protagonista.
+import { cantoVariante } from '../lib/store';
 interface Props {
   href: string;
   titulo: string;
@@ -15,22 +17,22 @@ interface Props {
 
 const { href, titulo, tipologia, ano, capa, variacaoLogo, logoClaro, indice, varImg } = Astro.props;
 
-// A variação composta divide-se em duas linhas empilhadas (ex.: A / MA)
-const [linha1, linha2] = variacaoLogo.split('/');
+const canto = cantoVariante(variacaoLogo);
 ---
 
-<a class={`cartao ${logoClaro ? '' : 'cartao--tinta-escura'}`} href={href} data-reveal>
+<a class={`cartao ${logoClaro ? '' : 'cartao--tinta-escura'}`} href={href} data-canto={canto} data-reveal>
   <figure class="cartao__media">
     <!-- Substituir pelo ficheiro real do projeto via /admin ou public/images -->
     <img src={capa} alt={`${titulo}, ${tipologia}`} loading={indice < 2 ? 'eager' : 'lazy'} />
     {varImg ? (
       <span
         class="cartao__marca cartao__marca--img"
+        data-canto={canto}
         style={`--logo:url('${varImg}')`}
         aria-hidden="true"
       />
     ) : (
-      <span class="cartao__marca" aria-hidden="true">{linha1}<br />{linha2}</span>
+      <span class="cartao__marca" data-canto={canto} aria-hidden="true">AMA</span>
     )}
     <span class="cartao__legenda">{titulo} · {ano}</span>
   </figure>

@@ -88,11 +88,11 @@ const { projeto } = Astro.props;
 
 <div class="par">
   <div class="campo">
-    <label for="variacaoLogo">Variação do logótipo na capa</label>
+    <label for="variacaoLogo">Posição do logótipo na capa</label>
     <select id="variacaoLogo" name="variacaoLogo">
-      {['A/MA', 'A/AM', 'MA/A'].map((v) => (
-        <option value={v} selected={(projeto?.variacaoLogo ?? 'A/MA') === v}>{v}</option>
-      ))}
+      <option value="A/MA" selected={(projeto?.variacaoLogo ?? 'A/MA') === 'A/MA'}>Canto inferior direito</option>
+      <option value="A/AM" selected={projeto?.variacaoLogo === 'A/AM'}>Canto superior direito</option>
+      <option value="MA/A" selected={projeto?.variacaoLogo === 'MA/A'}>Canto inferior esquerdo</option>
     </select>
   </div>
   <div class="campo">
