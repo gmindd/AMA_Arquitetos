@@ -15,6 +15,25 @@ import { traduzir, type CampoTraduzido, type Locale } from './i18n';
 const DATA_DIR = process.env.DATA_DIR ?? path.resolve('./data');
 const SEED_DIR = path.resolve('./seed');
 
+// Sinaliza nos logs se o DATA_DIR é claramente efémero (não montado como
+// volume persistente). Ajuda a diagnosticar o "site perde os logos após
+// deploy" — corre uma vez no arranque; ignora erros de leitura.
+let avisoVolumeDado = false;
+async function avisarSeVolumeAusente(): Promise<void> {
+  if (avisoVolumeDado) return;
+  avisoVolumeDado = true;
+  try {
+    await fs.access(DATA_DIR);
+  } catch {
+    console.warn(
+      `[AMA] DATA_DIR (${DATA_DIR}) ainda não existe. Se este for um deploy` +
+        ` novo e o directório não estiver montado como volume persistente,` +
+        ` tudo o que for carregado no /admin será perdido no próximo deploy.`,
+    );
+  }
+}
+avisarSeVolumeAusente();
+
 // Cada imagem carregada é reduzida até, no máximo, 1 MB.
 const MAX_SAIDA = 1024 * 1024;
 // Guarda de entrada: recusa ficheiros manifestamente grandes antes de processar.
