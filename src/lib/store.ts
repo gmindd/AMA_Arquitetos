@@ -77,19 +77,11 @@ export class ErroUpload extends Error {}
 // varAMA/varAAM/varMAA = variações compostas usadas sobre fotografia.
 export type ChaveLogo = 'principal' | 'icone' | 'varAMA' | 'varAAM' | 'varMAA';
 
-// Conta de envio configurada no backoffice (Resend)
-export interface Envio {
-  provedor: 'resend';
-  apiKey: string;
-  remetente?: string;
-}
-
 export interface Definicoes {
   logos: Partial<Record<ChaveLogo, string>>;
-  // Email para onde seguem os pedidos de orçamento (escolhido no backoffice)
-  emailDestino?: string;
-  // Conta que envia os alertas, ligada por OAuth no backoffice
-  envio?: Envio;
+  // Emails para onde seguem os pedidos do formulário (geridos no backoffice).
+  // A credencial de envio não vive aqui: é variável de ambiente (ver lib/email).
+  emailsDestino: string[];
 }
 
 // Pedido de orçamento submetido no formulário de contactos
@@ -291,12 +283,26 @@ export async function obterDefinicoes(): Promise<Definicoes> {
     const bruto = JSON.parse(await fs.readFile(path.join(DATA_DIR, 'definicoes.json'), 'utf8'));
     return {
       logos: { ...(bruto?.logos ?? {}) },
-      emailDestino: typeof bruto?.emailDestino === 'string' ? bruto.emailDestino : undefined,
-      envio: bruto?.envio && typeof bruto.envio.apiKey === 'string' ? bruto.envio : undefined,
+      emailsDestino: lerEmailsDestino(bruto),
     };
   } catch {
-    return { logos: {} };
+    return { logos: {}, emailsDestino: [] };
   }
+}
+
+// Lê a lista de destinatários, aceitando o formato antigo (emailDestino,
+// uma só string) para não perder o email já configurado no volume.
+// A chave de API antiga (bruto.envio) é ignorada de propósito: a credencial
+// passou a ser variável de ambiente e não deve voltar a ser lida do disco.
+function lerEmailsDestino(bruto: unknown): string[] {
+  const d = bruto as { emailsDestino?: unknown; emailDestino?: unknown } | null;
+  if (Array.isArray(d?.emailsDestino)) {
+    return d.emailsDestino.filter((e): e is string => typeof e === 'string' && e.trim() !== '');
+  }
+  if (typeof d?.emailDestino === 'string' && d.emailDestino.trim() !== '') {
+    return [d.emailDestino.trim()];
+  }
+  return [];
 }
 
 // Guarda um pedido de orçamento em disco (rede de segurança: usado quando o
@@ -308,9 +314,13 @@ export async function guardarMensagem(pedido: PedidoOrcamento): Promise<void> {
   await fs.writeFile(path.join(dir, nome), JSON.stringify(pedido, null, 2), 'utf8');
 }
 
+// Grava as definições. Escreve só os campos do tipo actual, pelo que a
+// primeira gravação após esta mudança limpa do disco a chave de API antiga
+// (bruto.envio) que deixou de ter lugar no ficheiro.
 export async function guardarDefinicoes(d: Definicoes): Promise<void> {
   await garantirDataDir();
-  await fs.writeFile(path.join(DATA_DIR, 'definicoes.json'), JSON.stringify(d, null, 2), 'utf8');
+  const limpo: Definicoes = { logos: d.logos, emailsDestino: d.emailsDestino };
+  await fs.writeFile(path.join(DATA_DIR, 'definicoes.json'), JSON.stringify(limpo, null, 2), 'utf8');
 }
 
 // --------- Uploads e processamento de imagem ---------

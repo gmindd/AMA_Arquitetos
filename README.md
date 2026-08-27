@@ -26,7 +26,7 @@ No primeiro arranque, se o `DATA_DIR` estiver vazio, é semeado com o conteúdo 
 - **Ocultar / mostrar** — cada projeto e obra tem um interruptor de visibilidade (e um botão rápido Ocultar/Mostrar na lista). Ocultar remove o item do site (grelha, hero e página própria dão 404) sem o apagar — é assim que se reduz ou aumenta o número de projetos visíveis.
 - **Marca e logótipos** (`/admin/marca`) — carregar os logótipos reais (lockup principal, ícone/favicon e variações compostas A/MA · A/AM · MA/A). Passam a ser usados em todo o site — cabeçalho, rodapé, favicon e capas dos projetos — com recuo ao lettering tipográfico quando não há ficheiro. Use SVG ou PNG com fundo transparente: cada logótipo é recolorido automaticamente para branco ou preto conforme o fundo.
 - **Compressão automática** — cada imagem carregada é reduzida no servidor até, no máximo, **1 MB** (fotografia convertida para WebP com dimensão/qualidade decrescentes; logótipos SVG/PNG mantêm nitidez e transparência).
-- **Definições** (`/admin/definicoes`) — configurar o envio dos pedidos de orçamento: colar a **chave de API do Resend**, o **remetente** (opcional) e o **email de destino**. Reconfigurável a qualquer momento. Se o envio falhar ou ainda não estiver configurado, cada pedido é guardado em `DATA_DIR/mensagens` para não se perder.
+- **Definições** (`/admin/definicoes`) — escolher **para quem seguem os pedidos** do formulário: um ou vários emails, um por linha; todos recebem cópia do mesmo pedido. As credenciais de envio **não** se configuram aqui — são variáveis de ambiente do servidor (ver abaixo), para a chave de API nunca ficar guardada no site. Se o envio falhar ou não estiver configurado, cada pedido é guardado em `DATA_DIR/mensagens` para não se perder.
 - As fotografias e logótipos ficam em `DATA_DIR/uploads` e são servidos em `/uploads/…` com cache longa; as definições da marca em `DATA_DIR/definicoes.json`.
 - Substituir um placeholder = editar o registo e carregar a fotografia real; o site reflete a alteração de imediato.
 
@@ -37,19 +37,28 @@ No primeiro arranque, se o `DATA_DIR` estiver vazio, é semeado com o conteúdo 
 3. Montar um **volume persistente em `/app/data`** — é aqui que ficam os projetos, as fotografias e os pedidos de orçamento; sem o volume, o conteúdo criado no painel perde-se em cada redeploy.
 4. A aplicação escuta na porta **4321**.
 
-### Envio de email (formulário de orçamento)
+### Envio de email (formulário de contactos)
 
-O formulário envia os pedidos por email através do **[Resend](https://resend.com)**, configurado no backoffice (`/admin/definicoes`) — sem variáveis de ambiente nem apps OAuth.
+A separação é: **quem envia** vive nas variáveis de ambiente do servidor; **para quem vai** escolhe-se no backoffice. Assim a chave de API nunca fica no volume de dados nem editável a partir do site.
 
-1. Criar uma conta gratuita em [resend.com](https://resend.com) (o plano gratuito chega bem para um portfólio).
-2. Em **API Keys**, criar uma chave (começa por `re_`) e copiá-la.
-3. No backoffice, em **Definições**, colar a chave, definir o **email de destino** e Guardar.
+**1. Credenciais — variáveis de ambiente (Coolify → Environment Variables)**
 
-Remetente: enquanto não verificarem um domínio no Resend, deixar o remetente em branco (usa `onboarding@resend.dev`) — nesse caso o **email de destino tem de ser o email usado para criar a conta Resend**. Para enviar de qualquer endereço e para qualquer destino (ex.: `obras@andremelissaarquitetos.pt`), verificar o domínio no Resend (adicionar os registos DNS) e indicar esse remetente.
+Via [Resend](https://resend.com) (recomendado):
 
-Sem chave configurada (ou se o envio falhar), os pedidos ficam guardados em `DATA_DIR/mensagens` para não se perderem.
+| Variável | Obrigatória | Exemplo |
+| --- | --- | --- |
+| `RESEND_API_KEY` | sim | `re_...` (criada em **API Keys** no Resend) |
+| `RESEND_FROM` | não | `AMA <obras@andremelissaarquitetos.pt>` |
 
-> Alternativa: o envio também funciona por SMTP via variáveis de ambiente `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASS` (e opcionais `SMTP_FROM`, `SMTP_SECURE`).
+Sem `RESEND_FROM` usa-se o remetente de teste `onboarding@resend.dev`; nesse caso o Resend só entrega ao email com que a conta foi criada. Para enviar de um endereço próprio e para qualquer destinatário, verificar o domínio no Resend (registos DNS) e definir `RESEND_FROM`.
+
+Alternativa por SMTP: `SMTP_HOST`, `SMTP_USER`, `SMTP_PASS` (e opcionais `SMTP_PORT`, `SMTP_FROM`, `SMTP_SECURE`). Se ambos estiverem definidos, o Resend tem precedência.
+
+**2. Destinatários — backoffice (`/admin/definicoes`)**
+
+Um email por linha; todos recebem cópia de cada pedido. O `reply-to` é preenchido com o contacto de quem submeteu, quando é um email válido, para se responder directamente.
+
+Sem credenciais, sem destinatários, ou se o envio falhar, os pedidos ficam guardados em `DATA_DIR/mensagens` para não se perderem.
 
 O `Astro.url` confia no `Host`/`X-Forwarded-Host` do proxy (ver `security.allowedDomains` em `astro.config.mjs`); a proteção contra POST de outras origens continua ativa, juntamente com o cookie de sessão `SameSite=Lax`.
 

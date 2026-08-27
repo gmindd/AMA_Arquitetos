@@ -1,6 +1,16 @@
-// Envio dos pedidos de orçamento por email.
-// Método principal: Resend (chave API colada no backoffice).
-// Alternativa: SMTP por variáveis de ambiente, se existir.
+// Envio dos pedidos do formulário por email.
+//
+// As credenciais de envio são SEMPRE variáveis de ambiente — nunca ficam
+// no volume de dados nem são editáveis no backoffice. No backoffice só se
+// escolhe para quem seguem os pedidos.
+//
+// Resend (preferido):
+//   RESEND_API_KEY   chave da API (re_...)
+//   RESEND_FROM      remetente, ex.: "AMA <obras@andremelissaarquitetos.pt>"
+//                    (opcional: sem domínio verificado usa onboarding@resend.dev)
+//
+// SMTP (alternativa):
+//   SMTP_HOST, SMTP_USER, SMTP_PASS, SMTP_PORT, SMTP_FROM, SMTP_SECURE
 
 import nodemailer from 'nodemailer';
 import type { Definicoes, PedidoOrcamento } from './store';
@@ -11,14 +21,29 @@ const RESEND_URL = process.env.RESEND_API_URL || 'https://api.resend.com/emails'
 const REMETENTE_PADRAO = 'AMA <onboarding@resend.dev>';
 const EMAIL_RE = /^[^@\s]+@[^@\s]+\.[^@\s]+$/;
 
+// Envio por Resend disponível via variáveis de ambiente?
+export function resendConfigurado(): boolean {
+  return Boolean(process.env.RESEND_API_KEY);
+}
+
 // Envio por SMTP disponível via variáveis de ambiente?
 export function smtpConfigurado(): boolean {
   return Boolean(process.env.SMTP_HOST && process.env.SMTP_USER && process.env.SMTP_PASS);
 }
 
-// Há algum método de envio pronto a usar para estas definições?
+// Há credenciais de envio no ambiente? (independente dos destinatários)
+export function credenciaisConfiguradas(): boolean {
+  return resendConfigurado() || smtpConfigurado();
+}
+
+// Há tudo o que é preciso para enviar: credenciais e pelo menos um destino.
 export function envioDisponivel(definicoes: Definicoes): boolean {
-  return Boolean(definicoes.envio?.apiKey) || smtpConfigurado();
+  return credenciaisConfiguradas() && definicoes.emailsDestino.length > 0;
+}
+
+// Valida um endereço de email
+export function emailValido(valor: string): boolean {
+  return EMAIL_RE.test(valor.trim());
 }
 
 // Monta o corpo de texto do email a partir do pedido
@@ -35,25 +60,27 @@ function corpoDoPedido(pedido: PedidoOrcamento): string {
   ].join('\n');
 }
 
-// Envia um pedido de orçamento. O destino é o email escolhido no backoffice.
+// Envia um pedido. Os destinos são os emails escolhidos no backoffice.
 export async function enviarPedido(pedido: PedidoOrcamento, definicoes: Definicoes): Promise<void> {
-  const assunto = `Novo pedido de orçamento (${pedido.tipo})`;
+  const destinos = definicoes.emailsDestino;
+  if (destinos.length === 0) throw new Error('Sem email de destino configurado.');
+
+  const assunto = `Novo pedido do site (${pedido.tipo})`;
   const corpo = corpoDoPedido(pedido);
-  const responderA = EMAIL_RE.test(pedido.contacto) ? pedido.contacto : undefined;
+  const responderA = emailValido(pedido.contacto) ? pedido.contacto.trim() : undefined;
 
   // --- Resend ---
-  if (definicoes.envio?.apiKey) {
-    if (!definicoes.emailDestino) throw new Error('Sem email de destino.');
-    const remetente = definicoes.envio.remetente?.trim() || REMETENTE_PADRAO;
+  if (resendConfigurado()) {
+    const remetente = process.env.RESEND_FROM?.trim() || REMETENTE_PADRAO;
     const resposta = await fetch(RESEND_URL, {
       method: 'POST',
       headers: {
-        Authorization: `Bearer ${definicoes.envio.apiKey}`,
+        Authorization: `Bearer ${process.env.RESEND_API_KEY}`,
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
         from: remetente,
-        to: [definicoes.emailDestino],
+        to: destinos,
         reply_to: responderA,
         subject: assunto,
         text: corpo,
@@ -67,12 +94,10 @@ export async function enviarPedido(pedido: PedidoOrcamento, definicoes: Definico
     return;
   }
 
-  // --- SMTP (alternativa por variáveis de ambiente) ---
+  // --- SMTP (alternativa) ---
   if (smtpConfigurado()) {
     const porta = Number(process.env.SMTP_PORT ?? 587);
     const de = process.env.SMTP_FROM || process.env.SMTP_USER || '';
-    const destino = definicoes.emailDestino || de;
-    if (!destino) throw new Error('Sem email de destino.');
     const transporte = nodemailer.createTransport({
       host: process.env.SMTP_HOST,
       port: porta,
@@ -81,7 +106,7 @@ export async function enviarPedido(pedido: PedidoOrcamento, definicoes: Definico
     });
     await transporte.sendMail({
       from: `AMA (site) <${de}>`,
-      to: destino,
+      to: destinos.join(', '),
       replyTo: responderA,
       subject: assunto,
       text: corpo,
@@ -89,5 +114,5 @@ export async function enviarPedido(pedido: PedidoOrcamento, definicoes: Definico
     return;
   }
 
-  throw new Error('Nenhum método de envio configurado.');
+  throw new Error('Nenhum método de envio configurado nas variáveis de ambiente.');
 }

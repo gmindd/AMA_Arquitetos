@@ -1,111 +1,81 @@
 ---
 import Admin from '../../layouts/Admin.astro';
-import { obterDefinicoes, guardarDefinicoes, type Envio } from '../../lib/store';
-import { envioDisponivel } from '../../lib/email';
+import { obterDefinicoes, guardarDefinicoes } from '../../lib/store';
+import {
+  credenciaisConfiguradas,
+  emailValido,
+  resendConfigurado,
+  smtpConfigurado,
+} from '../../lib/email';
+
+let erros: string[] = [];
 
 if (Astro.request.method === 'POST') {
   const dados = await Astro.request.formData();
   const atual = await obterDefinicoes();
 
-  const emailDestino = String(dados.get('emailDestino') ?? '').trim();
-  const remetente = String(dados.get('remetente') ?? '').trim();
-  const novaChave = String(dados.get('resendApiKey') ?? '').trim();
-  const removerChave = dados.get('remover_chave') === 'on';
+  // Uma linha por email; aceita também vírgulas e ponto e vírgula
+  const emails = String(dados.get('emailsDestino') ?? '')
+    .split(/[\n,;]+/)
+    .map((e) => e.trim())
+    .filter((e) => e !== '');
 
-  // Determina a configuração de envio (Resend)
-  let envio: Envio | undefined = atual.envio;
-  if (removerChave) {
-    envio = undefined;
-  } else if (novaChave) {
-    envio = { provedor: 'resend', apiKey: novaChave, remetente: remetente || undefined };
-  } else if (envio) {
-    envio = { ...envio, remetente: remetente || undefined };
+  const invalidos = emails.filter((e) => !emailValido(e));
+  if (invalidos.length > 0) {
+    erros = invalidos.map((e) => `"${e}" não é um email válido.`);
+  } else {
+    // Remove repetidos, ignorando maiúsculas
+    const vistos = new Set<string>();
+    const unicos = emails.filter((e) => {
+      const chave = e.toLowerCase();
+      if (vistos.has(chave)) return false;
+      vistos.add(chave);
+      return true;
+    });
+
+    await guardarDefinicoes({ ...atual, emailsDestino: unicos });
+    return Astro.redirect('/admin/definicoes?ok=1', 303);
   }
-
-  await guardarDefinicoes({
-    ...atual,
-    emailDestino: emailDestino || undefined,
-    envio,
-  });
-  return Astro.redirect('/admin/definicoes?ok=1', 303);
 }
 
 const definicoes = await obterDefinicoes();
-const configurado = Boolean(definicoes.envio?.apiKey);
-const pronto = envioDisponivel(definicoes);
 const guardado = Astro.url.searchParams.has('ok');
+
+const temCredenciais = credenciaisConfiguradas();
+const metodo = resendConfigurado() ? 'Resend' : smtpConfigurado() ? 'SMTP' : null;
+const temDestinos = definicoes.emailsDestino.length > 0;
+const pronto = temCredenciais && temDestinos;
 ---
 
 <Admin title="Definições · Gestão de conteúdos AMA">
   <h1>Definições</h1>
 
   {guardado && <div class="aviso">Alterações guardadas.</div>}
+  {erros.length > 0 && (
+    <div class="aviso">
+      {erros.map((e) => <p>{e}</p>)}
+    </div>
+  )}
 
-  <h2>Envio de alertas (Resend)</h2>
+  <h2>Para quem seguem os pedidos</h2>
   <p class="dica" style="max-width:48rem">
-    Os pedidos do formulário são enviados por email através do Resend. Cria uma
-    conta gratuita em <a href="https://resend.com" rel="noopener" target="_blank">resend.com</a>,
-    gera uma chave de API e cola-a abaixo. Podes reconfigurar quando quiseres.
+    Os pedidos enviados pelo formulário de contactos seguem por email para os
+    endereços abaixo. Um por linha. Todos recebem uma cópia do mesmo pedido.
   </p>
 
   <form class="admin-form" method="POST">
     <div class="campo">
-      <label for="resendApiKey">Chave de API do Resend</label>
-      <input
-        id="resendApiKey"
-        name="resendApiKey"
-        type="password"
-        autocomplete="off"
-        placeholder={configurado ? '•••••••• (configurada)' : 're_...'}
-      />
+      <label for="emailsDestino">Emails de destino</label>
+      <textarea
+        id="emailsDestino"
+        name="emailsDestino"
+        rows="4"
+        placeholder={'andremelissaarquitetos@gmail.com\nmelissa@exemplo.pt'}
+      >{definicoes.emailsDestino.join('\n')}</textarea>
       <span class="dica">
-        {configurado
-          ? 'Deixa em branco para manter a chave atual.'
-          : 'Cola aqui a chave gerada no Resend (começa por re_).'}
+        Um endereço por linha. Deixar em branco desliga o envio — os pedidos
+        continuam guardados no servidor, sem se perderem.
       </span>
-    </div>
-
-    {configurado && (
-      <div class="campo">
-        <label>
-          <input type="checkbox" name="remover_chave" /> Remover a chave (desativa o envio)
-        </label>
-      </div>
-    )}
-
-    <div class="campo">
-      <label for="remetente">Remetente (opcional)</label>
-      <input
-        id="remetente"
-        name="remetente"
-        type="text"
-        value={definicoes.envio?.remetente ?? ''}
-        placeholder="AMA <onboarding@resend.dev>"
-      />
-      <span class="dica">
-        Enquanto não verificarem um domínio no Resend, deixem em branco (usa
-        onboarding@resend.dev). Depois de verificarem, ex.: AMA &lt;obras@andremelissaarquitetos.pt&gt;.
-      </span>
-    </div>
-
-    <div class="campo">
-      <label for="emailDestino">Email de destino</label>
-      <input
-        id="emailDestino"
-        name="emailDestino"
-        type="email"
-        value={definicoes.emailDestino ?? ''}
-        placeholder="andremelissaarquitetos@gmail.com"
-      />
-      <span class="dica">
-        Para onde seguem os pedidos. Com o remetente de teste do Resend, tem de
-        ser o email usado para criar a conta Resend.
-      </span>
-    </div>
-
-    <div class="aviso" style="max-width:48rem">
-      <strong>Estado do envio:</strong>
-      {pronto ? ' pronto a enviar.' : ' ainda não configurado — os pedidos ficam guardados no servidor.'}
     </div>
 
     <div class="admin-acoes">
@@ -113,4 +83,30 @@ const guardado = Astro.url.searchParams.has('ok');
       <a class="botao-apagar" href="/admin">Voltar</a>
     </div>
   </form>
+
+  <h2>Estado do envio</h2>
+  <div class="aviso" style="max-width:48rem">
+    {pronto ? (
+      <p><strong>Pronto a enviar</strong> · via {metodo} · {definicoes.emailsDestino.length} destinatário{definicoes.emailsDestino.length === 1 ? '' : 's'}.</p>
+    ) : !temCredenciais ? (
+      <p>
+        <strong>Sem credenciais de envio.</strong> Os pedidos ficam guardados no
+        servidor mas não seguem por email.
+      </p>
+    ) : (
+      <p>
+        <strong>Sem destinatários.</strong> As credenciais ({metodo}) estão
+        configuradas, falta indicar acima para quem seguem os pedidos.
+      </p>
+    )}
+  </div>
+
+  <p class="dica" style="max-width:48rem">
+    A conta que envia os emails é configurada nas variáveis de ambiente do
+    servidor, não aqui — assim a chave de API nunca fica guardada no site.
+    Para Resend: <code>RESEND_API_KEY</code> e, opcionalmente,
+    <code>RESEND_FROM</code>. Em alternativa, SMTP:
+    <code>SMTP_HOST</code>, <code>SMTP_USER</code>, <code>SMTP_PASS</code>
+    (e <code>SMTP_PORT</code>, <code>SMTP_FROM</code>, <code>SMTP_SECURE</code>).
+  </p>
 </Admin>
