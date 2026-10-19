@@ -4,7 +4,7 @@
 
 ## Conceito: "Tudo começa com uma linha"
 
-O cliente da AMA é como as obras: nasce de uma planta e é acompanhado até ao fim. O site é uma prancheta de arquiteto (papel milimétrico, réguas, mira de CAD e carimbo da folha) e o visitante percorre o projeto de uma casa do primeiro traço à entrega da chave:
+O cliente da AMA é como as obras: nasce de uma planta e é acompanhado até ao fim. O site é uma prancheta de arquiteto (papel milimétrico, réguas e mira de CAD) e o visitante percorre o projeto de uma casa do primeiro traço à entrega da chave:
 
 Abre com a intro "André e Melissa Arquitetos": três gestos de scroll recolhem as minúsculas para trás das maiúsculas e formam o lockup AMA / ANDRÉ MELISSA ARCHITECTS; o gesto seguinte leva o AMA ao canto superior esquerdo em meio segundo, com a página a entrar em fade in. A intro corre ao abrir o site (não ao voltar de outra página do site).
 
@@ -18,7 +18,7 @@ Abre com a intro "André e Melissa Arquitetos": três gestos de scroll recolhem 
 | 05 | Obra | O papel inverte para negro, o modelo vira projeto fantasma e a obra cresce dentro dele |
 | 06 | Entrega | A cobertura levanta, o plano de corte desce, o mobiliário e a luz entram ("A casa é sua, Ana.") |
 | 07 | Equipa | André Machado e Melissa Fazendeiro, as duas assinaturas da folha |
-| 08 | Pedido | Formulário em forma de folha com carimbo e folha de esboço (lápis e régua com cotas em metros). O esboço segue em PNG anexado ao email |
+| 08 | Pedido | Formulário em forma de quadro de legenda. Ao enviar, recebe o carimbo "Recebido" |
 
 Outras páginas: **`/reabilitacao`** (antes/depois da fachada, equipa de construção própria, tipologias, pormenor construtivo de cobertura e processo de obra), **`/legal`** (identificação, habilitações, Livro de Reclamações, RAL) e **`/privacidade`** (RGPD e cookies).
 
@@ -26,7 +26,7 @@ Outras páginas: **`/reabilitacao`** (antes/depois da fachada, equipa de constru
 
 Em `src/lib/legal.ts`: firma, NIPC, conservatória, capital social, n.º de inscrição na Ordem dos Arquitectos de cada arquiteto e alvará/certificado IMPIC. Enquanto estiverem vazios aparecem no site assinalados como "A preencher".
 
-O nome e o programa do visitante acompanham tudo: carimbo fixo, título do desenho, etiqueta do visitante dentro da casa, título da entrega e formulário (guardados só em `localStorage`, por conveniência).
+O nome e o programa do visitante acompanham tudo: título do desenho, etiqueta do visitante dentro da casa, título da entrega e formulário (guardados só em `localStorage`, por conveniência).
 
 Paleta e regras da marca mantidas: só `#0A0A0A`, `#E6E4E0` e `#FFFFFF` (o branco é a luz), uma família tipográfica (com uma mono de sistema para cotas e anotações), sem fotografias. `prefers-reduced-motion` respeitado.
 
@@ -36,19 +36,18 @@ Paleta e regras da marca mantidas: só `#0A0A0A`, `#E6E4E0` e `#FFFFFF` (o branc
 src/pages/index.astro                 → início: intro + 9 folhas
 src/pages/reabilitacao.astro          → página de reabilitação
 src/pages/legal.astro, privacidade.astro → informação legal e política de privacidade
-src/pages/api/pedido.ts               → recebe o formulário e o esboço PNG (email via lib/email.ts, recuo para DATA_DIR/mensagens)
+src/pages/api/pedido.ts               → recebe o formulário (email via lib/email.ts, recuo para DATA_DIR/mensagens)
 src/lib/legal.ts                      → dados legais da empresa
-src/layouts/Conceito.astro            → prancheta: réguas, mira, moldura, cabeçalho e carimbo
+src/layouts/Conceito.astro            → prancheta: réguas, mira, moldura e cabeçalho
 src/components/conceito/Fachada*.astro → alçado antes/depois (SVG)
 src/components/conceito/Pormenor.astro → pormenor construtivo de cobertura (SVG animado)
 src/components/conceito/Rodape.astro, LogoLockup.astro → rodapé com informação legal e lockup AMA em texto
 src/scripts/conceito/
 ├── modelo.js     → a casa em metros: divisões, paredes com vãos, mobiliário, sol, percurso
 ├── casa.js       → a planta viva (canvas): projeção contínua planta → axonometria, fases por scroll
-├── prancheta.js  → réguas, mira e carimbo
+├── prancheta.js  → réguas, mira e menu
 ├── estado.js     → nome e programa do visitante
 ├── intro.js      → intro André e Melissa Arquitetos → AMA
-├── esboco.js     → folha de esboço do formulário (exporta PNG)
 ├── fachada.js    → linha de corte arrastável
 ├── pedido.js     → envio do formulário
 └── revelar.js    → títulos palavra a palavra

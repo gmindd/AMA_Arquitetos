@@ -1,8 +1,4 @@
-// Prancheta: réguas, mira do cursor e carimbo da folha.
-// O carimbo mostra o cliente (nome do visitante), o programa, a fase
-// e o número da folha da secção que está no ecrã.
-
-import { ouvir } from './estado.js';
+// Prancheta: réguas, mira do cursor e ligação ativa no menu.
 
 const raiz = document.documentElement;
 let leitor = null; // fornecedor de leitura (ex.: coordenadas na planta)
@@ -15,7 +11,7 @@ export function iniciarPrancheta() {
   iniciarLockups();
   iniciarReguas();
   iniciarMira();
-  iniciarCarimbo();
+  iniciarMenu();
 }
 
 // ---------- Lockups AMA: subtítulo com a largura exata do AMA ----------
@@ -121,61 +117,8 @@ function iniciarMira() {
   document.addEventListener('pointerleave', () => mira.classList.remove('ativa'));
 }
 
-// ---------- Carimbo ----------
-function iniciarCarimbo() {
-  const carimbo = document.querySelector('[data-carimbo]');
-  if (!carimbo) return;
-  const campo = (k) => carimbo.querySelector(`[data-c="${k}"]`);
-  const progresso = campo('progresso');
-
-  const definir = (k, valor) => {
-    const el = campo(k);
-    if (!el || el.textContent === valor) return;
-    el.textContent = valor;
-    el.classList.remove('pisca');
-    void el.offsetWidth;
-    el.classList.add('pisca');
-  };
-
-  ouvir((e) => {
-    const nome = e.nome.trim();
-    definir('cliente', nome || 'Por definir');
-    definir('projeto', nome ? `Casa ${nome.split(/\s+/)[0]}` : 'A sua casa');
-    definir('programa', e.programa || 'Por definir');
-  });
-
-  // Folha e fase: secções com data-folha (os passos do processo incluídos)
-  const folhas = [...document.querySelectorAll('[data-folha]')];
-  const atualizarFolha = (el) => {
-    definir('folha', `${el.dataset.folha}/${document.body.dataset.folhas || '08'}`);
-    definir('fase', `${el.dataset.folha} · ${el.dataset.fase}`);
-  };
-  const io = new IntersectionObserver(
-    (entradas) => {
-      entradas.forEach((en) => {
-        if (en.isIntersecting) atualizarFolha(en.target);
-      });
-    },
-    { rootMargin: '-45% 0px -45% 0px' },
-  );
-  folhas.forEach((f) => io.observe(f));
-
-  // No contacto (o formulário já é uma folha com carimbo) e no rodapé, o
-  // carimbo fixo recolhe-se para não tapar o conteúdo
-  const visiveis = new Set();
-  const ioOculto = new IntersectionObserver(
-    (entradas) => {
-      entradas.forEach((en) => (en.isIntersecting ? visiveis.add(en.target) : visiveis.delete(en.target)));
-      carimbo.classList.toggle('carimbo--oculto', visiveis.size > 0);
-    },
-    { rootMargin: '0px 0px -30% 0px' },
-  );
-  ['#contacto', '.rodape'].forEach((sel) => {
-    const el = document.querySelector(sel);
-    if (el) ioOculto.observe(el);
-  });
-
-  // Ligação ativa no menu
+// ---------- Ligação ativa no menu ----------
+function iniciarMenu() {
   // (só as ligações para secções desta mesma página; as outras páginas
   // marcam a ligação ativa no HTML com aria-current="page")
   const ligacoes = [...document.querySelectorAll('.topo__nav a')].filter((a) => {
@@ -195,11 +138,4 @@ function iniciarCarimbo() {
     { rootMargin: '-50% 0px -50% 0px' },
   );
   [...alvos, document.querySelector('[data-intro]'), document.querySelector('.abertura')].forEach((a) => a && ioNav.observe(a));
-
-  const atualizarProgresso = () => {
-    const max = document.documentElement.scrollHeight - window.innerHeight;
-    if (progresso) progresso.style.transform = `scaleX(${max > 0 ? window.scrollY / max : 0})`;
-  };
-  window.addEventListener('scroll', atualizarProgresso, { passive: true });
-  atualizarProgresso();
 }

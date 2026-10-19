@@ -407,16 +407,14 @@ html {
 
 .intro-ativa main,
 .intro-ativa .topo__nav,
-.intro-ativa .topo__cta,
-.intro-ativa .carimbo {
+.intro-ativa .topo__cta {
   opacity: 0;
 }
 
 /* Viagem do logótipo: a página entra em fade in ao mesmo tempo */
 .intro-saida main,
 .intro-saida .topo__nav,
-.intro-saida .topo__cta,
-.intro-saida .carimbo {
+.intro-saida .topo__cta {
   opacity: 1;
   transition: opacity 0.5s ease;
 }
@@ -469,93 +467,6 @@ html {
 .topo__cta:hover {
   background: var(--tinta);
   color: var(--papel);
-}
-
-/* Carimbo (legenda da folha) */
-.carimbo {
-  position: fixed;
-  z-index: 40;
-  right: 22px;
-  bottom: 22px;
-  width: 300px;
-  border: 1px solid var(--tinta);
-  background: var(--papel);
-  font-size: 0.74rem;
-  line-height: 1.25;
-  transition: opacity 0.5s var(--ease), transform 0.5s var(--ease);
-}
-
-.carimbo--oculto {
-  opacity: 0;
-  transform: translateY(12px);
-  pointer-events: none;
-}
-
-.carimbo__linha--marca {
-  display: flex;
-  align-items: center;
-  gap: 0.6rem;
-  padding: 0.5rem 0.65rem;
-  border-bottom: 1px solid var(--tinta);
-  font-family: var(--font-mono);
-  font-size: 0.62rem;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-}
-
-.carimbo__grelha {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-}
-
-.carimbo__campo {
-  padding: 0.4rem 0.65rem;
-  border-bottom: 1px solid var(--linha);
-  min-width: 0;
-}
-
-.carimbo__campo:nth-child(odd):not(.carimbo__campo--largo) {
-  border-right: 1px solid var(--linha);
-}
-
-.carimbo__campo--largo {
-  grid-column: 1 / -1;
-}
-
-.carimbo__campo > span:last-child {
-  display: block;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  font-weight: 700;
-}
-
-.carimbo__campo [data-c].pisca {
-  animation: pisca 0.9s var(--ease);
-}
-
-@keyframes pisca {
-  0% {
-    background: var(--tinta);
-    color: var(--papel);
-  }
-  100% {
-    background: transparent;
-  }
-}
-
-.carimbo__progresso {
-  display: block;
-  height: 3px;
-}
-
-.carimbo__progresso > span {
-  display: block;
-  height: 100%;
-  width: 100%;
-  background: var(--tinta);
-  transform: scaleX(0);
-  transform-origin: left;
 }
 
 /* ============================================================
@@ -1360,99 +1271,13 @@ html {
   opacity: 0.6;
 }
 
-/* 09 · Contacto: o formulário é uma folha com carimbo */
+/* 08 · Contacto: o formulário é uma folha com quadro de legenda */
 .folha-pedido {
   position: relative;
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(0, 460px);
+  max-width: 880px;
   margin-top: 8vh;
   border: 1px solid var(--tinta);
   background: var(--papel);
-}
-
-.folha-pedido__desenho {
-  position: relative;
-  min-height: 420px;
-  border-right: 1px solid var(--tinta);
-  background-image:
-    linear-gradient(var(--grelha-forte) 1px, transparent 1px),
-    linear-gradient(90deg, var(--grelha-forte) 1px, transparent 1px);
-  background-size: 25px 25px;
-  overflow: hidden;
-}
-
-/* Folha de esboço */
-.esboco__tela {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  touch-action: none;
-  cursor: crosshair;
-}
-
-.esboco--bloqueado .esboco__tela {
-  cursor: default;
-}
-
-.esboco__ferramentas {
-  position: absolute;
-  top: 0.75rem;
-  left: 0.75rem;
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.35rem;
-}
-
-.esboco__ferramentas button {
-  padding: 0.35rem 0.6rem;
-  border: 1px solid var(--tinta);
-  background: var(--papel);
-  font-family: var(--font-mono);
-  font-size: 0.66rem;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  cursor: pointer;
-}
-
-.esboco__ferramentas button[aria-pressed='true'] {
-  background: var(--tinta);
-  color: var(--papel);
-}
-
-.esboco--bloqueado .esboco__ferramentas {
-  display: none;
-}
-
-.folha-pedido__vazio {
-  pointer-events: none;
-  position: absolute;
-  left: 50%;
-  top: 50%;
-  transform: translate(-50%, -50%);
-  padding: 0.5rem 0.8rem;
-  border: 1px dashed var(--linha);
-  font-family: var(--font-mono);
-  font-size: 0.72rem;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  white-space: nowrap;
-  opacity: 0.7;
-  transition: opacity 0.5s;
-}
-
-.folha-pedido__vazio.escondido {
-  opacity: 0;
-}
-
-.folha-pedido__titulo {
-  position: absolute;
-  left: 1rem;
-  bottom: 0.9rem;
-  font-family: var(--font-mono);
-  font-size: 0.68rem;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
 }
 
 .folha-pedido__carimbo {
@@ -1521,8 +1346,8 @@ html {
 
 .carimbo-recebido {
   position: absolute;
-  left: 30%;
-  top: 46%;
+  left: 50%;
+  top: 50%;
   padding: 0.4rem 1.2rem;
   border: 4px double var(--tinta);
   font-family: var(--font-mono);
@@ -1534,7 +1359,7 @@ html {
   transform: translate(-50%, -50%) rotate(-12deg) scale(2.2);
   pointer-events: none;
   transition: opacity 0.35s ease-in, transform 0.5s cubic-bezier(0.5, 1.6, 0.5, 1);
-  transition-delay: 1.8s;
+  transition-delay: 0.15s;
 }
 
 .enviado .carimbo-recebido {
@@ -1934,10 +1759,6 @@ html {
 }
 
 @media (max-width: 1100px) {
-  .carimbo {
-    width: 250px;
-  }
-
   .topo__nav {
     display: none;
   }
@@ -1977,42 +1798,6 @@ html {
     font-size: 28px;
   }
 
-  /* Carimbo compacto: tira inferior com cliente, fase e folha */
-  .carimbo {
-    left: 8px;
-    right: 8px;
-    bottom: 8px;
-    width: auto;
-  }
-
-  .carimbo__linha--marca {
-    display: none;
-  }
-
-  .carimbo__grelha {
-    grid-template-columns: 1.1fr 1.5fr 0.6fr;
-  }
-
-  .carimbo__campo {
-    border-bottom: 0;
-    border-right: 1px solid var(--linha);
-  }
-
-  .carimbo__campo:nth-child(n) {
-    grid-column: auto;
-  }
-
-  .carimbo__campo:has([data-c='projeto']),
-  .carimbo__campo:has([data-c='programa']),
-  .carimbo__campo:nth-child(5),
-  .carimbo__campo:nth-child(7) {
-    display: none;
-  }
-
-  .carimbo__campo:has([data-c='folha']) {
-    border-right: 0;
-  }
-
   .abertura {
     padding-top: 22vh;
   }
@@ -2031,7 +1816,7 @@ html {
     top: auto;
     left: 12px;
     right: 12px;
-    bottom: 62px;
+    bottom: 18px;
     width: auto;
     padding: 1.1rem 1.15rem;
     transform: translateY(var(--desvio));
@@ -2126,21 +1911,6 @@ html {
     grid-template-columns: 1fr;
     gap: 3.5rem;
     margin-top: 7vh;
-  }
-
-  .folha-pedido {
-    grid-template-columns: 1fr;
-  }
-
-  .folha-pedido__desenho {
-    min-height: 200px;
-    border-right: 0;
-    border-bottom: 1px solid var(--tinta);
-  }
-
-  .carimbo-recebido {
-    left: 50%;
-    top: 100px;
   }
 
   .rodape {

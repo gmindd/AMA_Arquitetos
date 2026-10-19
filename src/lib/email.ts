@@ -61,14 +61,12 @@ function corpoDoPedido(pedido: PedidoOrcamento): string {
 }
 
 // Envia um pedido. Os destinos são os emails escolhidos no backoffice.
-// O esboço desenhado no formulário (PNG), se existir, segue em anexo.
-export async function enviarPedido(pedido: PedidoOrcamento, definicoes: Definicoes, desenho?: Buffer): Promise<void> {
+export async function enviarPedido(pedido: PedidoOrcamento, definicoes: Definicoes): Promise<void> {
   const destinos = definicoes.emailsDestino;
   if (destinos.length === 0) throw new Error('Sem email de destino configurado.');
 
   const assunto = `Novo pedido do site (${pedido.tipo})`;
-  const corpo = corpoDoPedido(pedido) + (desenho ? '\n\nEsboço do cliente em anexo (esboco.png).' : '');
-  const nomeAnexo = 'esboco.png';
+  const corpo = corpoDoPedido(pedido);
   const responderA = emailValido(pedido.contacto) ? pedido.contacto.trim() : undefined;
 
   // --- Resend ---
@@ -86,7 +84,6 @@ export async function enviarPedido(pedido: PedidoOrcamento, definicoes: Definico
         reply_to: responderA,
         subject: assunto,
         text: corpo,
-        ...(desenho ? { attachments: [{ filename: nomeAnexo, content: desenho.toString('base64') }] } : {}),
       }),
       signal: AbortSignal.timeout(10000),
     });
@@ -113,7 +110,6 @@ export async function enviarPedido(pedido: PedidoOrcamento, definicoes: Definico
       replyTo: responderA,
       subject: assunto,
       text: corpo,
-      attachments: desenho ? [{ filename: nomeAnexo, content: desenho, contentType: 'image/png' }] : undefined,
     });
     return;
   }

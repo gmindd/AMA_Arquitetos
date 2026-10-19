@@ -76,7 +76,7 @@ export function iniciarCasa({ seccao, tela, dica, passos, aoPasso, aoObra, aoLei
 
   // Área do ecrã onde o desenho é enquadrado
   function areaPalco() {
-    if (L > 900) return { x0: Math.max(L * 0.4, limiteTexto + 48), x1: L - 70, y0: 110, y1: A - 140 };
+    if (L > 900) return { x0: Math.max(L * 0.4, limiteTexto + 48), x1: L - 70, y0: 110, y1: A - 70 };
     return { x0: 18, x1: L - 18, y0: 116, y1: A * 0.5 };
   }
 
