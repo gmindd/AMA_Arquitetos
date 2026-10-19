@@ -3,6 +3,7 @@
 // recebe a primeira linha do projeto e o carimbo "Recebido".
 
 import { estado, ouvir, definir } from './estado.js';
+import { iniciarEsboco } from './esboco.js';
 
 export function iniciarPedido() {
   const form = document.querySelector('[data-pedido]');
@@ -12,6 +13,7 @@ export function iniciarPedido() {
   const estadoEl = form.querySelector('[data-estado]');
   const botao = form.querySelector('button[type="submit"]');
   const titulo = form.querySelector('[data-folha-titulo]');
+  const esboco = iniciarEsboco();
 
   // Pré-preenche só enquanto o visitante não escreveu no próprio campo
   let nomeTocado = false;
@@ -44,9 +46,18 @@ export function iniciarPedido() {
     botao.disabled = true;
     estadoEl.textContent = 'A enviar…';
     try {
+      const corpo = new FormData(form);
+      // O esboço segue como imagem PNG em anexo
+      if (esboco?.temDesenho()) {
+        const n = estado.nome.trim().split(/\s+/)[0];
+        const hoje = new Date().toLocaleDateString('pt-PT');
+        const legenda = `${n ? `Casa ${n}` : 'Esboço'} · ${tipo.value} · ${corpo.get('localizacao') || ''} · ${hoje}`;
+        const png = await esboco.exportar(legenda);
+        if (png) corpo.append('desenho', png, 'esboco.png');
+      }
       const resposta = await fetch(form.action, {
         method: 'POST',
-        body: new FormData(form),
+        body: corpo,
         headers: { Accept: 'application/json' },
       });
       const dados = await resposta.json().catch(() => ({}));
@@ -60,6 +71,7 @@ export function iniciarPedido() {
 
   function marcarEnviado() {
     form.classList.add('enviado');
+    esboco?.bloquear();
     form.querySelectorAll('input, select, textarea, button').forEach((c) => (c.disabled = true));
     const n = estado.nome.trim().split(/\s+/)[0];
     estadoEl.textContent = `Pedido recebido${n ? `, ${n}` : ''}. Respondemos em 24 a 48 horas úteis.`;

@@ -3,7 +3,6 @@
 // folha em branco à entrega da chave. Uma única planta (canvas) evolui
 // com o scroll; o texto de cada fase passa por cima.
 import Conceito from '../layouts/Conceito.astro';
-import Fachada from '../components/conceito/Fachada.astro';
 
 const passos = [
   {
@@ -54,22 +53,22 @@ const fasesObra = ['Estaleiro', 'Fundações', 'Estrutura', 'Cobertura', 'Caixil
 const programas = ['Casa nova', 'Reabilitação', 'Interiores', 'Reconversão'];
 ---
 
-<Conceito intro>
-  <!-- ============ Intro: André e Melissa Arquitetos → AMA ============ -->
-  <section class="intro" data-intro>
-    <div class="intro__palco">
-      <h1 class="intro__nome" aria-label="André e Melissa Arquitetos · AMA" data-intro-nome>
-        <span class="intro__palavra"><span class="intro__maiuscula">A</span><span class="intro__resto"><span>ndré e&nbsp;</span></span></span><span class="intro__palavra"><span class="intro__maiuscula">M</span><span class="intro__resto"><span>elissa&nbsp;</span></span></span><span class="intro__palavra"><span class="intro__maiuscula">A</span><span class="intro__resto"><span>rquitetos</span></span></span>
-      </h1>
-      <p class="intro__dica" aria-hidden="true"><span>Desça</span><span class="deslizar__seta"></span></p>
-    </div>
-  </section>
+<Conceito intro folhas="08">
+  <!-- ============ Intro: André e Melissa Arquitetos → AMA ============
+       Camada fixa (decorativa): o h1 da página é o título da abertura -->
+  <div class="intro" data-intro aria-hidden="true" slot="intro">
+    <p class="intro__nome" data-intro-nome>
+      <span class="intro__palavra"><span class="intro__maiuscula">A</span><span class="intro__resto"><span>ndré e&nbsp;</span></span></span><span class="intro__palavra"><span class="intro__maiuscula">M</span><span class="intro__resto"><span>elissa&nbsp;</span></span></span><span class="intro__palavra"><span class="intro__maiuscula">A</span><span class="intro__resto"><span>rquitetos</span></span></span>
+    </p>
+    <span class="intro__sub" data-intro-sub>André Melissa Architects</span>
+    <button class="intro__dica" type="button" tabindex="-1" data-intro-saltar><span>Desça</span><span class="deslizar__seta"></span></button>
+  </div>
 
   <!-- ============ 00 · Folha em branco ============ -->
   <section class="abertura" data-folha="00" data-fase="Folha em branco">
     <div class="abertura__texto">
       <p class="sobretitulo" data-aparece>Gabinete de arquitetura · Viana do Castelo</p>
-      <h2 class="abertura__titulo" data-palavras>Tudo começa com uma linha.</h2>
+      <h1 class="abertura__titulo" data-palavras>Tudo começa com uma linha.</h1>
       <p class="abertura__lead" data-aparece>
         Uma casa nasce numa folha em branco. Desenhamo-la consigo, construímo-la
         com equipa própria e só a largamos quando lhe entregamos a chave.
@@ -195,32 +194,10 @@ const programas = ['Casa nova', 'Reabilitação', 'Interiores', 'Reconversão'];
     </div>
   </section>
 
-  <!-- ============ 07 · Reabilitação ============ -->
-  <section class="reabilitacao" id="reabilitacao" data-folha="07" data-fase="Reabilitação">
+  <!-- ============ 07 · Equipa ============ -->
+  <section class="equipa" id="equipa" data-folha="07" data-fase="Equipa">
     <div class="seccao__cabeca">
-      <p class="sobretitulo" data-aparece>07 · Reabilitação</p>
-      <h2 class="seccao__titulo" data-palavras>Reabilitar é desenhar sobre o que já existe.</h2>
-      <p class="seccao__lead" data-aparece>
-        Fachadas, coberturas, condomínios e interiores com história. Fazemos o
-        levantamento, o projeto e a obra com equipa própria. Arraste a linha e
-        veja o mesmo prédio antes e depois.
-      </p>
-    </div>
-
-    <Fachada />
-
-    <ol class="etapas" data-aparece>
-      <li><span>01</span>Levantamento</li>
-      <li><span>02</span>Diagnóstico</li>
-      <li><span>03</span>Projeto</li>
-      <li><span>04</span>Execução</li>
-    </ol>
-  </section>
-
-  <!-- ============ 08 · Equipa ============ -->
-  <section class="equipa" id="equipa" data-folha="08" data-fase="Equipa">
-    <div class="seccao__cabeca">
-      <p class="sobretitulo" data-aparece>08 · Quem assina</p>
+      <p class="sobretitulo" data-aparece>07 · Quem assina</p>
       <h2 class="seccao__titulo" data-palavras>Cada folha leva duas assinaturas.</h2>
       <p class="seccao__lead" data-aparece>
         O AMA nasceu em 2022, em Viana do Castelo, pelas mãos de André Machado e
@@ -243,20 +220,29 @@ const programas = ['Casa nova', 'Reabilitação', 'Interiores', 'Reconversão'];
     </div>
   </section>
 
-  <!-- ============ 09 · Contacto ============ -->
-  <section class="contacto" id="contacto" data-folha="09" data-fase="Pedido de projeto">
+  <!-- ============ 08 · Contacto ============ -->
+  <section class="contacto" id="contacto" data-folha="08" data-fase="Pedido de projeto">
     <div class="seccao__cabeca">
-      <p class="sobretitulo" data-aparece>09 · A sua folha</p>
+      <p class="sobretitulo" data-aparece>08 · A sua folha</p>
       <h2 class="seccao__titulo" data-palavras>Vamos desenhar a sua?</h2>
       <p class="seccao__lead" data-aparece>
-        Conte-nos o que tem em mente. Respondemos em 24 a 48 horas úteis para
-        marcar a primeira conversa.
+        Conte-nos o que tem em mente e, se quiser, faça um esboço na folha: com o
+        lápis à mão livre ou com a régua, que mede em metros. O desenho segue com o
+        pedido. Respondemos em 24 a 48 horas úteis.
       </p>
     </div>
 
     <form class="folha-pedido" method="POST" action="/api/pedido" data-pedido novalidate>
-      <div class="folha-pedido__desenho" aria-hidden="true">
-        <span class="folha-pedido__vazio">A sua planta começa aqui</span>
+      <!-- Folha de esboço: o desenho segue em anexo (PNG) com o pedido -->
+      <div class="folha-pedido__desenho" data-esboco>
+        <canvas class="esboco__tela" data-esboco-tela role="img" aria-label="Folha de esboço: desenhe aqui a sua ideia com o rato ou o dedo"></canvas>
+        <span class="folha-pedido__vazio" data-esboco-vazio>Desenhe aqui a sua ideia</span>
+        <div class="esboco__ferramentas" role="toolbar" aria-label="Ferramentas de desenho">
+          <button type="button" data-ferramenta="lapis" aria-pressed="true">Lápis</button>
+          <button type="button" data-ferramenta="regua" aria-pressed="false">Régua</button>
+          <button type="button" data-acao="desfazer">Desfazer</button>
+          <button type="button" data-acao="limpar">Limpar</button>
+        </div>
         <span class="folha-pedido__titulo" data-folha-titulo>A sua casa</span>
       </div>
 
@@ -296,26 +282,4 @@ const programas = ['Casa nova', 'Reabilitação', 'Interiores', 'Reconversão'];
     </form>
   </section>
 
-  <footer class="rodape">
-    <span class="logo logo--rodape" style="--logo:url('/images/marca/ama-logo.svg')" role="img" aria-label="AMA André Melissa Arquitetos"></span>
-    <div class="rodape__bloco">
-      <span class="rotulo">Morada</span>
-      <p>Avenida do Atlântico 221, loja 10<br />4935-580 Chafé, Viana do Castelo</p>
-    </div>
-    <div class="rodape__bloco">
-      <span class="rotulo">Telefone</span>
-      <p>
-        André · <a href="tel:+351917091338">917 091 338</a><br />
-        Melissa · <a href="tel:+351918133120">918 133 120</a>
-      </p>
-    </div>
-    <div class="rodape__bloco">
-      <span class="rotulo">Contacto</span>
-      <p>
-        <a href="mailto:arquitetos@ama-lda.com">arquitetos@ama-lda.com</a><br />
-        <a href="https://www.instagram.com/andremelissaarquitetos" rel="noopener" target="_blank">@andremelissaarquitetos</a>
-      </p>
-    </div>
-    <p class="rodape__nota">Website conceito · {new Date().getFullYear()}</p>
-  </footer>
 </Conceito>

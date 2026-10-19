@@ -1,0 +1,197 @@
+---
+// Reabilitação: página própria. O mesmo papel e a mesma prancheta do
+// início, com o alçado antes/depois, a equipa de construção própria, o
+// que reabilitamos, um pormenor construtivo e o processo de obra.
+import Conceito from '../layouts/Conceito.astro';
+import Fachada from '../components/conceito/Fachada.astro';
+import Pormenor from '../components/conceito/Pormenor.astro';
+
+const vantagens = [
+  {
+    titulo: 'Um só interlocutor',
+    texto:
+      'Projeto, licenciamento e obra com a mesma equipa. Há sempre uma pessoa que responde por tudo, do orçamento à entrega da chave.',
+  },
+  {
+    titulo: 'Decisões tomadas em obra',
+    texto:
+      'Quando a obra revela o que o levantamento não mostrava, quem decide está lá. As alterações resolvem-se no local, sem semanas de troca de mensagens entre projetista e empreiteiro.',
+  },
+  {
+    titulo: 'Orçamento e prazo sob controlo',
+    texto:
+      'Quem orçamenta é quem executa. O planeamento da obra nasce com o projeto, não depois dele, e cada fase é acompanhada pelos arquitetos.',
+  },
+  {
+    titulo: 'O pormenor desenhado é o pormenor construído',
+    texto:
+      'Remates, impermeabilizações e acabamentos seguem o projeto, sem interpretações. A responsabilidade não se perde entre empresas.',
+  },
+];
+
+// Ícones a traço (viewBox 64 × 64)
+const tipologias = [
+  {
+    nome: 'Fachadas e empenas',
+    texto: 'Tratamento de fissuras e humidades, reboco, pintura, revestimentos cerâmicos e azulejo, caixilharia e serralharia.',
+    icone: 'M14 58 V10 H50 V58 M22 18 h8 v10 h-8 Z M34 18 h8 v10 h-8 Z M22 36 h8 v10 h-8 Z M34 36 h8 v10 h-8 Z M8 58 H56',
+  },
+  {
+    nome: 'Coberturas',
+    texto: 'Substituição de telhado, isolamento térmico, impermeabilização, caleiras, rufos e claraboias.',
+    icone: 'M6 34 L32 12 L58 34 M12 30 V54 H52 V30 M10 38 L32 20 L54 38',
+  },
+  {
+    nome: 'Condomínios',
+    texto: 'Obras em partes comuns: fachadas, coberturas, caixas de escada e entradas, em articulação com a administração do prédio.',
+    icone: 'M10 58 V8 H30 V58 M34 58 V20 H54 V58 M16 14 h8 M16 22 h8 M16 30 h8 M16 38 h8 M40 26 h8 M40 34 h8 M40 42 h8 M6 58 H58',
+  },
+  {
+    nome: 'Casas e apartamentos',
+    texto: 'Remodelação integral ou parcial, redistribuição de espaços, cozinhas, casas de banho e instalações.',
+    icone: 'M8 56 V24 L32 8 L56 24 V56 Z M8 56 H56 M26 56 V40 h12 v16 M14 30 h8 v8 h-8 Z',
+  },
+  {
+    nome: 'Centro histórico',
+    texto: 'Edifícios antigos tratados com respeito pelo que já existe, pelos materiais originais e pelas regras de proteção do património.',
+    icone: 'M12 58 V22 H52 V58 M8 22 H56 V16 H8 Z M20 58 V42 a12 12 0 0 1 24 0 V58 M20 28 h6 v8 h-6 Z M38 28 h6 v8 h-6 Z',
+  },
+  {
+    nome: 'Reconversão',
+    texto: 'Lojas, armazéns ou espaços sem uso que ganham uma nova função, de habitação, trabalho ou comércio.',
+    icone: 'M8 56 V18 H56 V56 Z M8 30 H56 M18 56 V40 h12 v16 M38 40 h10 v8 h-10 Z M40 12 l8 6 l-8 6',
+  },
+];
+
+const etapas = [
+  { titulo: 'Visita e levantamento', texto: 'Vamos ao local, medimos e registamos o estado de cada elemento do edifício.' },
+  {
+    titulo: 'Diagnóstico',
+    texto: 'Procuramos as causas, não só os sintomas: humidades, infiltrações, fissuras, materiais degradados.',
+  },
+  {
+    titulo: 'Projeto e orçamento',
+    texto: 'Definimos a solução, preparamos o projeto e, quando é preciso, o licenciamento. O orçamento acompanha o projeto.',
+  },
+  {
+    titulo: 'Execução com equipa própria',
+    texto: 'A obra é feita pela nossa equipa de construção, com os arquitetos em obra a acompanhar cada fase.',
+  },
+  { titulo: 'Entrega', texto: 'Percorremos a obra consigo, ponto por ponto, antes de entregar a chave.' },
+];
+---
+
+<Conceito
+  title="Reabilitação · AMA André Melissa Arquitetos"
+  description="Reabilitação de fachadas, coberturas, condomínios e casas em Viana do Castelo, com projeto e obra executada por equipa de construção própria."
+  folhas="06"
+  pagina="reabilitacao"
+>
+  <!-- R·01 · Abertura -->
+  <section class="reab-abertura" data-folha="01" data-fase="Reabilitação">
+    <p class="sobretitulo" data-aparece>Reabilitação · Equipa de construção própria</p>
+    <h1 class="seccao__titulo seccao__titulo--grande" data-palavras>Reabilitar é desenhar sobre o que já existe.</h1>
+    <p class="seccao__lead" data-aparece>
+      Fachadas, coberturas, condomínios e casas com história. Na AMA, o mesmo
+      gabinete faz o levantamento, o projeto e a obra, com equipa de construção
+      própria. Do primeiro diagnóstico ao último acabamento, há um só interlocutor.
+    </p>
+    <a class="deslizar deslizar--estatico" href="#antes-depois" data-aparece>
+      <span>Ver o antes e o depois</span>
+      <span class="deslizar__seta" aria-hidden="true"></span>
+    </a>
+  </section>
+
+  <!-- R·02 · Antes e depois -->
+  <section class="reab-seccao" id="antes-depois" data-folha="02" data-fase="Levantamento e proposta">
+    <div class="seccao__cabeca">
+      <p class="sobretitulo" data-aparece>02 · Antes e depois</p>
+      <h2 class="seccao__titulo" data-palavras>O mesmo prédio, no mesmo desenho.</h2>
+      <p class="seccao__lead" data-aparece>
+        À esquerda, o levantamento: fissuras, azulejo em falta, caixilharia gasta.
+        À direita, a fachada reabilitada. Arraste a linha para comparar.
+      </p>
+    </div>
+    <Fachada />
+  </section>
+
+  <!-- R·03 · Equipa de construção própria -->
+  <section class="reab-seccao reab-equipa" data-folha="03" data-fase="Equipa de construção">
+    <div class="seccao__cabeca">
+      <p class="sobretitulo" data-aparece>03 · Equipa de construção própria</p>
+      <h2 class="seccao__titulo" data-palavras>Quem desenha, constrói.</h2>
+      <p class="seccao__lead" data-aparece>
+        A AMA tem equipa de construção própria. Não entregamos o projeto a um
+        empreiteiro desconhecido nem gerimos a obra à distância: os arquitetos
+        que desenharam a intervenção estão em obra, lado a lado com a equipa que
+        a executa.
+      </p>
+    </div>
+    <ol class="vantagens">
+      {vantagens.map((v, i) => (
+        <li data-aparece style={`transition-delay:${i * 90}ms`}>
+          <span class="vantagens__n">{String(i + 1).padStart(2, '0')}</span>
+          <h3>{v.titulo}</h3>
+          <p>{v.texto}</p>
+        </li>
+      ))}
+    </ol>
+  </section>
+
+  <!-- R·04 · O que reabilitamos -->
+  <section class="reab-seccao" data-folha="04" data-fase="Tipologias">
+    <div class="seccao__cabeca">
+      <p class="sobretitulo" data-aparece>04 · O que reabilitamos</p>
+      <h2 class="seccao__titulo" data-palavras>Do telhado à caixa de escada.</h2>
+    </div>
+    <ul class="tipologias">
+      {tipologias.map((t, i) => (
+        <li class="tipologia" data-aparece style={`transition-delay:${(i % 3) * 90}ms`}>
+          <svg viewBox="0 0 64 64" aria-hidden="true">
+            <path d={t.icone} pathLength="1" />
+          </svg>
+          <h3>{t.nome}</h3>
+          <p>{t.texto}</p>
+        </li>
+      ))}
+    </ul>
+  </section>
+
+  <!-- R·05 · Pormenor construtivo -->
+  <section class="reab-seccao" data-folha="05" data-fase="Pormenor construtivo">
+    <div class="seccao__cabeca">
+      <p class="sobretitulo" data-aparece>05 · Pormenor construtivo</p>
+      <h2 class="seccao__titulo" data-palavras>O que não se vê também se desenha.</h2>
+      <p class="seccao__lead" data-aparece>
+        Numa cobertura reabilitada, cada camada tem uma função. Desenhamos o
+        pormenor e a nossa equipa executa-o tal como foi desenhado.
+      </p>
+    </div>
+    <Pormenor />
+  </section>
+
+  <!-- R·06 · Processo de obra e pedido -->
+  <section class="reab-seccao" data-folha="06" data-fase="Processo de obra">
+    <div class="seccao__cabeca">
+      <p class="sobretitulo" data-aparece>06 · Como trabalhamos</p>
+      <h2 class="seccao__titulo" data-palavras>Da visita à entrega, sem mudar de mãos.</h2>
+    </div>
+    <ol class="etapas-obra">
+      {etapas.map((e, i) => (
+        <li data-aparece>
+          <span class="etapas-obra__n">{String(i + 1).padStart(2, '0')}</span>
+          <div>
+            <h3>{e.titulo}</h3>
+            <p>{e.texto}</p>
+          </div>
+        </li>
+      ))}
+    </ol>
+
+    <div class="reab-cta" data-aparece>
+      <h2>Tem um edifício a precisar de obras?</h2>
+      <p>Conte-nos o que se passa. Marcamos uma visita para ver o edifício e falar consigo.</p>
+      <a class="botao" href="/#contacto" data-programa-link="Reabilitação">Pedir uma visita</a>
+    </div>
+  </section>
+</Conceito>

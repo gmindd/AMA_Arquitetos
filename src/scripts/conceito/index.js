@@ -9,14 +9,18 @@ import { iniciarFachada } from './fachada.js';
 import { iniciarPedido } from './pedido.js';
 import { iniciarIntro } from './intro.js';
 
-iniciarRevelar();
-iniciarIntro();
+const intro = iniciarIntro();
 iniciarPrancheta();
 iniciarConversa();
 iniciarProcesso();
 iniciarFachada();
 iniciarPedido();
-iniciarParalaxe();
+// As revelações da abertura esperam pela saída da intro (a página entra
+// em fade in nesse momento); sem intro, arrancam de imediato
+intro.then(() => {
+  iniciarRevelar();
+  iniciarParalaxe();
+});
 
 // Passo 01: nome e programa do visitante
 function iniciarConversa() {
@@ -37,6 +41,11 @@ function iniciarConversa() {
     etiquetas.forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.programa === e.programa)));
     if (nome && 'nome' in mudou && document.activeElement !== nome) nome.value = e.nome;
   });
+
+  // Ligações que pré-escolhem o programa do pedido (ex.: "Pedir uma visita")
+  document.querySelectorAll('[data-programa-link]').forEach((a) =>
+    a.addEventListener('click', () => definir({ programa: a.dataset.programaLink })),
+  );
 
   // Passo 06: o título da entrega dirige-se ao visitante pelo nome
   const titulo = document.querySelector('[data-titulo-entrega]');

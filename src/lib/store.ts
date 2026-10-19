@@ -92,6 +92,8 @@ export interface PedidoOrcamento {
   localizacao: string;
   mensagem: string;
   data: string;
+  /** Ficheiro do esboço guardado ao lado do pedido (quando o email falha) */
+  desenho?: string;
 }
 
 // Mapeia a variação escolhida num projeto para a chave do logótipo
@@ -307,11 +309,16 @@ function lerEmailsDestino(bruto: unknown): string[] {
 
 // Guarda um pedido de orçamento em disco (rede de segurança: usado quando o
 // envio por email falha ou ainda não está configurado, para não perder o lead).
-export async function guardarMensagem(pedido: PedidoOrcamento): Promise<void> {
+export async function guardarMensagem(pedido: PedidoOrcamento, desenho?: Buffer): Promise<void> {
   const dir = path.join(DATA_DIR, 'mensagens');
   await fs.mkdir(dir, { recursive: true });
-  const nome = `${Date.now()}-${slugificar(pedido.nome).slice(0, 40)}.json`;
-  await fs.writeFile(path.join(dir, nome), JSON.stringify(pedido, null, 2), 'utf8');
+  const base = `${Date.now()}-${slugificar(pedido.nome).slice(0, 40)}`;
+  const registo = { ...pedido };
+  if (desenho) {
+    registo.desenho = `${base}.png`;
+    await fs.writeFile(path.join(dir, registo.desenho), desenho);
+  }
+  await fs.writeFile(path.join(dir, `${base}.json`), JSON.stringify(registo, null, 2), 'utf8');
 }
 
 // Grava as definições. Escreve só os campos do tipo actual, pelo que a

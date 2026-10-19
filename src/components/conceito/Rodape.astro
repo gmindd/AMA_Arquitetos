@@ -1,0 +1,41 @@
+---
+// Rodapé comum a todas as páginas: contactos e informação legal.
+import LogoLockup from './LogoLockup.astro';
+import { empresa, LIVRO_RECLAMACOES } from '../../lib/legal';
+
+const ano = new Date().getFullYear();
+---
+
+<footer class="rodape">
+  <LogoLockup classe="lockup--rodape" />
+  <div class="rodape__bloco">
+    <span class="rotulo">Morada</span>
+    <p>Avenida do Atlântico 221, loja 10<br />4935-580 Chafé, Viana do Castelo</p>
+  </div>
+  <div class="rodape__bloco">
+    <span class="rotulo">Telefone</span>
+    <p>
+      {empresa.telefones.map((t, i) => (
+        <>
+          {t.nome.split(' ')[0]} · <a href={t.href}>{t.numero}</a>
+          {i < empresa.telefones.length - 1 && <br />}
+        </>
+      ))}
+    </p>
+  </div>
+  <div class="rodape__bloco">
+    <span class="rotulo">Contacto</span>
+    <p>
+      <a href={`mailto:${empresa.email}`}>{empresa.email}</a><br />
+      <a href={empresa.instagram.href} rel="noopener" target="_blank">{empresa.instagram.rotulo}</a>
+    </p>
+  </div>
+
+  <nav class="rodape__legal" aria-label="Informação legal">
+    <span>© {ano} {empresa.firma || 'AMA André Melissa Arquitetos'}</span>
+    <a href="/legal">Informação legal</a>
+    <a href="/privacidade">Privacidade e cookies</a>
+    <a href={LIVRO_RECLAMACOES} rel="noopener" target="_blank">Livro de Reclamações</a>
+    <span class="rodape__nota">Website conceito</span>
+  </nav>
+</footer>

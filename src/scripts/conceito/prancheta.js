@@ -5,7 +5,6 @@
 import { ouvir } from './estado.js';
 
 const raiz = document.documentElement;
-const TOTAL_FOLHAS = '09';
 let leitor = null; // fornecedor de leitura (ex.: coordenadas na planta)
 
 export function definirLeitura(texto) {
@@ -13,9 +12,27 @@ export function definirLeitura(texto) {
 }
 
 export function iniciarPrancheta() {
+  iniciarLockups();
   iniciarReguas();
   iniciarMira();
   iniciarCarimbo();
+}
+
+// ---------- Lockups AMA: subtítulo com a largura exata do AMA ----------
+function iniciarLockups() {
+  const lockups = [...document.querySelectorAll('[data-lockup]')];
+  if (!lockups.length) return;
+  const ajustar = () =>
+    lockups.forEach((l) => {
+      const ama = l.querySelector('.lockup__ama');
+      const sub = l.querySelector('.lockup__sub');
+      sub.style.fontSize = '10px';
+      const w = sub.getBoundingClientRect().width;
+      if (w > 0) sub.style.fontSize = `${(10 * ama.getBoundingClientRect().width) / w}px`;
+    });
+  ajustar();
+  document.fonts?.ready.then(ajustar);
+  window.addEventListener('resize', ajustar);
 }
 
 // ---------- Réguas ----------
@@ -130,7 +147,7 @@ function iniciarCarimbo() {
   // Folha e fase: secções com data-folha (os passos do processo incluídos)
   const folhas = [...document.querySelectorAll('[data-folha]')];
   const atualizarFolha = (el) => {
-    definir('folha', `${el.dataset.folha}/${TOTAL_FOLHAS}`);
+    definir('folha', `${el.dataset.folha}/${document.body.dataset.folhas || '08'}`);
     definir('fase', `${el.dataset.folha} · ${el.dataset.fase}`);
   };
   const io = new IntersectionObserver(
@@ -143,18 +160,29 @@ function iniciarCarimbo() {
   );
   folhas.forEach((f) => io.observe(f));
 
-  // No contacto o formulário já é uma folha com carimbo: esconde o fixo
-  const contacto = document.querySelector('#contacto');
-  if (contacto) {
-    new IntersectionObserver(
-      ([en]) => carimbo.classList.toggle('carimbo--oculto', en.isIntersecting),
-      { rootMargin: '0px 0px -30% 0px' },
-    ).observe(contacto);
-  }
+  // No contacto (o formulário já é uma folha com carimbo) e no rodapé, o
+  // carimbo fixo recolhe-se para não tapar o conteúdo
+  const visiveis = new Set();
+  const ioOculto = new IntersectionObserver(
+    (entradas) => {
+      entradas.forEach((en) => (en.isIntersecting ? visiveis.add(en.target) : visiveis.delete(en.target)));
+      carimbo.classList.toggle('carimbo--oculto', visiveis.size > 0);
+    },
+    { rootMargin: '0px 0px -30% 0px' },
+  );
+  ['#contacto', '.rodape'].forEach((sel) => {
+    const el = document.querySelector(sel);
+    if (el) ioOculto.observe(el);
+  });
 
   // Ligação ativa no menu
-  const ligacoes = [...document.querySelectorAll('.topo__nav a')];
-  const alvos = ligacoes.map((a) => document.querySelector(a.getAttribute('href')));
+  // (só as ligações para secções desta mesma página; as outras páginas
+  // marcam a ligação ativa no HTML com aria-current="page")
+  const ligacoes = [...document.querySelectorAll('.topo__nav a')].filter((a) => {
+    const u = new URL(a.href);
+    return u.pathname === location.pathname && u.hash;
+  });
+  const alvos = ligacoes.map((a) => document.querySelector(new URL(a.href).hash));
   const ioNav = new IntersectionObserver(
     (entradas) => {
       entradas.forEach((en) => {

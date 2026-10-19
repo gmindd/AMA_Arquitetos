@@ -1,0 +1,14 @@
+---
+// Lockup AMA / ANDRÉ MELISSA ARCHITECTS em texto (o mesmo desenho de
+// /images/marca/ama-logo.svg). Em texto nunca fica cortado, seja qual for
+// a fonte disponível; o subtítulo é ajustado à largura do AMA pelo JS.
+interface Props {
+  classe?: string;
+}
+const { classe = '' } = Astro.props;
+---
+
+<span class={`lockup ${classe}`} role="img" aria-label="AMA André Melissa Architects" data-lockup>
+  <span class="lockup__ama" aria-hidden="true">AMA</span>
+  <span class="lockup__sub" aria-hidden="true">André Melissa Architects</span>
+</span>

@@ -1,0 +1,97 @@
+---
+// Informação legal: identificação da sociedade, habilitações
+// profissionais, Livro de Reclamações e resolução alternativa de litígios.
+import Conceito from '../layouts/Conceito.astro';
+import { empresa, LIVRO_RECLAMACOES, ral, PORTAL_CONSUMIDOR } from '../lib/legal';
+
+const falta = 'A preencher';
+---
+
+<Conceito title="Informação legal · AMA André Melissa Arquitetos" folhas="01" pagina="legal">
+  <article class="documento" data-folha="01" data-fase="Informação legal">
+    <p class="sobretitulo">Informação legal</p>
+    <h1 class="seccao__titulo">Informação legal</h1>
+
+    <h2>Identificação</h2>
+    <dl class="documento__ficha">
+      <dt>Firma</dt>
+      <dd>{empresa.firma || <span class="por-preencher">{falta}</span>}</dd>
+      <dt>NIPC</dt>
+      <dd>{empresa.nipc || <span class="por-preencher">{falta}</span>}</dd>
+      <dt>Sede</dt>
+      <dd>{empresa.sede}</dd>
+      <dt>Registo comercial</dt>
+      <dd>
+        {empresa.conservatoria
+          ? `Conservatória do Registo Comercial de ${empresa.conservatoria}, sob o número único de matrícula e de pessoa coletiva ${empresa.nipc}`
+          : <span class="por-preencher">{falta}</span>}
+      </dd>
+      <dt>Capital social</dt>
+      <dd>{empresa.capitalSocial || <span class="por-preencher">{falta}</span>}</dd>
+      <dt>Contactos</dt>
+      <dd>
+        <a href={`mailto:${empresa.email}`}>{empresa.email}</a><br />
+        {empresa.telefones.map((t) => (
+          <>
+            {t.nome} · <a href={t.href}>{t.numero}</a> (chamada para rede móvel nacional)<br />
+          </>
+        ))}
+      </dd>
+    </dl>
+
+    <h2>Habilitações profissionais</h2>
+    <dl class="documento__ficha">
+      {empresa.arquitetos.map((a) => (
+        <>
+          <dt>{a.nome}</dt>
+          <dd>
+            Inscrição na Ordem dos Arquitectos n.º {a.ordem || <span class="por-preencher">{falta}</span>}
+          </dd>
+        </>
+      ))}
+      <dt>Execução de obras</dt>
+      <dd>
+        Alvará ou certificado de empreiteiro de obras públicas e particulares emitido pelo IMPIC, I.P.:
+        {' '}{empresa.alvara || <span class="por-preencher">{falta}</span>}
+      </dd>
+    </dl>
+
+    <h2>Livro de Reclamações</h2>
+    <p>
+      Nos termos do Decreto-Lei n.º 156/2005, na redação atual, dispomos de Livro de
+      Reclamações em formato físico, nas nossas instalações, e em formato eletrónico,
+      disponível em <a href={LIVRO_RECLAMACOES} rel="noopener" target="_blank">livroreclamacoes.pt</a>.
+    </p>
+
+    <h2>Resolução alternativa de litígios de consumo</h2>
+    <p>
+      Em caso de litígio de consumo, o consumidor pode recorrer a uma das seguintes
+      entidades de resolução alternativa de litígios (Lei n.º 144/2015, de 8 de setembro):
+    </p>
+    <ul>
+      {ral.map((r) => (
+        <li>
+          <a href={r.href} rel="noopener" target="_blank">{r.nome}</a>. {r.nota}
+        </li>
+      ))}
+    </ul>
+    <p>
+      Mais informações no Portal do Consumidor, em
+      <a href={PORTAL_CONSUMIDOR} rel="noopener" target="_blank">consumidor.gov.pt</a>.
+    </p>
+
+    <h2>Propriedade intelectual</h2>
+    <p>
+      Os textos, desenhos, ilustrações e o logótipo deste website são propriedade da
+      AMA ou utilizados com autorização, e estão protegidos pelo Código do Direito de
+      Autor e dos Direitos Conexos. Não podem ser reproduzidos sem autorização prévia.
+      Os desenhos de projetos apresentados são ilustrativos.
+    </p>
+
+    <h2>Privacidade</h2>
+    <p>
+      O tratamento de dados pessoais está descrito na
+      <a href="/privacidade">política de privacidade e cookies</a>.
+    </p>
+  </article>
+</Conceito>

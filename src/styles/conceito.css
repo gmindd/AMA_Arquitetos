@@ -22,6 +22,7 @@
   --font-sans: 'Neue Haas Grotesk Display Pro', 'Helvetica Now Display', 'Helvetica Neue', Helvetica, Arial, sans-serif;
   /* Lettering do logótipo (o mesmo de /images/marca/ama-mark.svg) */
   --font-logo: 'Neue Haas Grotesk Display Pro', 'Helvetica Now Display', 'Helvetica Neue', 'Arial Black', Helvetica, Arial, sans-serif;
+  --font-logo-sub: 'Neue Haas Grotesk Display Pro', 'Helvetica Now Display', 'Helvetica Neue', Helvetica, Arial, sans-serif;
   --font-mono: ui-monospace, 'SF Mono', 'JetBrains Mono', Menlo, Consolas, monospace;
 
   --regua: 22px;
@@ -390,19 +391,34 @@ textarea {
   color: var(--tinta);
 }
 
-/* Enquanto a intro corre, o logótipo do cabeçalho é a própria intro */
-.com-intro .topo__marca {
+/* Enquanto a intro corre: scroll bloqueado, página escondida e o
+   logótipo do cabeçalho substituído pelas letras da própria intro */
+html {
+  scrollbar-gutter: stable;
+}
+
+.intro-ativa {
+  overflow: hidden;
+}
+
+.intro-ativa .topo__marca {
   opacity: 0;
 }
 
-.com-intro.intro-fim .topo__marca {
+.intro-ativa main,
+.intro-ativa .topo__nav,
+.intro-ativa .topo__cta,
+.intro-ativa .carimbo {
+  opacity: 0;
+}
+
+/* Viagem do logótipo: a página entra em fade in ao mesmo tempo */
+.intro-saida main,
+.intro-saida .topo__nav,
+.intro-saida .topo__cta,
+.intro-saida .carimbo {
   opacity: 1;
-}
-
-.com-intro:not(.intro-fim) .carimbo {
-  opacity: 0;
-  transform: translateY(12px);
-  pointer-events: none;
+  transition: opacity 0.5s ease;
 }
 
 .topo__nav {
@@ -433,7 +449,8 @@ textarea {
 }
 
 .topo__nav a:hover::after,
-.topo__nav a[aria-current='true']::after {
+.topo__nav a[aria-current='true']::after,
+.topo__nav a[aria-current='page']::after {
   transform: scaleX(1);
   transform-origin: left;
 }
@@ -544,22 +561,20 @@ textarea {
 /* ============================================================
    Intro · André e Melissa Arquitetos → AMA
    --p (0 a 1) recolhe as minúsculas para trás das maiúsculas;
-   --w é a largura natural de cada resto, medida pelo JS.
+   --w é a largura natural de cada resto, medida pelo JS;
+   --r (0 a 1) abre o subtítulo a partir do centro.
    ============================================================ */
 .intro {
-  position: relative;
-  height: 280svh;
+  display: none;
 }
 
-.intro__palco {
-  position: sticky;
-  top: 0;
+.intro-ativa .intro {
+  position: fixed;
+  inset: 0;
   z-index: 45;
-  height: 100svh;
   display: flex;
   align-items: center;
   justify-content: center;
-  pointer-events: none;
 }
 
 .intro__nome {
@@ -571,10 +586,6 @@ textarea {
   letter-spacing: -0.013em;
   white-space: nowrap;
   color: var(--tinta);
-}
-
-.intro-fim .intro__nome {
-  visibility: hidden;
 }
 
 .intro__palavra {
@@ -603,6 +614,20 @@ textarea {
   transform: translateX(calc(var(--w) * -1 * var(--p, 0)));
 }
 
+/* Subtítulo do lockup, como em /images/marca/ama-logo.svg */
+.intro__sub {
+  position: absolute;
+  font-family: var(--font-logo-sub);
+  font-weight: 500;
+  font-size: 20px;
+  line-height: 1;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  color: var(--tinta);
+  clip-path: inset(0 calc(50% * (1 - var(--r, 0))));
+}
+
 .intro__dica {
   position: absolute;
   left: 50%;
@@ -616,6 +641,7 @@ textarea {
   font-size: 0.72rem;
   letter-spacing: 0.12em;
   text-transform: uppercase;
+  cursor: pointer;
   transition: opacity 0.4s;
 }
 
@@ -1322,43 +1348,51 @@ textarea {
   overflow: hidden;
 }
 
-.folha-pedido__desenho::before,
-.folha-pedido__desenho::after {
-  content: '';
+/* Folha de esboço */
+.esboco__tela {
   position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  touch-action: none;
+  cursor: crosshair;
+}
+
+.esboco--bloqueado .esboco__tela {
+  cursor: default;
+}
+
+.esboco__ferramentas {
+  position: absolute;
+  top: 0.75rem;
+  left: 0.75rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+}
+
+.esboco__ferramentas button {
+  padding: 0.35rem 0.6rem;
+  border: 1px solid var(--tinta);
+  background: var(--papel);
+  font-family: var(--font-mono);
+  font-size: 0.66rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+
+.esboco__ferramentas button[aria-pressed='true'] {
   background: var(--tinta);
-  transition: transform 1.6s var(--ease);
+  color: var(--papel);
 }
 
-/* A primeira linha da planta do cliente, traçada quando o pedido segue */
-.folha-pedido__desenho::before {
-  left: 12%;
-  right: 12%;
-  top: 58%;
-  height: 2px;
-  transform: scaleX(0);
-  transform-origin: left;
-}
-
-.folha-pedido__desenho::after {
-  left: 12%;
-  top: 22%;
-  bottom: 42%;
-  width: 2px;
-  transform: scaleY(0);
-  transform-origin: bottom;
-  transition-delay: 0.9s;
-}
-
-.enviado .folha-pedido__desenho::before {
-  transform: scaleX(1);
-}
-
-.enviado .folha-pedido__desenho::after {
-  transform: scaleY(1);
+.esboco--bloqueado .esboco__ferramentas {
+  display: none;
 }
 
 .folha-pedido__vazio {
+  pointer-events: none;
   position: absolute;
   left: 50%;
   top: 50%;
@@ -1374,7 +1408,7 @@ textarea {
   transition: opacity 0.5s;
 }
 
-.enviado .folha-pedido__vazio {
+.folha-pedido__vazio.escondido {
   opacity: 0;
 }
 
@@ -1475,6 +1509,315 @@ textarea {
   transform: translate(-50%, -50%) rotate(-12deg) scale(1);
 }
 
+/* ============================================================
+   Página de Reabilitação
+   ============================================================ */
+.reab-abertura {
+  position: relative;
+  min-height: 92svh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: calc(var(--regua) + 14vh) var(--gutter) 10vh calc(var(--regua) + var(--gutter));
+}
+
+.seccao__titulo--grande {
+  max-width: 14ch;
+  font-size: clamp(2.8rem, 7.4vw, 7rem);
+}
+
+.deslizar--estatico {
+  position: static;
+  margin-top: 3rem;
+}
+
+.reab-seccao {
+  position: relative;
+  padding: 16vh var(--gutter) 10vh calc(var(--regua) + var(--gutter));
+}
+
+.vantagens {
+  list-style: none;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0;
+  max-width: 1120px;
+  margin-top: 8vh;
+  border-top: 1px solid var(--tinta);
+}
+
+.vantagens li {
+  padding: 2rem 2.5rem 2.5rem 0;
+  border-bottom: 1px solid var(--linha);
+}
+
+.vantagens li:nth-child(odd) {
+  border-right: 1px solid var(--linha);
+}
+
+.vantagens li:nth-child(even) {
+  padding-left: 2.5rem;
+}
+
+.vantagens__n {
+  display: block;
+  margin-bottom: 1.2rem;
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  opacity: 0.6;
+}
+
+.vantagens h3,
+.tipologia h3,
+.etapas-obra h3 {
+  margin-bottom: 0.6rem;
+  font-size: 1.35rem;
+  line-height: 1.15;
+  letter-spacing: -0.02em;
+}
+
+.vantagens p,
+.tipologia p,
+.etapas-obra p {
+  max-width: 42ch;
+  font-size: 0.98rem;
+}
+
+.tipologias {
+  list-style: none;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 3.5rem 3rem;
+  max-width: 1120px;
+  margin-top: 8vh;
+}
+
+.tipologia {
+  padding-top: 1.25rem;
+  border-top: 1px solid var(--tinta);
+}
+
+.tipologia svg {
+  display: block;
+  width: 64px;
+  height: 64px;
+  margin-bottom: 1.25rem;
+  overflow: visible;
+}
+
+.tipologia path {
+  fill: none;
+  stroke: var(--tinta);
+  stroke-width: 1.4;
+  stroke-linejoin: round;
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+  transition: stroke-dashoffset 1.8s var(--ease) 0.3s;
+}
+
+.tipologia.visivel path {
+  stroke-dashoffset: 0;
+}
+
+/* Pormenor: as camadas entram de cima, uma a uma */
+.pormenor {
+  max-width: 1120px;
+  margin: 8vh 0 0;
+}
+
+.pormenor__svg {
+  display: block;
+  width: 100%;
+  height: auto;
+  overflow: visible;
+  color: var(--tinta);
+}
+
+.pormenor__svg .po-contorno,
+.pormenor__svg .po-fino,
+.pormenor__svg .po-grosso,
+.pormenor__svg .po-tracejado {
+  fill: none;
+  stroke: currentColor;
+}
+
+.pormenor__svg .po-contorno {
+  stroke-width: 1.3;
+}
+
+.pormenor__svg .po-fino {
+  stroke-width: 0.7;
+}
+
+.pormenor__svg .po-grosso {
+  stroke-width: 2.6;
+}
+
+.pormenor__svg .po-tracejado {
+  stroke-width: 1.2;
+  stroke-dasharray: 8 5;
+}
+
+.pormenor__svg .papel {
+  fill: var(--papel);
+}
+
+.pormenor__svg circle {
+  fill: currentColor;
+}
+
+.po-camada {
+  opacity: 0;
+  transform: translateY(-46px);
+  transition: opacity 0.6s var(--ease), transform 0.9s var(--ease);
+  transition-delay: calc(0.3s + var(--i) * 0.38s);
+}
+
+.po-legenda {
+  opacity: 0;
+  transition: opacity 0.6s var(--ease);
+  transition-delay: calc(0.7s + var(--i) * 0.38s);
+}
+
+.pormenor.visivel .po-camada,
+.pormenor.visivel .po-legenda {
+  opacity: 1;
+  transform: none;
+}
+
+.pormenor__svg .po-num {
+  font-family: var(--font-mono);
+  font-size: 15px;
+  font-weight: 700;
+  fill: currentColor;
+}
+
+.pormenor__svg .po-nota {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  fill: currentColor;
+  opacity: 0.65;
+}
+
+/* Processo de obra: linha vertical com as etapas */
+.etapas-obra {
+  list-style: none;
+  position: relative;
+  max-width: 760px;
+  margin-top: 8vh;
+}
+
+.etapas-obra::before {
+  content: '';
+  position: absolute;
+  left: 1.1rem;
+  top: 0.5rem;
+  bottom: 0.5rem;
+  width: 1px;
+  background: var(--tinta);
+}
+
+.etapas-obra li {
+  position: relative;
+  display: grid;
+  grid-template-columns: 2.2rem 1fr;
+  gap: 1.75rem;
+  padding-bottom: 2.75rem;
+}
+
+.etapas-obra__n {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 2.2rem;
+  height: 2.2rem;
+  border: 1px solid var(--tinta);
+  background: var(--papel);
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+}
+
+.reab-cta {
+  max-width: 760px;
+  margin-top: 10vh;
+  padding: 2.5rem;
+  border: 1px solid var(--tinta);
+  background: var(--papel);
+}
+
+.reab-cta h2 {
+  margin-bottom: 0.75rem;
+  font-size: clamp(1.8rem, 3.2vw, 2.8rem);
+  line-height: 1;
+  letter-spacing: -0.03em;
+}
+
+.reab-cta p {
+  max-width: 44ch;
+  margin-bottom: 1.75rem;
+}
+
+/* Páginas legais */
+.documento {
+  max-width: 760px;
+  padding: calc(var(--regua) + 18vh) var(--gutter) 12vh calc(var(--regua) + var(--gutter));
+}
+
+.documento h2 {
+  margin: 3rem 0 0.9rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--linha);
+  font-size: 1.3rem;
+  letter-spacing: -0.015em;
+}
+
+.documento p,
+.documento li {
+  max-width: 62ch;
+  margin-bottom: 0.8rem;
+}
+
+.documento ul {
+  padding-left: 1.2rem;
+}
+
+.documento a {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.documento__ficha {
+  display: grid;
+  grid-template-columns: minmax(9rem, auto) 1fr;
+  gap: 0.6rem 1.5rem;
+}
+
+.documento__ficha dt {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  opacity: 0.6;
+  padding-top: 0.2rem;
+}
+
+.documento__data {
+  margin-top: 3rem;
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  opacity: 0.6;
+}
+
+/* Campo legal ainda por preencher: visível de propósito, para não esquecer */
+.por-preencher {
+  padding: 0 0.35rem;
+  border: 1px dashed var(--tinta);
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
 /* Rodapé */
 .rodape {
   display: grid;
@@ -1486,9 +1829,35 @@ textarea {
   font-size: 0.92rem;
 }
 
-.logo--rodape {
-  width: 150px;
-  height: 96px;
+/* Lockup AMA / ANDRÉ MELISSA ARCHITECTS em texto */
+.lockup {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: flex-start;
+  color: var(--tinta);
+}
+
+.lockup__ama {
+  font-family: var(--font-logo);
+  font-size: 64px;
+  font-weight: 900;
+  line-height: 0.92;
+  letter-spacing: -0.013em;
+}
+
+.lockup__sub {
+  margin-top: 0.55em;
+  font-family: var(--font-logo-sub);
+  font-size: 7.5px;
+  font-weight: 500;
+  line-height: 1;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.logo-ama--mini {
+  font-size: 13px;
 }
 
 .rodape__bloco .rotulo {
@@ -1499,10 +1868,20 @@ textarea {
   text-decoration: underline;
 }
 
-.rodape__nota {
+.rodape__legal {
   grid-column: 1 / -1;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 1.5rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--linha);
   font-family: var(--font-mono);
   font-size: 0.7rem;
+  letter-spacing: 0.04em;
+}
+
+.rodape__nota {
+  margin-left: auto;
   opacity: 0.6;
 }
 
@@ -1659,6 +2038,29 @@ textarea {
     display: none;
   }
 
+  .vantagens,
+  .tipologias {
+    grid-template-columns: 1fr;
+  }
+
+  .vantagens li,
+  .vantagens li:nth-child(even) {
+    padding: 1.6rem 0;
+    border-right: 0;
+  }
+
+  .pormenor__svg {
+    width: 150%;
+  }
+
+  .pormenor {
+    overflow-x: auto;
+  }
+
+  .reab-cta {
+    padding: 1.5rem;
+  }
+
   .fachada {
     margin-left: -8%;
     margin-right: -8%;
@@ -1705,6 +2107,19 @@ textarea {
   .rodape {
     grid-template-columns: 1fr;
     padding-bottom: 14vh;
+  }
+
+  .documento__ficha {
+    grid-template-columns: 1fr;
+    gap: 0.2rem;
+  }
+
+  .documento__ficha dd {
+    margin-bottom: 0.8rem;
+  }
+
+  .rodape__nota {
+    margin-left: 0;
   }
 }
 

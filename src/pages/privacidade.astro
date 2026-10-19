@@ -1,0 +1,77 @@
+---
+// Política de privacidade e cookies (RGPD e Lei n.º 58/2019).
+import Conceito from '../layouts/Conceito.astro';
+import { empresa } from '../lib/legal';
+
+const responsavel = empresa.firma || 'AMA André Melissa Arquitetos';
+---
+
+<Conceito title="Privacidade e cookies · AMA André Melissa Arquitetos" folhas="01" pagina="legal">
+  <article class="documento" data-folha="01" data-fase="Privacidade">
+    <p class="sobretitulo">Privacidade e cookies</p>
+    <h1 class="seccao__titulo">Política de privacidade</h1>
+
+    <h2>Responsável pelo tratamento</h2>
+    <p>
+      {responsavel}{empresa.nipc && `, NIPC ${empresa.nipc}`}, com sede em {empresa.sede}.
+      Para qualquer questão sobre os seus dados pessoais, contacte-nos por
+      <a href={`mailto:${empresa.email}`}>{empresa.email}</a>.
+    </p>
+
+    <h2>Que dados recolhemos</h2>
+    <p>
+      Só recolhemos os dados que nos envia no formulário de pedido: nome, contacto
+      (email ou telefone), tipo de projeto, localização, a descrição do que pretende
+      e, se o fizer, o esboço desenhado na folha do formulário, que recebemos como
+      imagem. Não pedimos dados sensíveis.
+    </p>
+
+    <h2>Para que os usamos e com que fundamento</h2>
+    <p>
+      Usamos estes dados apenas para responder ao seu pedido, marcar a primeira
+      conversa ou visita e preparar uma proposta. O fundamento é a realização de
+      diligências pré-contratuais a seu pedido (artigo 6.º, n.º 1, alínea b) do
+      RGPD). Não usamos os seus dados para publicidade nem os vendemos a terceiros.
+    </p>
+
+    <h2>Durante quanto tempo</h2>
+    <p>
+      Conservamos o pedido durante o tempo necessário para lhe responder e, se não
+      houver contrato, no máximo dois anos após o último contacto. Se vier a ser
+      celebrado um contrato, os dados ficam sujeitos aos prazos legais de
+      conservação aplicáveis (por exemplo, fiscais).
+    </p>
+
+    <h2>Quem tem acesso</h2>
+    <p>
+      Os pedidos são lidos pela equipa da AMA. Para os fazer chegar até nós
+      recorremos a um prestador de serviços de envio de email e ao servidor onde o
+      site está alojado, que atuam como subcontratantes, só segundo as nossas
+      instruções. Caso algum destes prestadores trate dados fora do Espaço Económico
+      Europeu, a transferência é feita com as garantias previstas no RGPD, como as
+      cláusulas contratuais-tipo aprovadas pela Comissão Europeia.
+    </p>
+
+    <h2>Os seus direitos</h2>
+    <p>
+      Pode pedir o acesso, a retificação ou o apagamento dos seus dados, a limitação
+      ou a oposição ao tratamento e a portabilidade, escrevendo para
+      <a href={`mailto:${empresa.email}`}>{empresa.email}</a>. Tem também o direito de
+      apresentar reclamação à Comissão Nacional de Proteção de Dados
+      (<a href="https://www.cnpd.pt" rel="noopener" target="_blank">cnpd.pt</a>).
+    </p>
+
+    <h2>Cookies e armazenamento local</h2>
+    <p>
+      Este website não usa cookies de análise, de publicidade nem de redes sociais.
+      Para que o nome e o tipo de projeto que escreve no início acompanhem o
+      desenho e o formulário, o seu navegador guarda-os localmente (localStorage).
+      Essa informação fica só no seu dispositivo, não nos é enviada até submeter o
+      formulário e pode ser apagada a qualquer momento nas definições do navegador.
+      A área de gestão do site, usada apenas pela equipa, recorre a um cookie de
+      sessão estritamente necessário.
+    </p>
+
+    <p class="documento__data">Última atualização: outubro de 2026.</p>
+  </article>
+</Conceito>

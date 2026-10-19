@@ -1,0 +1,87 @@
+---
+// Pormenor construtivo de uma cobertura reabilitada: as camadas entram
+// uma a uma (de baixo para cima) quando o desenho chega ao ecrã, cada uma
+// com a sua legenda. Sem fotografias: o rigor mostra-se no desenho.
+const camadas = [
+  { n: 1, nome: 'Estrutura existente', nota: 'consolidada e tratada' },
+  { n: 2, nome: 'Barreira pára-vapor', nota: 'protege o isolamento' },
+  { n: 3, nome: 'Isolamento térmico', nota: 'conforto e eficiência' },
+  { n: 4, nome: 'Membrana impermeabilizante', nota: 'estanquidade' },
+  { n: 5, nome: 'Ripado e contra-ripado', nota: 'ventilação da cobertura' },
+  { n: 6, nome: 'Telha cerâmica', nota: 'revestimento final' },
+];
+// ondas da telha
+let telha = 'M0 0';
+for (let x = 0; x <= 560; x += 28) telha += ` Q${x + 14} -16 ${x + 28} 0`;
+---
+
+<figure class="pormenor" data-pormenor data-aparece>
+  <svg class="pormenor__svg" viewBox="0 0 1080 430" role="img" aria-labelledby="pormenor-titulo">
+    <title id="pormenor-titulo">Pormenor construtivo de uma cobertura reabilitada, com seis camadas</title>
+    <defs>
+      <pattern id="po-betao" width="10" height="10" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
+        <path d="M0 0 V10" class="po-fino" />
+      </pattern>
+      <pattern id="po-isolamento" width="24" height="44" patternUnits="userSpaceOnUse">
+        <path d="M0 22 Q6 2 12 22 T24 22" class="po-fino" />
+      </pattern>
+    </defs>
+
+    <g transform="translate(70 330) rotate(-12)">
+      <!-- 1 · estrutura -->
+      <g class="po-camada" style="--i:0">
+        <rect x="0" y="0" width="600" height="56" fill="url(#po-betao)" />
+        <rect x="0" y="0" width="600" height="56" class="po-contorno" />
+        <path d="M60 56 v40 h40 v-40 M300 56 v40 h40 v-40 M540 56 v40 h40 v-40" class="po-contorno" />
+      </g>
+      <!-- 2 · pára-vapor -->
+      <g class="po-camada" style="--i:1">
+        <path d="M0 -4 H600" class="po-tracejado" />
+      </g>
+      <!-- 3 · isolamento -->
+      <g class="po-camada" style="--i:2">
+        <rect x="0" y="-52" width="600" height="44" fill="url(#po-isolamento)" />
+        <rect x="0" y="-52" width="600" height="44" class="po-contorno" />
+      </g>
+      <!-- 4 · membrana -->
+      <g class="po-camada" style="--i:3">
+        <path d="M0 -58 H600" class="po-grosso" />
+      </g>
+      <!-- 5 · ripado -->
+      <g class="po-camada" style="--i:4">
+        {[30, 140, 250, 360, 470, 580].map((x) => <rect x={x - 10} y="-78" width="20" height="18" class="po-contorno papel" />)}
+        <path d="M0 -92 H600 M0 -80 H600" class="po-contorno" />
+      </g>
+      <!-- 6 · telha -->
+      <g class="po-camada" style="--i:5">
+        <path d={telha} transform="translate(-10 -98)" class="po-grosso" />
+        <path d="M600 -100 q30 0 34 26 v26 h-28 v-20" class="po-contorno" />
+      </g>
+    </g>
+
+    <!-- legendas -->
+    <g class="po-legendas">
+      {camadas.map((c, i) => {
+        const y = 60 + (5 - i) * 52;
+        // pontos sobre cada camada (já com a rotação do desenho aplicada)
+        const alvos = [
+          [310, 308],
+          [382, 260],
+          [455, 218],
+          [518, 176],
+          [623, 142],
+          [597, 116],
+        ];
+        const [ax, ay] = alvos[i];
+        return (
+          <g class="po-legenda" style={`--i:${i}`}>
+            <path d={`M${ax} ${ay} L${ax} ${y} H760`} class="po-fino" />
+            <circle cx={ax} cy={ay} r="3.5" />
+            <text x="770" y={y - 4} class="po-num">{String(c.n).padStart(2, '0')} · {c.nome}</text>
+            <text x="770" y={y + 13} class="po-nota">{c.nota}</text>
+          </g>
+        );
+      })}
+    </g>
+  </svg>
+</figure>

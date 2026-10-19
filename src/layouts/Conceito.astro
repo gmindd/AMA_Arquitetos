@@ -3,6 +3,7 @@
 // Réguas, mira do cursor, moldura da folha e carimbo (legenda) são
 // fixos e acompanham toda a página; o conteúdo de cada página entra
 // no <slot />. O carimbo é preenchido com o nome do visitante.
+import Rodape from '../components/conceito/Rodape.astro';
 import '../styles/conceito.css';
 
 interface Props {
@@ -10,10 +11,16 @@ interface Props {
   description?: string;
   /** A página abre com a intro "André e Melissa Arquitetos" → AMA */
   intro?: boolean;
+  /** Número total de folhas da página (para o carimbo) */
+  folhas?: string;
+  /** Página ativa no menu */
+  pagina?: 'inicio' | 'reabilitacao' | 'legal';
 }
 
 const {
   intro = false,
+  folhas = '08',
+  pagina = 'inicio',
   title = 'AMA André Melissa Arquitetos · Tudo começa com uma linha',
   description = 'Gabinete de arquitetura em Viana do Castelo. Projeto, reabilitação e obra com equipa própria, do primeiro traço à entrega da chave.',
 } = Astro.props;
@@ -23,7 +30,7 @@ const data = `${String(hoje.getDate()).padStart(2, '0')}.${String(hoje.getMonth(
 ---
 
 <!doctype html>
-<html lang="pt" class={intro ? 'com-intro' : undefined}>
+<html lang="pt">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -31,12 +38,34 @@ const data = `${String(hoje.getDate()).padStart(2, '0')}.${String(hoje.getMonth(
     <meta name="description" content={description} />
     <meta name="theme-color" content="#e6e4e0" />
     <link rel="icon" href="/favicon.svg" />
-    <noscript><style>.com-intro .topo__marca { opacity: 1 !important; } .alcado * { animation-play-state: running !important; }</style></noscript>
+    <noscript><style>.alcado * { animation-play-state: running !important; }</style></noscript>
+    {
+      intro && (
+        <script is:inline>
+          // Decide antes de pintar se a intro corre: só ao abrir o site
+          // (não ao voltar de outra página do site nem com âncora no URL).
+          // Se o script principal não arrancar, a página nunca fica escondida.
+          (function () {
+            try {
+              var nav = performance.getEntriesByType('navigation')[0];
+              var interna = document.referrer && new URL(document.referrer).origin === location.origin && (!nav || nav.type !== 'reload');
+              if (location.hash || interna) return;
+              history.scrollRestoration = 'manual';
+              var raiz = document.documentElement;
+              raiz.classList.add('intro-ativa');
+              setTimeout(function () {
+                if (!window.__amaIntro) raiz.classList.remove('intro-ativa');
+              }, 4000);
+            } catch (e) {}
+          })();
+        </script>
+      )
+    }
     <script>
       import '../scripts/conceito/index.js';
     </script>
   </head>
-  <body>
+  <body data-folhas={folhas}>
     <a class="salto" href="#conteudo">Saltar para o conteúdo</a>
 
     <!-- Prancheta: elementos fixos, puramente decorativos -->
@@ -56,17 +85,17 @@ const data = `${String(hoje.getDate()).padStart(2, '0')}.${String(hoje.getMonth(
         <span class="logo-ama" aria-hidden="true" data-logo-ama><span>A</span><span>M</span><span>A</span></span>
       </a>
       <nav class="topo__nav" aria-label="Secções">
-        <a href="#processo">Processo</a>
-        <a href="#reabilitacao">Reabilitação</a>
-        <a href="#equipa">Equipa</a>
+        <a href="/#processo">Processo</a>
+        <a href="/reabilitacao" aria-current={pagina === 'reabilitacao' ? 'page' : undefined}>Reabilitação</a>
+        <a href="/#equipa">Equipa</a>
       </nav>
-      <a class="topo__cta" href="#contacto">Começar projeto</a>
+      <a class="topo__cta" href="/#contacto">Começar projeto</a>
     </header>
 
     <!-- Carimbo da folha: projeto, cliente, fase e folha -->
     <aside class="carimbo" aria-label="Carimbo do projeto" data-carimbo>
       <div class="carimbo__linha carimbo__linha--marca">
-        <span class="logo logo--mini" style="--logo:url('/images/marca/ama-mark.svg')"></span>
+        <span class="logo-ama logo-ama--mini" aria-hidden="true">AMA</span>
         <span>André Melissa Arquitetos</span>
       </div>
       <div class="carimbo__grelha">
@@ -102,8 +131,12 @@ const data = `${String(hoje.getDate()).padStart(2, '0')}.${String(hoje.getMonth(
       <span class="carimbo__progresso"><span data-c="progresso"></span></span>
     </aside>
 
+    <!-- Intro da página (fora do <main>, que fica escondido enquanto corre) -->
+    <slot name="intro" />
+
     <main id="conteudo">
       <slot />
+      <Rodape />
     </main>
   </body>
 </html>
