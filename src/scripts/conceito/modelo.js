@@ -1,24 +1,35 @@
-// Modelo da casa conceito, em metros. Planta de 14 × 9 m, piso único:
-// quartos a norte, sala e cozinha a sul (luz), entrada a nascente.
-// As paredes são geradas a partir de eixos com vãos; cada troço fica
-// um paralelepípedo (planta retangular + cotas z0..z1).
+// Modelo da casa, em metros, simplificado a partir das peças desenhadas de
+// um projeto real da AMA (planta do rés-do-chão, esc. 1:100): uma casa
+// antiga de paredes de pedra, a reabilitar, com pátio interior e
+// cozinha/sala em open space, prolongada por uma ampliação nova com
+// corredor, instalações sanitárias, arrumos e dois quartos.
+// Eixos: x ao longo do lote (norte = +x), y em profundidade (rua = +y).
 
-export const ALTURA = 2.9;
-export const LARGURA = 14;
-export const PROFUNDIDADE = 9;
-const EXT = 0.3;
+export const ALTURA = 3.0; // pé-direito / altura das paredes
+export const LARGURA = 20.66;
+export const PROFUNDIDADE = 8.02;
+const PEDRA = 0.45; // paredes antigas, em pedra
+const NOVA = 0.3; // paredes exteriores da ampliação
 const INT = 0.12;
+
+// Pegada construída: casa existente + ampliação [x0, y0, x1, y1]
+export const pegadas = [
+  [0, 0, 12.25, 7.95],
+  [12.1, 1.57, LARGURA, PROFUNDIDADE],
+];
 
 // Divisões: retângulo [x0, y0, x1, y1]
 export const divisoes = [
-  { nome: 'Quarto', r: [0, 0, 4.2, 4] },
-  { nome: 'Quarto', r: [4.2, 0, 8.2, 4] },
-  { nome: 'Banho', r: [8.2, 0, 10.4, 4] },
-  { nome: 'Suite', r: [10.4, 0, 14, 4] },
-  { nome: 'Circulação', r: [0, 4, 14, 5.4], semBolha: true },
-  { nome: 'Sala', r: [0, 5.4, 7, 9] },
-  { nome: 'Cozinha', r: [7, 5.4, 10.4, 9] },
-  { nome: 'Entrada', r: [10.4, 5.4, 14, 9] },
+  { nome: 'Lavandaria', r: [0.45, 0.45, 2.42, 2.57] },
+  { nome: 'Hall', r: [2.42, 0.45, 4.85, 2.57] },
+  { nome: 'Pátio', r: [0.45, 2.57, 4.8, 7.5], exterior: true },
+  { nome: 'Cozinha e sala', r: [4.85, 0.45, 11.2, 7.5] },
+  { nome: 'I.S.', r: [12.25, 1.87, 14.99, 3.52] },
+  { nome: 'I.S.', r: [14.99, 1.87, 17.45, 3.52] },
+  { nome: 'Arrumos', r: [17.45, 1.87, 20.36, 5.06] },
+  { nome: 'Corredor', r: [12.25, 3.52, 17.45, 5.06], semBolha: true },
+  { nome: 'Quarto', r: [12.25, 5.06, 16.85, 7.72] },
+  { nome: 'Quarto', r: [16.85, 5.06, 20.36, 7.72] },
 ].map((d) => ({
   ...d,
   area: (d.r[2] - d.r[0]) * (d.r[3] - d.r[1]),
@@ -28,65 +39,79 @@ export const divisoes = [
 
 // Posição solta das bolhas no diagrama inicial (antes de virarem divisões)
 export const bolhas = [
-  { i: 0, x: 2.4, y: 1.6 },
-  { i: 1, x: 6.4, y: 1.2 },
-  { i: 2, x: 9.4, y: 2.6 },
-  { i: 3, x: 12.6, y: 1.8 },
-  { i: 5, x: 3.2, y: 7.4 },
-  { i: 6, x: 8.2, y: 7.8 },
-  { i: 7, x: 12.4, y: 7.0 },
+  { i: 0, x: 1.2, y: 1.1 },
+  { i: 1, x: 3.9, y: 1.0 },
+  { i: 2, x: 2.3, y: 5.6 },
+  { i: 3, x: 8.2, y: 4.3 },
+  { i: 4, x: 13.4, y: 2.2 },
+  { i: 5, x: 16.1, y: 2.9 },
+  { i: 6, x: 19.3, y: 3.0 },
+  { i: 8, x: 14.2, y: 6.6 },
+  { i: 9, x: 18.9, y: 6.5 },
 ];
 
 // Ligações do diagrama funcional (índices de divisões)
 export const ligacoes = [
-  [5, 6],
-  [5, 7],
-  [6, 7],
-  [5, 0],
-  [5, 1],
-  [7, 3],
+  [1, 0],
   [1, 2],
+  [1, 3],
+  [2, 3],
+  [3, 8],
+  [3, 9],
+  [8, 4],
+  [9, 5],
+  [9, 6],
 ];
 
-// Eixo de parede: (x1,y1)→(x2,y2), espessura, vãos {em, l, tipo, lado}
-// em = distância ao início do eixo; tipo = janela | porta | vao
+// Eixo de parede: (x1,y1)→(x2,y2), espessura e, vãos {em, l, tipo, lado}
+// n = normal exterior da fachada (para saber que caixilhos se veem)
 const eixos = [
-  // Exteriores
-  { a: [0, 0], b: [14, 0], e: EXT, ext: true, vaos: [
-    { em: 1.3, l: 1.6, tipo: 'janela' },
-    { em: 5.4, l: 1.6, tipo: 'janela' },
-    { em: 8.9, l: 0.8, tipo: 'janela' },
-    { em: 11.4, l: 1.8, tipo: 'janela' },
+  // Casa existente: paredes de pedra
+  { a: [0, 0.22], b: [12.25, 0.22], e: PEDRA, ext: true, n: [0, -1], vaos: [
+    { em: 0.8, l: 1.0, tipo: 'janela' },
+    { em: 7.6, l: 1.6, tipo: 'janela' },
   ] },
-  { a: [0, 9], b: [14, 9], e: EXT, ext: true, vaos: [
-    { em: 0.8, l: 5, tipo: 'janela', grande: true },
-    { em: 7.8, l: 1.8, tipo: 'janela' },
-    { em: 11.6, l: 1.2, tipo: 'porta', lado: -1 },
+  { a: [0, 7.72], b: [12.25, 7.72], e: PEDRA, ext: true, n: [0, 1], vaos: [
+    { em: 3.2, l: 0.9, tipo: 'porta', lado: -1 },
+    { em: 6.6, l: 1.4, tipo: 'janela' },
+    { em: 9.3, l: 1.4, tipo: 'janela' },
   ] },
-  { a: [0, 0], b: [0, 9], e: EXT, ext: true, vaos: [
-    { em: 1.2, l: 1.6, tipo: 'janela' },
-    { em: 6.3, l: 1.8, tipo: 'janela' },
+  { a: [0.22, 0], b: [0.22, 7.95], e: PEDRA, ext: true, n: [-1, 0], vaos: [] },
+  // Ampliação nova
+  { a: [12.1, 1.72], b: [LARGURA, 1.72], e: NOVA, ext: true, n: [0, -1], vaos: [
+    { em: 1.3, l: 0.6, tipo: 'janela' },
+    { em: 3.9, l: 0.6, tipo: 'janela' },
+    { em: 6.6, l: 1.0, tipo: 'janela' },
   ] },
-  { a: [14, 0], b: [14, 9], e: EXT, ext: true, vaos: [
-    { em: 1.1, l: 1.8, tipo: 'janela' },
-    { em: 6.6, l: 1.2, tipo: 'janela' },
+  { a: [12.1, 7.87], b: [LARGURA, 7.87], e: NOVA, ext: true, n: [0, 1], vaos: [
+    { em: 1.6, l: 1.6, tipo: 'janela' },
+    { em: 6.1, l: 1.4, tipo: 'janela' },
   ] },
-  // Interiores
-  { a: [0, 4], b: [14, 4], e: INT, vaos: [
-    { em: 3.0, l: 0.9, tipo: 'porta', lado: -1 },
-    { em: 4.5, l: 0.9, tipo: 'porta', lado: -1 },
-    { em: 9.2, l: 0.8, tipo: 'porta', lado: -1 },
-    { em: 10.7, l: 0.9, tipo: 'porta', lado: -1 },
+  { a: [20.51, 1.72], b: [20.51, 7.87], e: NOVA, ext: true, n: [1, 0], vaos: [
+    { em: 2.0, l: 0.9, tipo: 'janela' },
   ] },
-  { a: [4.2, 0], b: [4.2, 4], e: INT, vaos: [] },
-  { a: [8.2, 0], b: [8.2, 4], e: INT, vaos: [] },
-  { a: [10.4, 0], b: [10.4, 4], e: INT, vaos: [] },
-  { a: [5.2, 5.4], b: [14, 5.4], e: INT, vaos: [
-    { em: 2.4, l: 0.9, tipo: 'porta', lado: 1 },
-    { em: 5.6, l: 2.8, tipo: 'vao' },
+  // Parede antiga entre a casa e a ampliação, com a passagem para o corredor
+  { a: [12.1, 0.45], b: [12.1, 7.5], e: NOVA, vaos: [{ em: 3.67, l: 0.82, tipo: 'vao' }] },
+  // Interiores da casa existente
+  { a: [2.42, 0.45], b: [2.42, 2.57], e: INT, vaos: [{ em: 1.2, l: 0.8, tipo: 'porta', lado: 1 }] },
+  { a: [0.45, 2.57], b: [4.85, 2.57], e: 0.2, vaos: [{ em: 2.75, l: 0.9, tipo: 'porta', lado: -1 }] },
+  { a: [4.85, 0.45], b: [4.85, 2.57], e: 0.2, vaos: [{ em: 0.4, l: 0.9, tipo: 'porta', lado: 1 }] },
+  // Envidraçado entre o pátio e a sala
+  { a: [4.8, 2.57], b: [4.8, 7.5], e: 0.15, n: [-1, 0], vaos: [{ em: 0.25, l: 4.5, tipo: 'janela', grande: true }] },
+  // Caixa de escada
+  { a: [11.2, 0.45], b: [11.2, 7.5], e: INT, vaos: [{ em: 3.67, l: 0.82, tipo: 'vao' }] },
+  // Interiores da ampliação
+  { a: [12.25, 3.52], b: [17.45, 3.52], e: INT, vaos: [
+    { em: 0.9, l: 0.75, tipo: 'porta', lado: -1 },
+    { em: 3.5, l: 0.75, tipo: 'porta', lado: -1 },
   ] },
-  { a: [7, 5.4], b: [7, 9], e: INT, vaos: [{ em: 0.9, l: 1.8, tipo: 'vao' }] },
-  { a: [10.4, 5.4], b: [10.4, 9], e: INT, vaos: [] },
+  { a: [14.99, 1.87], b: [14.99, 3.52], e: INT, vaos: [] },
+  { a: [17.45, 1.87], b: [17.45, 5.06], e: INT, vaos: [{ em: 2.05, l: 0.8, tipo: 'porta', lado: 1 }] },
+  { a: [12.25, 5.06], b: [20.36, 5.06], e: INT, vaos: [
+    { em: 3.1, l: 0.85, tipo: 'porta', lado: 1 },
+    { em: 5.4, l: 0.85, tipo: 'porta', lado: 1 },
+  ] },
+  { a: [16.85, 5.06], b: [16.85, 7.72], e: INT, vaos: [] },
 ];
 
 // Converte um troço ao longo do eixo em retângulo de planta
@@ -97,14 +122,14 @@ function retangulo(eixo, t0, t1) {
   const m = eixo.e / 2;
   if (h) {
     const ext0 = eixo.ext && t0 === 0 ? m : 0;
-    const ext1 = eixo.ext && t1 === x2 - x1 ? m : 0;
+    const ext1 = eixo.ext && Math.abs(t1 - (x2 - x1)) < 1e-6 ? m : 0;
     return [x1 + t0 - ext0, y1 - m, x1 + t1 + ext1, y1 + m];
   }
   return [x1 - m, y1 + t0, x1 + m, y1 + t1];
 }
 
 export const paredes = []; // { r, z0, z1, ext, ordem }
-export const vaos = []; // { tipo, r, h, eixo, lado, grande }
+export const vaos = []; // { tipo, r, h, lado, grande, n }
 
 eixos.forEach((eixo, ie) => {
   const comp = Math.hypot(eixo.b[0] - eixo.a[0], eixo.b[1] - eixo.a[1]);
@@ -114,63 +139,88 @@ eixos.forEach((eixo, ie) => {
     if (v.em > t) paredes.push({ r: retangulo(eixo, t, v.em), z0: 0, z1: ALTURA, ext: !!eixo.ext, eixo: ie });
     const r = retangulo(eixo, v.em, v.em + v.l);
     if (v.tipo === 'janela') {
-      const peitoril = v.grande ? 0.1 : 0.9;
+      const peitoril = v.grande ? 0.05 : 0.9;
       paredes.push({ r, z0: 0, z1: peitoril, ext: true, eixo: ie, baixo: true });
-      paredes.push({ r, z0: 2.2, z1: ALTURA, ext: true, eixo: ie });
-      vaos.push({ tipo: 'janela', r, h: eixo.a[1] === eixo.b[1], z0: peitoril, z1: 2.2, grande: !!v.grande });
+      paredes.push({ r, z0: 2.25, z1: ALTURA, ext: true, eixo: ie });
+      vaos.push({ tipo: 'janela', r, h: eixo.a[1] === eixo.b[1], z0: peitoril, z1: 2.25, grande: !!v.grande, n: eixo.n });
     } else {
-      paredes.push({ r, z0: 2.1, z1: ALTURA, ext: !!eixo.ext, eixo: ie });
+      paredes.push({ r, z0: 2.15, z1: ALTURA, ext: !!eixo.ext, eixo: ie });
       vaos.push({ tipo: v.tipo, r, h: eixo.a[1] === eixo.b[1], lado: v.lado || 1, l: v.l });
     }
     t = v.em + v.l;
   }
-  if (t < comp) paredes.push({ r: retangulo(eixo, t, comp), z0: 0, z1: ALTURA, ext: !!eixo.ext, eixo: ie });
+  if (t < comp - 1e-6) paredes.push({ r: retangulo(eixo, t, comp), z0: 0, z1: ALTURA, ext: !!eixo.ext, eixo: ie });
 });
 
-// Ordem de construção: exteriores primeiro, de norte para sul
+// Ordem de construção: primeiro as paredes de pedra (a reabilitar), depois
+// a ampliação, de poente para nascente
 paredes.forEach((p, i) => {
-  p.ordem = (p.ext ? 0 : 0.5) + (p.r[1] + p.r[3]) / 2 / PROFUNDIDADE * 0.5 + i * 0.0001;
+  const cx = (p.r[0] + p.r[2]) / 2;
+  p.ordem = (p.ext ? 0 : 0.5) + (cx / LARGURA) * 0.5 + i * 0.0001;
 });
 const ordens = [...paredes].sort((a, b) => a.ordem - b.ordem);
 ordens.forEach((p, k) => (p.ordem = k / (ordens.length - 1)));
 
+// Escada (caixa entre a casa e a ampliação): degraus [x0, y0, x1, y1, z]
+export const escada = Array.from({ length: 11 }, (_, i) => [11.27, 4.1 - (i + 1) * 0.22, 12.03, 4.1 - i * 0.22, (i + 1) * 0.19]);
+
+// Coberturas: duas águas (cumeeira ao longo do lote) e uma laje plana
+export const coberturas = [
+  { tipo: 'duas-aguas', x0: 4.6, x1: LARGURA + 0.15, y0: -0.2, y1: PROFUNDIDADE + 0.2, subida: 2.4 },
+  { tipo: 'plana', r: [-0.1, -0.1, 4.85, 2.75] },
+];
+
 // Mobiliário: [x0, y0, x1, y1, altura]
 export const mobiliario = [
-  // Quarto 1
-  [1.3, 0.4, 2.9, 2.4, 0.5], [0.7, 0.4, 1.15, 0.85, 0.5], [3.05, 0.4, 3.5, 0.85, 0.5], [0.35, 3.25, 2.4, 3.85, 2.0],
-  // Quarto 2
-  [5.3, 0.4, 6.9, 2.4, 0.5], [7.25, 0.4, 8.05, 1.6, 0.75],
-  // Banho
-  [8.5, 0.35, 9.0, 0.95, 0.4], [9.5, 0.35, 10.2, 0.85, 0.85], [8.4, 2.6, 10.2, 3.8, 0.06],
-  // Suite
-  [11.4, 0.4, 13.2, 2.4, 0.5], [13.25, 2.6, 13.8, 3.85, 2.0],
-  // Sala
-  [0.5, 6.0, 1.4, 8.4, 0.8], [2.0, 6.7, 3.0, 7.7, 0.4], [4.4, 6.3, 6.2, 7.4, 0.75],
-  [4.6, 5.85, 5.05, 6.2, 0.45], [5.6, 5.85, 6.05, 6.2, 0.45], [4.6, 7.5, 5.05, 7.85, 0.45], [5.6, 7.5, 6.05, 7.85, 0.45],
-  // Cozinha
-  [7.3, 8.1, 10.25, 8.75, 0.9], [9.6, 5.6, 10.25, 8.1, 0.9], [7.9, 6.3, 9.0, 7.3, 0.9],
-  // Entrada
-  [13.2, 5.9, 13.75, 6.5, 0.45],
+  // Lavandaria
+  [0.6, 0.6, 1.25, 1.2, 0.85], [1.35, 0.6, 2.0, 1.2, 0.85],
+  // Hall: roupeiro
+  [4.1, 1.7, 4.72, 2.45, 2.0],
+  // Cozinha: bancada ao longo da fachada e ilha
+  [6.6, 0.5, 11.1, 1.1, 0.9], [6.05, 2.78, 10.49, 3.68, 0.9],
+  // Sala: mesa de jantar e cadeiras, sofá em L e móvel
+  [5.9, 4.85, 7.0, 7.25, 0.75],
+  [5.45, 5.0, 5.8, 5.4, 0.45], [5.45, 5.85, 5.8, 6.25, 0.45], [5.45, 6.7, 5.8, 7.1, 0.45],
+  [7.1, 5.0, 7.45, 5.4, 0.45], [7.1, 5.85, 7.45, 6.25, 0.45], [7.1, 6.7, 7.45, 7.1, 0.45],
+  [9.75, 4.6, 10.6, 7.35, 0.8], [8.1, 6.5, 9.75, 7.35, 0.8], [8.4, 5.1, 9.3, 5.9, 0.4],
+  // Instalações sanitárias
+  [12.45, 1.95, 12.95, 2.55, 0.4], [13.4, 1.95, 14.25, 2.4, 0.85], [13.95, 2.6, 14.9, 3.45, 0.06],
+  [15.15, 1.95, 15.65, 2.55, 0.4], [16.25, 1.95, 17.1, 2.4, 0.85], [16.45, 2.6, 17.4, 3.45, 0.06],
+  // Arrumos
+  [17.6, 1.95, 20.3, 2.45, 2.0],
+  // Quartos: camas e roupeiros
+  [14.6, 5.4, 16.4, 7.4, 0.5], [12.3, 5.15, 12.9, 7.65, 2.0],
+  [18.2, 5.3, 19.95, 7.3, 0.5], [16.95, 5.15, 17.5, 6.5, 2.0],
+  // Pátio: lajetas do caminho e floreira
+  [3.25, 2.78, 4.0, 3.42, 0.03], [3.25, 3.56, 4.0, 4.2, 0.03], [3.25, 4.34, 4.0, 4.98, 0.03],
+  [3.25, 5.12, 4.0, 5.76, 0.03], [3.25, 5.9, 4.0, 6.54, 0.03], [3.25, 6.68, 4.0, 7.32, 0.03],
+  [4.1, 2.75, 4.65, 7.45, 0.4],
 ];
 
-// Manchas de sol no pavimento, a entrar pelos vãos a sul
+// Árvore do pátio: centro, raio da copa e altura
+export const arvore = { x: 1.55, y: 6.35, r: 0.9, h: 3.6 };
+
+// Manchas de sol no pavimento: pelo envidraçado do pátio e pelos quartos
 export const sol = [
-  [[0.8, 8.85], [5.8, 8.85], [5.0, 6.6], [0.35, 6.6]],
-  [[7.8, 8.85], [9.6, 8.85], [9.0, 7.6], [7.4, 7.6]],
+  [[4.87, 3.1], [4.87, 7.2], [7.3, 6.5], [7.3, 3.7]],
+  [[13.7, 7.7], [15.3, 7.7], [15.65, 6.5], [14.05, 6.5]],
+  [[18.3, 7.7], [19.7, 7.7], [20.0, 6.6], [18.6, 6.6]],
 ];
 
-// Percurso do visitante: da rua até à sala
+// Percurso do visitante: da rua, pelo portão e pelo pátio, até à sala
 export const percurso = [
-  [12.2, 10.6],
-  [12.2, 8.6],
-  [12.2, 4.7],
-  [6.0, 4.7],
-  [3.6, 7.2],
+  [3.65, 9.4],
+  [3.65, 7.6],
+  [3.65, 3.0],
+  [3.65, 1.6],
+  [5.5, 1.0],
+  [7.4, 4.3],
+  [8.7, 5.6],
 ];
 
 // Cotas: cadeia superior e totais
 export const cotas = {
-  parciais: [0, 4.2, 8.2, 10.4, 14],
-  total: 14,
-  lateral: 9,
+  parciais: [0, 4.85, 12.1, 14.99, 17.45, LARGURA],
+  total: LARGURA,
+  lateral: PROFUNDIDADE,
 };

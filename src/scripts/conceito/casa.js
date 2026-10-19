@@ -7,7 +7,7 @@
 
 import {
   divisoes, bolhas, ligacoes, paredes, vaos, mobiliario, sol, percurso, cotas,
-  ALTURA, LARGURA, PROFUNDIDADE,
+  pegadas, escada, coberturas, arvore, ALTURA, LARGURA, PROFUNDIDADE,
 } from './modelo.js';
 import { primeiroNome } from './estado.js';
 
@@ -23,6 +23,11 @@ const OSSO = [230, 228, 224];
 const BRANCO = [255, 255, 255];
 const mistura = (c1, c2, t) => c1.map((v, i) => Math.round(lerp(v, c2[i], t)));
 const rgba = (c, a = 1) => `rgba(${c[0]},${c[1]},${c[2]},${a})`;
+
+// Cantos de cada volume construído
+const CANTOS = pegadas.flatMap(([x0, y0, x1, y1]) => [[x0, y0], [x1, y0], [x1, y1], [x0, y1]]);
+// Grua: base junto ao topo norte do lote
+const GRUA = { x: LARGURA + 2.2, y: -1.4, altura: 9, lanca: 11 };
 
 // Fases da obra e o ponto (0–1 do progresso de obra) em que ficam feitas
 export const FASES_OBRA = [0.04, 0.16, 0.5, 0.74, 0.86, 0.99];
@@ -76,7 +81,7 @@ export function iniciarCasa({ seccao, tela, dica, passos, aoPasso, aoObra, aoLei
 
   // Área do ecrã onde o desenho é enquadrado
   function areaPalco() {
-    if (L > 900) return { x0: Math.max(L * 0.4, limiteTexto + 48), x1: L - 70, y0: 110, y1: A - 70 };
+    if (L > 900) return { x0: Math.max(L * 0.4, limiteTexto + 40), x1: L - 40, y0: 110, y1: A - 60 };
     return { x0: 18, x1: L - 18, y0: 116, y1: A * 0.5 };
   }
 
@@ -115,9 +120,11 @@ export function iniciarCasa({ seccao, tela, dica, passos, aoPasso, aoObra, aoLei
   function enquadrar(c, grua) {
     const area = areaPalco();
     const pts = [];
-    const caixa = [[-2.6, -1.9], [15.6, -1.9], [15.6, 11.9], [-2.6, 11.9]];
+    // Em planta há margem para notas e cotas; em axonometria aperta-se
+    const mg = lerp(1, 0.25, c.e);
+    const caixa = [[-4.4 * mg, -1.9 * mg], [LARGURA + 1.4 * mg, -1.9 * mg], [LARGURA + 1.4 * mg, PROFUNDIDADE + 2.3 * mg], [-4.4 * mg, PROFUNDIDADE + 2.3 * mg]];
     caixa.forEach(([x, y]) => pts.push([x, y, 0]));
-    [[0, 0], [14, 0], [14, 9], [0, 9]].forEach(([x, y]) => pts.push([x, y, ALTURA + 0.4]));
+    CANTOS.forEach(([x, y]) => pts.push([x, y, ALTURA + 0.4]));
     const base = { ...c, s: 1, ox: 0, oy: 0 };
     let minX = Infinity, maxX = -Infinity, minY = Infinity, maxY = -Infinity;
     for (const [x, y, z] of pts) {
@@ -126,7 +133,8 @@ export function iniciarCasa({ seccao, tela, dica, passos, aoPasso, aoObra, aoLei
       minY = Math.min(minY, py); maxY = Math.max(maxY, py);
     }
     if (grua > 0) {
-      for (const [x, y, z] of [[16.4, -1.4, 10.8], [16.4 + 11, -1.4, 9], [16.4 - 11, -1.4, 9], [16.4, -1.4 + 11, 9], [16.4, -1.4 - 11, 9]]) {
+      const { x: gx, y: gy, altura: ga, lanca: gl } = GRUA;
+      for (const [x, y, z] of [[gx, gy, ga + 1.8], [gx + gl, gy, ga], [gx - gl, gy, ga], [gx, gy + gl, ga], [gx, gy - gl, ga]]) {
         const [px, py] = projetar(x, y, z, base);
         minX = lerp(minX, Math.min(minX, px), grua); maxX = lerp(maxX, Math.max(maxX, px), grua);
         minY = lerp(minY, Math.min(minY, py), grua); maxY = lerp(maxY, Math.max(maxY, py), grua);
@@ -230,6 +238,46 @@ export function iniciarCasa({ seccao, tela, dica, passos, aoPasso, aoObra, aoLei
     });
   }
 
+  // Face plana qualquer (ex.: águas e empenas do telhado). Os vértices vêm
+  // por ordem anti-horária vistos de fora; só se desenha se estiver virada
+  // para o observador. "linhas" são traços a desenhar sobre a face.
+  function poliFace(p3, estilo, lista, linhas = []) {
+    const q = p3.map(([x, y, z]) => [x, y, z * cam.e]);
+    const u = [q[1][0] - q[0][0], q[1][1] - q[0][1], q[1][2] - q[0][2]];
+    const v = [q[2][0] - q[0][0], q[2][1] - q[0][1], q[2][2] - q[0][2]];
+    const n = [u[1] * v[2] - u[2] * v[1], u[2] * v[0] - u[0] * v[2], u[0] * v[1] - u[1] * v[0]];
+    const sa = Math.sin(cam.a);
+    const ca = Math.cos(cam.a);
+    const vista = n[0] * sa * Math.sin(cam.b) + n[1] * ca * Math.sin(cam.b) + n[2] * Math.cos(cam.b);
+    if (vista <= 1e-6) return;
+    const c = p3.reduce((acc, p) => [acc[0] + p[0] / p3.length, acc[1] + p[1] / p3.length, acc[2] + p[2] / p3.length], [0, 0, 0]);
+    const len = Math.hypot(...n) || 1;
+    lista.push({
+      pts: p3.map((p) => projetar(...p)),
+      prof: profundidade(...c),
+      sombra: 0.04 + 0.14 * (1 - Math.abs(n[2]) / len) + (n[1] < 0 ? 0.06 : 0),
+      estilo,
+      lado: true,
+      linhas: linhas.map(([a, b]) => [projetar(...a), projetar(...b)]),
+    });
+  }
+
+  // Telhado de duas águas com cumeeira ao longo de x
+  function duasAguas(t, zb, estilo, lista) {
+    const { x0, x1, y0, y1, subida } = t;
+    const ym = (y0 + y1) / 2;
+    const zt = zb + subida;
+    const juntas = (ya) => {
+      const l = [];
+      for (let x = x0 + 0.5; x < x1 - 0.2; x += 0.55) l.push([[x, ya, zb], [x, ym, zt]]);
+      return l;
+    };
+    poliFace([[x0, y0, zb], [x1, y0, zb], [x1, ym, zt], [x0, ym, zt]], estilo, lista, juntas(y0));
+    poliFace([[x1, y1, zb], [x0, y1, zb], [x0, ym, zt], [x1, ym, zt]], estilo, lista, juntas(y1));
+    poliFace([[x0, y1, zb], [x0, y0, zb], [x0, ym, zt]], estilo, lista);
+    poliFace([[x1, y0, zb], [x1, y1, zb], [x1, ym, zt]], estilo, lista);
+  }
+
   // ---------- Desenho principal ----------
   function desenhar(s, tempo) {
     // Variáveis de fase
@@ -261,7 +309,7 @@ export function iniciarCasa({ seccao, tela, dica, passos, aoPasso, aoObra, aoLei
 
     // Câmara: planta → axonometria; na entrega continua a rodar devagar
     const orbita = seg(s, 4.5, 5.4) * 0.22;
-    cam = enquadrar({ a: lerp(0, -0.62, camP) - orbita, b: lerp(0, 0.98, camP), e: camP }, grua);
+    cam = enquadrar({ a: lerp(0, -0.42, camP) - orbita, b: lerp(0, 0.98, camP), e: camP }, grua);
 
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
     ctx.clearRect(0, 0, L, A);
@@ -295,7 +343,8 @@ export function iniciarCasa({ seccao, tela, dica, passos, aoPasso, aoObra, aoLei
       ctx.fillStyle = cor(0.85);
       ctx.lineWidth = px;
       ctx.globalAlpha = notasP;
-      const sol0 = projetar(3.5, 11.2);
+      // sol a sul: entra pelo pátio
+      const sol0 = projetar(-1.9, 5.1);
       const r = 0.42 * cam.s;
       ctx.beginPath();
       ctx.arc(sol0[0], sol0[1], r, 0, Math.PI * 2 * notasP);
@@ -304,20 +353,24 @@ export function iniciarCasa({ seccao, tela, dica, passos, aoPasso, aoObra, aoLei
         const ang = (k / 8) * Math.PI * 2;
         linha([sol0[0] + Math.cos(ang) * r * 1.4, sol0[1] + Math.sin(ang) * r * 1.4], [sol0[0] + Math.cos(ang) * r * 1.9, sol0[1] + Math.sin(ang) * r * 1.9]);
       }
-      texto('luz a sul na sala', sol0[0] + r * 2.5, sol0[1], { tam: 13, italico: true, alinha: 'left' });
-      polilinhaParcial([projetar(3.5, 10.4), projetar(3.5, 9.4)], notasP);
-      const ondas = [];
-      for (let k = 0; k < 3; k++) {
-        const pts = [];
-        for (let j = 0; j <= 16; j++) pts.push(projetar(-1.2 - k * 0.45 + Math.sin(j * 0.9 + k) * 0.12, 5.6 + j * 0.22));
-        ondas.push(pts);
-      }
-      ondas.forEach((pts) => polilinhaParcial(pts, notasP));
-      texto('mar a poente', projetar(-2.4, 5.1)[0], projetar(-2.4, 5.1)[1], { tam: 13, italico: true, alinha: 'left' });
-      const chave = [projetar(0.4, -0.5), projetar(0.4, -0.8), projetar(13.6, -0.8), projetar(13.6, -0.5)];
-      polilinhaParcial(chave, notasP);
-      const t0 = projetar(7, -1.35);
-      texto('quartos a norte, em sossego', t0[0], t0[1], { tam: 13, italico: true });
+      const ts = projetar(-0.9, 6.35);
+      texto('luz a sul,', ts[0], ts[1], { tam: 13, italico: true, alinha: 'right' });
+      texto('pelo pátio', ts[0], ts[1] + 16, { tam: 13, italico: true, alinha: 'right' });
+      polilinhaParcial([projetar(-1.0, 5.1), projetar(0.6, 5.1)], notasP);
+      // a casa existente e a ampliação
+      polilinhaParcial([projetar(0.3, -0.45), projetar(0.3, -0.8), projetar(12.0, -0.8), projetar(12.0, -0.45)], notasP);
+      polilinhaParcial([projetar(12.35, -0.45), projetar(12.35, -0.8), projetar(LARGURA - 0.2, -0.8), projetar(LARGURA - 0.2, -0.45)], notasP);
+      const t0 = projetar(6.15, -1.35);
+      texto('casa existente, a reabilitar', t0[0], t0[1], { tam: 13, italico: true });
+      const t1 = projetar((12.35 + LARGURA) / 2, -1.35);
+      texto('ampliação nova', t1[0], t1[1], { tam: 13, italico: true });
+      // a rua
+      ctx.setLineDash([6, 6]);
+      polilinhaParcial([projetar(-2.4, PROFUNDIDADE + 0.9), projetar(LARGURA + 1.2, PROFUNDIDADE + 0.9)], notasP);
+      polilinhaParcial([projetar(-2.4, PROFUNDIDADE + 1.7), projetar(LARGURA + 1.2, PROFUNDIDADE + 1.7)], notasP);
+      ctx.setLineDash([]);
+      const tr = projetar(7.5, PROFUNDIDADE + 1.3);
+      texto('rua · entrada pelo pátio', tr[0], tr[1], { tam: 13, italico: true });
       ctx.globalAlpha = 1;
     }
 
@@ -408,10 +461,10 @@ export function iniciarCasa({ seccao, tela, dica, passos, aoPasso, aoObra, aoLei
       ctx.restore();
       // Corte A-A'
       ctx.setLineDash([10, 4, 2, 4]);
-      polilinhaParcial([projetar(-1.8, 7.2), projetar(15.8, 7.2)], cotasP);
+      polilinhaParcial([projetar(-1.8, 4.5), projetar(LARGURA + 1.8, 4.5)], cotasP);
       ctx.setLineDash([]);
       if (cotasP > 0.6) {
-        [[-2.1, 7.2, 'A'], [16.1, 7.2, "A'"]].forEach(([x, y, l]) => {
+        [[-2.1, 4.5, 'A'], [LARGURA + 2.1, 4.5, "A'"]].forEach(([x, y, l]) => {
           const p = projetar(x, y);
           ctx.beginPath();
           ctx.arc(p[0], p[1], 9, 0, Math.PI * 2);
@@ -446,6 +499,10 @@ export function iniciarCasa({ seccao, tela, dica, passos, aoPasso, aoObra, aoLei
         poligono(f.pts);
         ctx.fill();
         ctx.stroke();
+        if (f.linhas?.length) {
+          ctx.lineWidth = px * 0.4;
+          f.linhas.forEach(([a, b]) => linha(a, b));
+        }
       }
     }
 
@@ -453,7 +510,11 @@ export function iniciarCasa({ seccao, tela, dica, passos, aoPasso, aoObra, aoLei
     if (camP > 0) {
       const laje = lerp(1, emOut(seg(bp, 0.04, 0.16)), m);
       const listaLaje = [];
-      if (laje > 0) faces([-0.25, -0.25, 14.25, 9.25], -0.4, -0.4 + 0.4 * laje, { tipo: 'laje' }, listaLaje);
+      if (laje > 0) {
+        pegadas.forEach(([x0, y0, x1, y1]) =>
+          faces([x0 - 0.2, y0 - 0.2, x1 + 0.2, y1 + 0.2], -0.4, -0.4 + 0.4 * laje, { tipo: 'laje' }, listaLaje),
+        );
+      }
       pintarFaces(listaLaje);
     }
 
@@ -461,8 +522,20 @@ export function iniciarCasa({ seccao, tela, dica, passos, aoPasso, aoObra, aoLei
     const aPav = Math.max(poche, camP);
     if (aPav > 0) {
       ctx.fillStyle = rgba(papel, aPav);
-      poligono([projetar(0, 0), projetar(LARGURA, 0), projetar(LARGURA, PROFUNDIDADE), projetar(0, PROFUNDIDADE)]);
-      ctx.fill();
+      pegadas.forEach(([x0, y0, x1, y1]) => {
+        poligono([projetar(x0, y0), projetar(x1, y0), projetar(x1, y1), projetar(x0, y1)]);
+        ctx.fill();
+      });
+      // Pátio a céu aberto: tracejado de jardim
+      ctx.save();
+      ctx.strokeStyle = cor(0.22 * aPav);
+      ctx.lineWidth = px * 0.6;
+      divisoes.filter((dv) => dv.exterior).forEach(({ r: [x0, y0, x1, y1] }) => {
+        poligono([projetar(x0, y0), projetar(x1, y0), projetar(x1, y1), projetar(x0, y1)]);
+        ctx.clip();
+        for (let c = x0 + y0 - (y1 - y0); c < x1 + y1; c += 0.35) linha(projetar(c - y0, y0), projetar(c - y1, y1));
+      });
+      ctx.restore();
     }
     hoverA += ((salaHover >= 0 ? 1 : 0) - hoverA) * 0.2;
     if (salaHover >= 0 && hoverA > 0.01) {
@@ -486,7 +559,11 @@ export function iniciarCasa({ seccao, tela, dica, passos, aoPasso, aoObra, aoLei
         if (v <= 0) return;
         const [x, y] = projetar(dv.cx, dv.cy);
         ctx.globalAlpha = v;
-        const t = clamp(cam.s * 0.3, 9, 12);
+        // Corpo de letra que cabe na largura da divisão (mín. 7 px)
+        const larguraSala = (dv.r[2] - dv.r[0]) * cam.s * 0.9;
+        ctx.font = `700 12px ui-monospace, Menlo, Consolas, monospace`;
+        const caber = (larguraSala / ctx.measureText(dv.nome.toUpperCase()).width) * 12;
+        const t = Math.max(7, Math.min(clamp(cam.s * 0.3, 9, 12), caber));
         if (dv.semBolha) {
           texto(dv.nome.toUpperCase(), x, y, { tam: t * 0.85, mono: true, cor: cor(0.6) });
         } else {
@@ -502,6 +579,14 @@ export function iniciarCasa({ seccao, tela, dica, passos, aoPasso, aoObra, aoLei
     if (aSimb > 0) {
       ctx.strokeStyle = cor(aSimb);
       ctx.lineWidth = px * 0.8;
+      // Escada em planta: degraus e seta no sentido da subida
+      escada.forEach(([x0, y0, x1]) => linha(projetar(x0, y0), projetar(x1, y0)));
+      const ex = (escada[0][0] + escada[0][2]) / 2;
+      const ultimo = escada[escada.length - 1];
+      polilinhaParcial([projetar(ex, escada[0][3] - 0.1), projetar(ex, ultimo[1] + 0.15)], simbolos);
+      const ponta = projetar(ex, ultimo[1] + 0.15);
+      linha(ponta, projetar(ex - 0.15, ultimo[1] + 0.4));
+      linha(ponta, projetar(ex + 0.15, ultimo[1] + 0.4));
       vaos.forEach((v) => {
         const [x0, y0, x1, y1] = v.r;
         if (v.tipo === 'janela') {
@@ -553,10 +638,10 @@ export function iniciarCasa({ seccao, tela, dica, passos, aoPasso, aoObra, aoLei
     const aAnd = m * seg(bp, 0.14, 0.24) * (1 - seg(bp, 0.84, 0.94));
     const hAnd = 0.8 + (ALTURA + 0.6) * seg(bp, 0.14, 0.62);
     const ladosAndaime = [
-      { a: [-0.6, -0.6], b: [14.6, -0.6], n: [0, -1] },
-      { a: [14.6, -0.6], b: [14.6, 9.6], n: [1, 0] },
-      { a: [14.6, 9.6], b: [-0.6, 9.6], n: [0, 1] },
-      { a: [-0.6, 9.6], b: [-0.6, -0.6], n: [-1, 0] },
+      { a: [-0.6, -0.6], b: [LARGURA + 0.6, -0.6], n: [0, -1] },
+      { a: [LARGURA + 0.6, -0.6], b: [LARGURA + 0.6, PROFUNDIDADE + 0.6], n: [1, 0] },
+      { a: [LARGURA + 0.6, PROFUNDIDADE + 0.6], b: [-0.6, PROFUNDIDADE + 0.6], n: [0, 1] },
+      { a: [-0.6, PROFUNDIDADE + 0.6], b: [-0.6, -0.6], n: [-1, 0] },
     ];
     function andaimes(frente) {
       if (aAnd <= 0) return;
@@ -586,9 +671,9 @@ export function iniciarCasa({ seccao, tela, dica, passos, aoPasso, aoObra, aoLei
     if (grua > 0) {
       ctx.strokeStyle = cor(0.7 * grua);
       ctx.lineWidth = px * 0.7;
-      const bx = 16.4;
-      const by = -1.4;
-      const H = 9;
+      const bx = GRUA.x;
+      const by = GRUA.y;
+      const H = GRUA.altura;
       for (const dx of [-0.25, 0.25]) linha(projetar(bx + dx, by, 0), projetar(bx + dx, by, H * grua));
       for (let z = 0; z < H * grua - 0.6; z += 0.6) linha(projetar(bx - 0.25, by, z), projetar(bx + 0.25, by, z + 0.6));
       if (grua > 0.6) {
@@ -623,7 +708,7 @@ export function iniciarCasa({ seccao, tela, dica, passos, aoPasso, aoObra, aoLei
         poligono([projetar(x0, y0, ALTURA), projetar(x1, y0, ALTURA), projetar(x1, y1, ALTURA), projetar(x0, y1, ALTURA)]);
         ctx.stroke();
       });
-      [[0, 0], [14, 0], [14, 9], [0, 9]].forEach(([x, y]) => linha(projetar(x, y, 0), projetar(x, y, ALTURA)));
+      CANTOS.forEach(([x, y]) => linha(projetar(x, y, 0), projetar(x, y, ALTURA)));
       ctx.setLineDash([]);
     }
 
@@ -654,7 +739,17 @@ export function iniciarCasa({ seccao, tela, dica, passos, aoPasso, aoObra, aoLei
     const aCob = desce * (1 - levanta);
     if (aCob > 0.01) {
       const zc = ALTURA + (1 - desce) * 6 + levanta * 7;
-      faces([-0.3, -0.3, 14.3, 9.3], zc, zc + 0.32, { tipo: 'cobertura', alfa: aCob }, lista);
+      coberturas.forEach((c) => {
+        if (c.tipo === 'duas-aguas') duasAguas(c, zc, { tipo: 'cobertura', alfa: aCob }, lista);
+        else faces(c.r, zc, zc + 0.3, { tipo: 'cobertura', alfa: aCob }, lista);
+      });
+    }
+    // Escada: os degraus sobem com a obra
+    if (camP > 0) {
+      const sobe = m > 0 ? lerp(1, emOut(seg(bp, 0.45, 0.6)), m) : 1;
+      escada.forEach(([x0, y0, x1, y1, z]) => {
+        if (z * sobe > 0.01) faces([x0, y0, x1, y1], 0, Math.min(z * sobe, corte), { tipo: 'movel', alfa: seg(camP, 0, 0.4) }, lista);
+      });
     }
     if (moveis > 0) {
       mobiliario.forEach((mv, i) => {
@@ -667,6 +762,27 @@ export function iniciarCasa({ seccao, tela, dica, passos, aoPasso, aoObra, aoLei
 
     andaimes(true);
 
+    // Árvore do pátio: copa em planta; em axonometria, tronco e copa no ar
+    const aArv = Math.max(poche, camP) * (1 - levanta * 0) * (m > 0 ? lerp(1, seg(bp, 0.86, 1), m) : 1);
+    if (aArv > 0) {
+      ctx.save();
+      ctx.globalAlpha = aArv;
+      ctx.strokeStyle = T;
+      ctx.lineWidth = px * 0.8;
+      const base = projetar(arvore.x, arvore.y, 0);
+      const copa = projetar(arvore.x, arvore.y, cam.e > 0.05 ? arvore.h : 0);
+      if (cam.e > 0.05) linha(base, copa);
+      ctx.fillStyle = rgba(mistura(papel, BRANCO, 0.4), 0.85);
+      ctx.beginPath();
+      ctx.arc(copa[0], copa[1], arvore.r * cam.s, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.arc(copa[0], copa[1], arvore.r * cam.s * 0.55, 0, Math.PI * 2);
+      ctx.stroke();
+      ctx.restore();
+    }
+
     // Caixilharia: a moldura dos vãos de janela em 3D
     const aCaix = camP > 0.3 ? (m > 0 ? lerp(seg(camP, 0.3, 1), seg(bp, 0.74, 0.86), m) : seg(camP, 0.3, 1)) : 0;
     if (aCaix > 0) {
@@ -677,13 +793,11 @@ export function iniciarCasa({ seccao, tela, dica, passos, aoPasso, aoObra, aoLei
       vaos.forEach((v) => {
         if (v.tipo !== 'janela') return;
         const [x0, y0, x1, y1] = v.r;
-        // só os vãos das fachadas viradas para o observador
-        const sul = v.h && y0 > 4;
-        const oeste = !v.h && x0 < 1;
-        const visivel = (sul && ca > 0) || (oeste && sa < 0) || (!v.h && x0 > 13 && sa > 0) || (v.h && y0 < 1 && ca < 0);
-        if (!visivel) return;
-        const ym = v.h ? y1 : (y0 + y1) / 2;
-        const xm = v.h ? (x0 + x1) / 2 : x0;
+        // só os vãos das fachadas viradas para o observador, na face exterior
+        const n = v.n || [0, 1];
+        if (n[0] * sa + n[1] * ca <= 0) return;
+        const ym = v.h ? (n[1] > 0 ? y1 : y0) : (y0 + y1) / 2;
+        const xm = v.h ? (x0 + x1) / 2 : n[0] > 0 ? x1 : x0;
         const p = v.h
           ? [[x0, ym, v.z0], [x1, ym, v.z0], [x1, ym, v.z1], [x0, ym, v.z1]]
           : [[xm, y0, v.z0], [xm, y1, v.z0], [xm, y1, v.z1], [xm, y0, v.z1]];
@@ -710,11 +824,11 @@ export function iniciarCasa({ seccao, tela, dica, passos, aoPasso, aoObra, aoLei
       rotulo = s < 2.0 ? 'Você está aqui' : nome || 'Você';
       aV = aV1;
     } else if (aV2 > 0) {
-      pos = [15.6, 10.6];
+      pos = [LARGURA + 1.2, PROFUNDIDADE + 1.4];
       rotulo = 'Visita à obra';
       aV = aV2;
     } else if (aV3 > 0) {
-      pos = [3.0, 7.6];
+      pos = [8.6, 5.7];
       rotulo = nome ? `${nome}, em casa` : 'Em casa';
       aV = aV3;
     }
@@ -761,17 +875,22 @@ export function iniciarCasa({ seccao, tela, dica, passos, aoPasso, aoObra, aoLei
     // --- Rosa dos ventos (norte) ---
     const aNorte = seg(s, 1.6, 2.0) * (1 - seg(s, 2.5, 2.8));
     if (aNorte > 0) {
-      const p = [area.x1 - 18, area.y0 + 8];
+      // o norte do projeto aponta para o topo do lote (+x)
+      const c = [area.x1 - 34, area.y0 + 30];
       ctx.globalAlpha = aNorte;
       ctx.strokeStyle = T;
       ctx.fillStyle = T;
       ctx.lineWidth = 1;
       ctx.beginPath();
-      ctx.arc(p[0], p[1] + 22, 16, 0, Math.PI * 2);
+      ctx.arc(c[0], c[1], 16, 0, Math.PI * 2);
       ctx.stroke();
-      poligono([[p[0], p[1] + 4], [p[0] + 6, p[1] + 30], [p[0], p[1] + 25], [p[0] - 6, p[1] + 30]]);
+      ctx.save();
+      ctx.translate(c[0], c[1]);
+      ctx.rotate(Math.PI / 2 + cam.a);
+      poligono([[0, -18], [6, 8], [0, 3], [-6, 8]]);
       ctx.fill();
-      texto('N', p[0], p[1] - 6, { tam: 10, mono: true, peso: 700, cor: T });
+      ctx.restore();
+      texto('N', c[0] + 26, c[1] + 0.5, { tam: 10, mono: true, peso: 700, cor: T });
       ctx.globalAlpha = 1;
     }
 

@@ -43,7 +43,7 @@ src/components/conceito/Fachada*.astro → alçado antes/depois (SVG)
 src/components/conceito/Pormenor.astro → pormenor construtivo de cobertura (SVG animado)
 src/components/conceito/Rodape.astro, LogoLockup.astro → rodapé com informação legal e lockup AMA em texto
 src/scripts/conceito/
-├── modelo.js     → a casa em metros: divisões, paredes com vãos, mobiliário, sol, percurso
+├── modelo.js     → a casa em metros (simplificada de um projeto real da AMA: casa antiga a reabilitar + ampliação): divisões, paredes com vãos, escada, telhado, mobiliário, sol, percurso
 ├── casa.js       → a planta viva (canvas): projeção contínua planta → axonometria, fases por scroll
 ├── prancheta.js  → réguas, mira e menu
 ├── estado.js     → nome e programa do visitante
