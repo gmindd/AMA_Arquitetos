@@ -55,7 +55,7 @@ export function iniciarCasa({ seccao, tela, dica, passos, aoPasso, aoObra, aoLei
     dpr = Math.min(window.devicePixelRatio || 1, 2);
     tela.width = Math.round(L * dpr);
     tela.height = Math.round(A * dpr);
-    const cartao = passos[0]?.querySelector('.passo__cartao');
+    const cartao = seccao.querySelector('.passo__cartao');
     limiteTexto = cartao ? cartao.getBoundingClientRect().right : 0;
     centros = passos.map((el) => {
       const b = el.getBoundingClientRect();

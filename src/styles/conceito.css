@@ -839,34 +839,67 @@ html {
 
 .passos {
   position: relative;
-  z-index: 1;
-  width: min(40vw, 520px);
-  margin-left: calc(var(--regua) + var(--gutter));
+  z-index: 0;
   padding-bottom: 45svh;
   pointer-events: none;
 }
 
+/* Cada bloco é o comprimento de scroll de uma fase */
 .passo {
   min-height: 130svh;
-  display: flex;
-  align-items: center;
+}
+
+/* Texto das fases: fixo no palco enquanto a fase corre; troca em fade,
+   a sair para cima (fases já vistas) e a entrar de baixo (seguintes) */
+.palco__textos {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
 }
 
 .passo__cartao {
-  pointer-events: auto;
+  --desvio: 28px;
+  position: absolute;
+  top: 50%;
+  left: calc(var(--regua) + var(--gutter));
+  width: min(40vw, 520px);
   padding: 1.75rem;
   border: 1px solid var(--linha);
   background: color-mix(in srgb, var(--papel) 88%, transparent);
   -webkit-backdrop-filter: blur(6px);
   backdrop-filter: blur(6px);
-  opacity: 0.18;
-  transform: translateY(30px);
-  transition: opacity 0.7s var(--ease), transform 0.9s var(--ease);
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(calc(-50% + var(--desvio)));
+  transition:
+    opacity 0.45s var(--ease),
+    transform 0.7s var(--ease),
+    visibility 0s linear 0.7s;
 }
 
-.passo.ativo .passo__cartao {
+.passo__cartao.antes {
+  transform: translateY(calc(-50% - var(--desvio)));
+}
+
+.passo__cartao.ativo {
   opacity: 1;
+  visibility: visible;
+  transform: translateY(-50%);
+  pointer-events: auto;
+  transition:
+    opacity 0.6s var(--ease) 0.18s,
+    transform 0.8s var(--ease) 0.18s,
+    visibility 0s linear 0s;
+}
+
+/* Título palavra a palavra quando a fase entra */
+.passo__cartao .palavra > span {
+  transform: translateY(110%);
+}
+
+.passo__cartao.ativo .palavra > span {
   transform: none;
+  transition-delay: calc(0.25s + var(--k, 0) * 55ms);
 }
 
 .passo__num {
@@ -913,7 +946,7 @@ html {
   opacity: 0.7;
 }
 
-.passo .botao {
+.passo__cartao .botao {
   margin-top: 1.75rem;
 }
 
@@ -1990,20 +2023,26 @@ html {
     left: -35%;
   }
 
-  .passos {
-    width: auto;
-    margin: 0 12px;
-  }
-
   .passo {
-    align-items: flex-end;
     min-height: 120svh;
-    padding-bottom: 21svh;
   }
 
   .passo__cartao {
-    width: 100%;
+    top: auto;
+    left: 12px;
+    right: 12px;
+    bottom: 62px;
+    width: auto;
     padding: 1.1rem 1.15rem;
+    transform: translateY(var(--desvio));
+  }
+
+  .passo__cartao.antes {
+    transform: translateY(calc(var(--desvio) * -1));
+  }
+
+  .passo__cartao.ativo {
+    transform: none;
   }
 
   .passo__num {

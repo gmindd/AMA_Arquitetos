@@ -113,27 +113,22 @@ const programas = ['Casa nova', 'Reabilitação', 'Interiores', 'Reconversão'];
   </section>
 
   <!-- ============ 01–06 · O processo numa única planta ============ -->
+  <!-- O palco fica fixo durante o processo: a planta (canvas) e o texto de
+       cada fase, que troca em fade quando a fase seguinte começa. Os blocos
+       em .passos são só o comprimento de scroll de cada fase. -->
   <section class="processo" id="processo" data-processo>
-    <div class="palco" aria-hidden="true">
-      <canvas class="palco__tela" data-tela></canvas>
-      <div class="palco__dica" data-dica></div>
-    </div>
-
-    <div class="passos">
-      {
-        passos.map((p, i) => (
-          <article
-            class={`passo ${i === 4 ? 'passo--obra' : ''}`}
-            data-passo={i}
-            data-folha={p.n}
-            data-fase={p.fase}
-          >
-            <div class="passo__cartao">
+    <div class="palco">
+      <canvas class="palco__tela" data-tela aria-hidden="true"></canvas>
+      <div class="palco__dica" data-dica aria-hidden="true"></div>
+      <div class="palco__textos">
+        {
+          passos.map((p, i) => (
+            <article class={`passo__cartao ${i === 4 ? 'passo__cartao--obra' : ''}`} data-cartao={i}>
               <p class="passo__num">
                 <span>{p.n}</span>
                 <span>{p.fase}</span>
               </p>
-              <h2 class="passo__titulo" data-palavras {...(i === 5 ? { 'data-titulo-entrega': '' } : {})}>
+              <h2 class="passo__titulo" data-palavras-passo {...(i === 5 ? { 'data-titulo-entrega': '' } : {})}>
                 {p.titulo}
               </h2>
               <p class="passo__texto">{p.texto}</p>
@@ -187,10 +182,14 @@ const programas = ['Casa nova', 'Reabilitação', 'Interiores', 'Reconversão'];
                   Começar a minha planta
                 </a>
               )}
-            </div>
-          </article>
-        ))
-      }
+            </article>
+          ))
+        }
+      </div>
+    </div>
+
+    <div class="passos" aria-hidden="true">
+      {passos.map((p, i) => <div class="passo" data-passo={i} data-folha={p.n} data-fase={p.fase} />)}
     </div>
   </section>
 

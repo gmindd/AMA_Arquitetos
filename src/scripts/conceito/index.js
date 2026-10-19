@@ -68,6 +68,8 @@ function iniciarProcesso() {
   const tela = document.querySelector('[data-tela]');
   if (!seccao || !tela || !tela.getContext) return;
   const passos = [...seccao.querySelectorAll('[data-passo]')];
+  const cartoes = [...seccao.querySelectorAll('[data-cartao]')];
+  seccao.querySelectorAll('[data-palavras-passo]').forEach(partirPalavras);
   const pct = document.querySelector('[data-obra-pct]');
   const fases = [...document.querySelectorAll('[data-obra-fase]')];
 
@@ -76,7 +78,12 @@ function iniciarProcesso() {
     tela,
     dica: seccao.querySelector('[data-dica]'),
     passos,
-    aoPasso: (i) => passos.forEach((p, k) => p.classList.toggle('ativo', k === i)),
+    // O texto da fase ativa fica fixo; os outros saem para cima ou para baixo
+    aoPasso: (i) =>
+      cartoes.forEach((c, k) => {
+        c.classList.toggle('ativo', k === i);
+        c.classList.toggle('antes', k < i);
+      }),
     aoObra: (bp) => {
       if (pct) pct.textContent = String(Math.round(bp * 100));
       fases.forEach((f, k) => f.classList.toggle('feita', bp >= FASES_OBRA[k]));
