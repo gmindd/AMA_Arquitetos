@@ -1,9 +1,11 @@
-// Modelo da casa, em metros, simplificado a partir das peças desenhadas de
-// um projeto real da AMA (planta do rés-do-chão, esc. 1:100): uma casa
-// antiga de paredes de pedra, a reabilitar, com pátio interior e
-// cozinha/sala em open space, prolongada por uma ampliação nova com
-// corredor, instalações sanitárias, arrumos e dois quartos.
+// Caso real de reabilitação, em metros, simplificado a partir das peças
+// desenhadas de um projeto da AMA (planta do rés-do-chão e planta de
+// alterações, esc. 1:100). Mantêm-se as paredes de pedra da casa
+// existente (bloco a nascente, onde ficam os quartos); a construção anexa
+// é demolida e dá lugar a uma ampliação nova com hall, lavandaria, pátio
+// interior e cozinha/sala em open space. O interior é todo redesenhado.
 // Eixos: x ao longo do lote (norte = +x), y em profundidade (rua = +y).
+// Paredes: estado 'manter' (existentes) ou novas (a construir).
 
 export const ALTURA = 3.0; // pé-direito / altura das paredes
 export const LARGURA = 20.66;
@@ -66,7 +68,7 @@ export const ligacoes = [
 // Eixo de parede: (x1,y1)→(x2,y2), espessura e, vãos {em, l, tipo, lado}
 // n = normal exterior da fachada (para saber que caixilhos se veem)
 const eixos = [
-  // Casa existente: paredes de pedra
+  // Ampliação nova: paredes exteriores
   { a: [0, 0.22], b: [12.25, 0.22], e: PEDRA, ext: true, n: [0, -1], vaos: [
     { em: 0.8, l: 1.0, tipo: 'janela' },
     { em: 7.6, l: 1.6, tipo: 'janela' },
@@ -77,22 +79,22 @@ const eixos = [
     { em: 9.3, l: 1.4, tipo: 'janela' },
   ] },
   { a: [0.22, 0], b: [0.22, 7.95], e: PEDRA, ext: true, n: [-1, 0], vaos: [] },
-  // Ampliação nova
-  { a: [12.1, 1.72], b: [LARGURA, 1.72], e: NOVA, ext: true, n: [0, -1], vaos: [
+  // Casa existente: paredes de pedra a manter
+  { a: [12.1, 1.72], b: [LARGURA, 1.72], e: NOVA, ext: true, n: [0, -1], estado: 'manter', vaos: [
     { em: 1.3, l: 0.6, tipo: 'janela' },
     { em: 3.9, l: 0.6, tipo: 'janela' },
     { em: 6.6, l: 1.0, tipo: 'janela' },
   ] },
-  { a: [12.1, 7.87], b: [LARGURA, 7.87], e: NOVA, ext: true, n: [0, 1], vaos: [
+  { a: [12.1, 7.87], b: [LARGURA, 7.87], e: NOVA, ext: true, n: [0, 1], estado: 'manter', vaos: [
     { em: 1.6, l: 1.6, tipo: 'janela' },
     { em: 6.1, l: 1.4, tipo: 'janela' },
   ] },
-  { a: [20.51, 1.72], b: [20.51, 7.87], e: NOVA, ext: true, n: [1, 0], vaos: [
+  { a: [20.51, 1.72], b: [20.51, 7.87], e: NOVA, ext: true, n: [1, 0], estado: 'manter', vaos: [
     { em: 2.0, l: 0.9, tipo: 'janela' },
   ] },
-  // Parede antiga entre a casa e a ampliação, com a passagem para o corredor
-  { a: [12.1, 0.45], b: [12.1, 7.5], e: NOVA, vaos: [{ em: 3.67, l: 0.82, tipo: 'vao' }] },
-  // Interiores da casa existente
+  // Empena da casa existente, a manter, com a passagem para o corredor
+  { a: [12.1, 1.72], b: [12.1, 7.87], e: NOVA, estado: 'manter', vaos: [{ em: 2.4, l: 0.82, tipo: 'vao' }] },
+  // Interiores da ampliação
   { a: [2.42, 0.45], b: [2.42, 2.57], e: INT, vaos: [{ em: 1.2, l: 0.8, tipo: 'porta', lado: 1 }] },
   { a: [0.45, 2.57], b: [4.85, 2.57], e: 0.2, vaos: [{ em: 2.75, l: 0.9, tipo: 'porta', lado: -1 }] },
   { a: [4.85, 0.45], b: [4.85, 2.57], e: 0.2, vaos: [{ em: 0.4, l: 0.9, tipo: 'porta', lado: 1 }] },
@@ -100,7 +102,7 @@ const eixos = [
   { a: [4.8, 2.57], b: [4.8, 7.5], e: 0.15, n: [-1, 0], vaos: [{ em: 0.25, l: 4.5, tipo: 'janela', grande: true }] },
   // Caixa de escada
   { a: [11.2, 0.45], b: [11.2, 7.5], e: INT, vaos: [{ em: 3.67, l: 0.82, tipo: 'vao' }] },
-  // Interiores da ampliação
+  // Interiores da casa existente (redesenhados)
   { a: [12.25, 3.52], b: [17.45, 3.52], e: INT, vaos: [
     { em: 0.9, l: 0.75, tipo: 'porta', lado: -1 },
     { em: 3.5, l: 0.75, tipo: 'porta', lado: -1 },
@@ -136,24 +138,24 @@ eixos.forEach((eixo, ie) => {
   let t = 0;
   const ordenados = [...eixo.vaos].sort((p, q) => p.em - q.em);
   for (const v of ordenados) {
-    if (v.em > t) paredes.push({ r: retangulo(eixo, t, v.em), z0: 0, z1: ALTURA, ext: !!eixo.ext, eixo: ie });
+    if (v.em > t) paredes.push({ r: retangulo(eixo, t, v.em), z0: 0, z1: ALTURA, ext: !!eixo.ext, eixo: ie, estado: eixo.estado });
     const r = retangulo(eixo, v.em, v.em + v.l);
     if (v.tipo === 'janela') {
       const peitoril = v.grande ? 0.05 : 0.9;
-      paredes.push({ r, z0: 0, z1: peitoril, ext: true, eixo: ie, baixo: true });
-      paredes.push({ r, z0: 2.25, z1: ALTURA, ext: true, eixo: ie });
+      paredes.push({ r, z0: 0, z1: peitoril, ext: true, eixo: ie, baixo: true, estado: eixo.estado });
+      paredes.push({ r, z0: 2.25, z1: ALTURA, ext: true, eixo: ie, estado: eixo.estado });
       vaos.push({ tipo: 'janela', r, h: eixo.a[1] === eixo.b[1], z0: peitoril, z1: 2.25, grande: !!v.grande, n: eixo.n });
     } else {
-      paredes.push({ r, z0: 2.15, z1: ALTURA, ext: !!eixo.ext, eixo: ie });
+      paredes.push({ r, z0: 2.15, z1: ALTURA, ext: !!eixo.ext, eixo: ie, estado: eixo.estado });
       vaos.push({ tipo: v.tipo, r, h: eixo.a[1] === eixo.b[1], lado: v.lado || 1, l: v.l });
     }
     t = v.em + v.l;
   }
-  if (t < comp - 1e-6) paredes.push({ r: retangulo(eixo, t, comp), z0: 0, z1: ALTURA, ext: !!eixo.ext, eixo: ie });
+  if (t < comp - 1e-6) paredes.push({ r: retangulo(eixo, t, comp), z0: 0, z1: ALTURA, ext: !!eixo.ext, eixo: ie, estado: eixo.estado });
 });
 
-// Ordem de construção: primeiro as paredes de pedra (a reabilitar), depois
-// a ampliação, de poente para nascente
+// Ordem de construção das paredes novas: exteriores primeiro, de poente
+// para nascente (as paredes a manter já lá estão)
 paredes.forEach((p, i) => {
   const cx = (p.r[0] + p.r[2]) / 2;
   p.ordem = (p.ext ? 0 : 0.5) + (cx / LARGURA) * 0.5 + i * 0.0001;
@@ -224,3 +226,39 @@ export const cotas = {
   total: LARGURA,
   lateral: PROFUNDIDADE,
 };
+
+// Construção anexa existente, a demolir: [x0, y0, x1, y1, altura]
+export const demolicoes = [
+  [3.6, 0.08, 11.4, 0.42, ALTURA],
+  [3.7, 0.42, 4.02, 7.6, ALTURA],
+  [4.02, 3.05, 11.4, 3.37, ALTURA],
+  [11.22, 0.42, 11.54, 3.05, ALTURA],
+  [9.6, 5.15, 12.0, 5.45, ALTURA],
+  [0.35, 2.4, 0.65, 7.6, 2.2],
+  [0.65, 7.42, 3.7, 7.72, 2.2],
+  [14.35, 3.3, 14.5, 4.6, ALTURA],
+  [15.5, 4.55, 17.0, 4.7, ALTURA],
+];
+
+// Levantamento: pontos assinalados no existente, com a nota na rua
+export const levantamento = [
+  { n: 1, x: 16.3, y: 7.87, tx: 16.9, ty: PROFUNDIDADE + 1.1, t: 'paredes de pedra, a manter' },
+  { n: 2, x: 7.6, y: 3.2, tx: 7.6, ty: PROFUNDIDADE + 1.9, t: 'construção anexa, a demolir' },
+  { n: 3, x: 2.0, y: 5.0, tx: 1.2, ty: PROFUNDIDADE + 1.1, t: 'logradouro' },
+];
+
+// Desenho: margens das notas [esquerda, topo, direita, baixo], linha de
+// corte, norte (+x), rotação da axonometria e lugar "em casa"
+export const margens = [4.4, 1.9, 1.4, 2.6];
+export const corteY = 4.5;
+export const norte = Math.PI / 2;
+export const rotacao = -0.42;
+export const emCasa = [8.6, 5.7];
+
+// Notas do levantamento: o que existe e o que vai mudar
+export const notas = [
+  { tipo: 'linha', pts: [[12.25, -0.45 + 1.57], [12.25, -0.8 + 1.57], [LARGURA - 0.2, -0.8 + 1.57], [LARGURA - 0.2, -0.45 + 1.57]] },
+  { tipo: 'texto', x: (12.25 + LARGURA) / 2, y: -1.35 + 1.57, t: 'casa existente' },
+  { tipo: 'linha', pts: [[0.3, -0.45], [0.3, -0.8], [12.0, -0.8], [12.0, -0.45]] },
+  { tipo: 'texto', x: 6.15, y: -1.35, t: 'construção anexa e logradouro' },
+];

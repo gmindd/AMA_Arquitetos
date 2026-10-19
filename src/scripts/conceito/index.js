@@ -5,9 +5,13 @@ import { estado, ouvir, definir, primeiroNome } from './estado.js';
 import { iniciarPrancheta, definirLeitura } from './prancheta.js';
 import { iniciarRevelar, partirPalavras } from './revelar.js';
 import { iniciarCasa, FASES_OBRA } from './casa.js';
+import * as modeloCasa from './modelo-casa.js';
+import * as modeloReabilitacao from './modelo-reabilitacao.js';
 import { iniciarFachada } from './fachada.js';
 import { iniciarPedido } from './pedido.js';
 import { iniciarIntro } from './intro.js';
+
+const MODELOS = { processo: modeloCasa, reabilitacao: modeloReabilitacao };
 
 const intro = iniciarIntro();
 iniciarPrancheta();
@@ -62,33 +66,38 @@ function iniciarConversa() {
   }
 }
 
-// Passos 01–06: a planta viva no canvas
+// Percursos com planta viva no canvas: o processo (início) e o caso de
+// reabilitação (página Reabilitação), cada um com o seu modelo de casa.
 function iniciarProcesso() {
-  const seccao = document.querySelector('[data-processo]');
-  const tela = document.querySelector('[data-tela]');
-  if (!seccao || !tela || !tela.getContext) return;
-  const passos = [...seccao.querySelectorAll('[data-passo]')];
-  const cartoes = [...seccao.querySelectorAll('[data-cartao]')];
-  seccao.querySelectorAll('[data-palavras-passo]').forEach(partirPalavras);
-  const pct = document.querySelector('[data-obra-pct]');
-  const fases = [...document.querySelectorAll('[data-obra-fase]')];
+  document.querySelectorAll('[data-processo]').forEach((seccao) => {
+    const tela = seccao.querySelector('[data-tela]');
+    if (!tela || !tela.getContext) return;
+    const roteiro = seccao.dataset.roteiro || 'processo';
+    const passos = [...seccao.querySelectorAll('[data-passo]')];
+    const cartoes = [...seccao.querySelectorAll('[data-cartao]')];
+    seccao.querySelectorAll('[data-palavras-passo]').forEach(partirPalavras);
+    const pct = seccao.querySelector('[data-obra-pct]');
+    const fases = [...seccao.querySelectorAll('[data-obra-fase]')];
 
-  iniciarCasa({
-    seccao,
-    tela,
-    dica: seccao.querySelector('[data-dica]'),
-    passos,
-    // O texto da fase ativa fica fixo; os outros saem para cima ou para baixo
-    aoPasso: (i) =>
-      cartoes.forEach((c, k) => {
-        c.classList.toggle('ativo', k === i);
-        c.classList.toggle('antes', k < i);
-      }),
-    aoObra: (bp) => {
-      if (pct) pct.textContent = String(Math.round(bp * 100));
-      fases.forEach((f, k) => f.classList.toggle('feita', bp >= FASES_OBRA[k]));
-    },
-    aoLeitura: definirLeitura,
+    iniciarCasa({
+      seccao,
+      tela,
+      dica: seccao.querySelector('[data-dica]'),
+      passos,
+      modelo: MODELOS[roteiro],
+      roteiro,
+      // O texto da fase ativa fica fixo; os outros saem para cima ou para baixo
+      aoPasso: (i) =>
+        cartoes.forEach((c, k) => {
+          c.classList.toggle('ativo', k === i);
+          c.classList.toggle('antes', k < i);
+        }),
+      aoObra: (bp) => {
+        if (pct) pct.textContent = String(Math.round(bp * 100));
+        fases.forEach((f, k) => f.classList.toggle('feita', bp >= FASES_OBRA[roteiro][k]));
+      },
+      aoLeitura: definirLeitura,
+    });
   });
 }
 

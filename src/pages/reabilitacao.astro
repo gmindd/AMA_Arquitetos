@@ -63,22 +63,46 @@ const tipologias = [
   },
 ];
 
-const etapas = [
-  { titulo: 'Visita e levantamento', texto: 'Vamos ao local, medimos e registamos o estado de cada elemento do edifício.' },
+// Caso real: do levantamento à entrega, sobre a planta de um projeto AMA
+const passosCaso = [
   {
-    titulo: 'Diagnóstico',
-    texto: 'Procuramos as causas, não só os sintomas: humidades, infiltrações, fissuras, materiais degradados.',
+    n: '01',
+    fase: 'Levantamento',
+    titulo: 'Primeiro, medimos o que existe.',
+    texto:
+      'Antes de desenhar, registamos o edifício tal como está: paredes, vãos, cotas e o estado de cada elemento. Neste caso, uma casa térrea em pedra com uma construção anexa no logradouro.',
   },
   {
-    titulo: 'Projeto e orçamento',
-    texto: 'Definimos a solução, preparamos o projeto e, quando é preciso, o licenciamento. O orçamento acompanha o projeto.',
+    n: '02',
+    fase: 'Manter, demolir, construir',
+    titulo: 'O projeto decide o que fica.',
+    texto:
+      'Mantêm-se as paredes de pedra da casa. A construção anexa é demolida e dá lugar a uma cozinha e sala abertas para um pátio interior. O interior é todo redesenhado.',
   },
   {
-    titulo: 'Execução com equipa própria',
-    texto: 'A obra é feita pela nossa equipa de construção, com os arquitetos em obra a acompanhar cada fase.',
+    n: '03',
+    fase: 'Modelo',
+    titulo: 'O antigo e o novo, lado a lado.',
+    texto:
+      'Antes da obra, a casa já se percorre. As paredes que ficam e as que nascem leem-se no mesmo modelo, e cada decisão é tomada consigo.',
   },
-  { titulo: 'Entrega', texto: 'Percorremos a obra consigo, ponto por ponto, antes de entregar a chave.' },
+  {
+    n: '04',
+    fase: 'Obra com equipa própria',
+    titulo: 'Escorar, demolir, construir.',
+    texto:
+      'Numa obra AMA, a nossa equipa de construção executa o que desenhámos: escora e protege as paredes que ficam, demole o que sai e ergue o novo, com os arquitetos em obra em cada fase.',
+  },
+  {
+    n: '05',
+    fase: 'Entrega',
+    titulo: 'Uma casa antiga com vida nova.',
+    texto:
+      'A pedra que já lá estava e o desenho novo passam a ser uma só casa, entregue pelas mesmas mãos que a desenharam e construíram.',
+  },
 ];
+const fasesObraCaso = ['Escoramento', 'Demolições', 'Estrutura nova', 'Paredes', 'Cobertura', 'Acabamentos'];
+
 ---
 
 <Conceito
@@ -96,23 +120,77 @@ const etapas = [
       gabinete faz o levantamento, o projeto e a obra, com equipa de construção
       própria. Do primeiro diagnóstico ao último acabamento, há um só interlocutor.
     </p>
-    <a class="deslizar deslizar--estatico" href="#antes-depois" data-aparece>
-      <span>Ver o antes e o depois</span>
+    <a class="deslizar deslizar--estatico" href="#caso" data-aparece>
+      <span>Ver um caso real, do levantamento à entrega</span>
       <span class="deslizar__seta" aria-hidden="true"></span>
     </a>
   </section>
 
-  <!-- R·02 · Antes e depois -->
-  <section class="reab-seccao" id="antes-depois" data-folha="02" data-fase="Levantamento e proposta">
+  <!-- R·02 · Caso real: a planta viva da reabilitação -->
+  <section class="reab-seccao reab-seccao--caso" id="caso">
     <div class="seccao__cabeca">
-      <p class="sobretitulo" data-aparece>02 · Antes e depois</p>
-      <h2 class="seccao__titulo" data-palavras>O mesmo prédio, no mesmo desenho.</h2>
+      <p class="sobretitulo" data-aparece>02 · Caso real</p>
+      <h2 class="seccao__titulo" data-palavras>Do levantamento à entrega da chave.</h2>
       <p class="seccao__lead" data-aparece>
-        À esquerda, o levantamento: fissuras, azulejo em falta, caixilharia gasta.
-        À direita, a fachada reabilitada. Arraste a linha para comparar.
+        A reabilitação e ampliação de uma casa térrea em pedra, desenhada pela AMA.
+        Desça e acompanhe a obra a acontecer na planta.
       </p>
     </div>
-    <Fachada />
+  </section>
+
+  <section class="processo processo--reabilitacao" data-processo data-roteiro="reabilitacao">
+    <div class="palco">
+      <canvas class="palco__tela" data-tela aria-hidden="true"></canvas>
+      <div class="palco__dica" data-dica aria-hidden="true"></div>
+      <div class="palco__textos">
+        {
+          passosCaso.map((p, i) => (
+            <article class="passo__cartao" data-cartao={i}>
+              <p class="passo__num">
+                <span>{p.n}</span>
+                <span>{p.fase}</span>
+              </p>
+              <h3 class="passo__titulo" data-palavras-passo>{p.titulo}</h3>
+              <p class="passo__texto">{p.texto}</p>
+
+              {i === 0 && (
+                <ul class="lista-tracos">
+                  <li>Reabilitação e ampliação</li>
+                  <li>Casa térrea em pedra</li>
+                  <li>Projeto AMA</li>
+                </ul>
+              )}
+
+              {i === 2 && <p class="passo__nota">Passe o cursor pela planta para visitar cada divisão.</p>}
+
+              {i === 3 && (
+                <div class="obra">
+                  <p class="obra__pct">
+                    <span data-obra-pct>0</span>
+                    <span>%</span>
+                  </p>
+                  <ol class="obra__fases">
+                    {fasesObraCaso.map((f) => (
+                      <li data-obra-fase>{f}</li>
+                    ))}
+                  </ol>
+                </div>
+              )}
+
+              {i === 4 && (
+                <a class="botao" href="/#contacto" data-programa-link="Reabilitação">
+                  Pedir uma visita
+                </a>
+              )}
+            </article>
+          ))
+        }
+      </div>
+    </div>
+
+    <div class="passos" aria-hidden="true">
+      {passosCaso.map((p, i) => <div class="passo" data-passo={i} data-fase={p.fase} />)}
+    </div>
   </section>
 
   <!-- R·03 · Equipa de construção própria -->
@@ -138,10 +216,23 @@ const etapas = [
     </ol>
   </section>
 
-  <!-- R·04 · O que reabilitamos -->
+  <!-- R·04 · Antes e depois -->
+  <section class="reab-seccao" id="antes-depois" data-folha="02" data-fase="Levantamento e proposta">
+    <div class="seccao__cabeca">
+      <p class="sobretitulo" data-aparece>04 · Antes e depois</p>
+      <h2 class="seccao__titulo" data-palavras>O mesmo prédio, no mesmo desenho.</h2>
+      <p class="seccao__lead" data-aparece>
+        À esquerda, o levantamento: fissuras, azulejo em falta, caixilharia gasta.
+        À direita, a fachada reabilitada. Arraste a linha para comparar.
+      </p>
+    </div>
+    <Fachada />
+  </section>
+
+  <!-- R·05 · O que reabilitamos -->
   <section class="reab-seccao" data-folha="04" data-fase="Tipologias">
     <div class="seccao__cabeca">
-      <p class="sobretitulo" data-aparece>04 · O que reabilitamos</p>
+      <p class="sobretitulo" data-aparece>05 · O que reabilitamos</p>
       <h2 class="seccao__titulo" data-palavras>Do telhado à caixa de escada.</h2>
     </div>
     <ul class="tipologias">
@@ -157,10 +248,10 @@ const etapas = [
     </ul>
   </section>
 
-  <!-- R·05 · Pormenor construtivo -->
+  <!-- R·06 · Pormenor construtivo -->
   <section class="reab-seccao" data-folha="05" data-fase="Pormenor construtivo">
     <div class="seccao__cabeca">
-      <p class="sobretitulo" data-aparece>05 · Pormenor construtivo</p>
+      <p class="sobretitulo" data-aparece>06 · Pormenor construtivo</p>
       <h2 class="seccao__titulo" data-palavras>O que não se vê também se desenha.</h2>
       <p class="seccao__lead" data-aparece>
         Numa cobertura reabilitada, cada camada tem uma função. Desenhamos o
@@ -170,24 +261,8 @@ const etapas = [
     <Pormenor />
   </section>
 
-  <!-- R·06 · Processo de obra e pedido -->
-  <section class="reab-seccao" data-folha="06" data-fase="Processo de obra">
-    <div class="seccao__cabeca">
-      <p class="sobretitulo" data-aparece>06 · Como trabalhamos</p>
-      <h2 class="seccao__titulo" data-palavras>Da visita à entrega, sem mudar de mãos.</h2>
-    </div>
-    <ol class="etapas-obra">
-      {etapas.map((e, i) => (
-        <li data-aparece>
-          <span class="etapas-obra__n">{String(i + 1).padStart(2, '0')}</span>
-          <div>
-            <h3>{e.titulo}</h3>
-            <p>{e.texto}</p>
-          </div>
-        </li>
-      ))}
-    </ol>
-
+  <!-- R·07 · Pedido -->
+  <section class="reab-seccao">
     <div class="reab-cta" data-aparece>
       <h2>Tem um edifício a precisar de obras?</h2>
       <p>Conte-nos o que se passa. Marcamos uma visita para ver o edifício e falar consigo.</p>

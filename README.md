@@ -20,7 +20,7 @@ Abre com a intro "André e Melissa Arquitetos": três gestos de scroll recolhem 
 | 07 | Equipa | André Machado e Melissa Fazendeiro, as duas assinaturas da folha |
 | 08 | Pedido | Formulário em forma de quadro de legenda. Ao enviar, recebe o carimbo "Recebido" |
 
-Outras páginas: **`/reabilitacao`** (antes/depois da fachada, equipa de construção própria, tipologias, pormenor construtivo de cobertura e processo de obra), **`/legal`** (identificação, habilitações, Livro de Reclamações, RAL) e **`/privacidade`** (RGPD e cookies).
+Outras páginas: **`/reabilitacao`** (caso real em cinco fases sobre a planta de um projeto AMA, equipa de construção própria, antes/depois da fachada, tipologias e pormenor construtivo de cobertura), **`/legal`** (identificação, habilitações, Livro de Reclamações, RAL) e **`/privacidade`** (RGPD e cookies).
 
 ### Dados legais por preencher
 
@@ -43,8 +43,9 @@ src/components/conceito/Fachada*.astro → alçado antes/depois (SVG)
 src/components/conceito/Pormenor.astro → pormenor construtivo de cobertura (SVG animado)
 src/components/conceito/Rodape.astro, LogoLockup.astro → rodapé com informação legal e lockup AMA em texto
 src/scripts/conceito/
-├── modelo.js     → a casa em metros (simplificada de um projeto real da AMA: casa antiga a reabilitar + ampliação): divisões, paredes com vãos, escada, telhado, mobiliário, sol, percurso
-├── casa.js       → a planta viva (canvas): projeção contínua planta → axonometria, fases por scroll
+├── modelo-casa.js         → a casa do processo (início), em metros
+├── modelo-reabilitacao.js → caso real de reabilitação (simplificado de um projeto AMA): paredes a manter, demolições, ampliação, escada, telhado de duas águas
+├── casa.js       → a planta viva (canvas), partilhada pelos dois percursos: processo e reabilitação (levantamento → manter/demolir/construir → axonometria → obra → entrega)
 ├── prancheta.js  → réguas, mira e menu
 ├── estado.js     → nome e programa do visitante
 ├── intro.js      → intro André e Melissa Arquitetos → AMA

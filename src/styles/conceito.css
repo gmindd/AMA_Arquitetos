@@ -1394,6 +1394,11 @@ html {
   padding: 16vh var(--gutter) 10vh calc(var(--regua) + var(--gutter));
 }
 
+/* Cabeça do caso real: o percurso com a planta começa logo a seguir */
+.reab-seccao--caso {
+  padding-bottom: 0;
+}
+
 .vantagens {
   list-style: none;
   display: grid;
