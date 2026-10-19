@@ -20,6 +20,8 @@
   --grelha-forte: color-mix(in srgb, var(--tinta) 8%, transparent);
 
   --font-sans: 'Neue Haas Grotesk Display Pro', 'Helvetica Now Display', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  /* Lettering do logótipo (o mesmo de /images/marca/ama-mark.svg) */
+  --font-logo: 'Neue Haas Grotesk Display Pro', 'Helvetica Now Display', 'Helvetica Neue', 'Arial Black', Helvetica, Arial, sans-serif;
   --font-mono: ui-monospace, 'SF Mono', 'JetBrains Mono', Menlo, Consolas, monospace;
 
   --regua: 22px;
@@ -377,6 +379,32 @@ textarea {
   pointer-events: none;
 }
 
+/* Logótipo AMA em texto: destino das maiúsculas da intro */
+.logo-ama {
+  display: inline-flex;
+  font-family: var(--font-logo);
+  font-weight: 900;
+  font-size: 34px;
+  line-height: 1;
+  letter-spacing: -0.013em;
+  color: var(--tinta);
+}
+
+/* Enquanto a intro corre, o logótipo do cabeçalho é a própria intro */
+.com-intro .topo__marca {
+  opacity: 0;
+}
+
+.com-intro.intro-fim .topo__marca {
+  opacity: 1;
+}
+
+.com-intro:not(.intro-fim) .carimbo {
+  opacity: 0;
+  transform: translateY(12px);
+  pointer-events: none;
+}
+
 .topo__nav {
   display: flex;
   gap: 1.75rem;
@@ -514,6 +542,88 @@ textarea {
 }
 
 /* ============================================================
+   Intro · André e Melissa Arquitetos → AMA
+   --p (0 a 1) recolhe as minúsculas para trás das maiúsculas;
+   --w é a largura natural de cada resto, medida pelo JS.
+   ============================================================ */
+.intro {
+  position: relative;
+  height: 280svh;
+}
+
+.intro__palco {
+  position: sticky;
+  top: 0;
+  z-index: 45;
+  height: 100svh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+}
+
+.intro__nome {
+  display: flex;
+  font-family: var(--font-logo);
+  font-size: clamp(2.5rem, 6vw, 9rem);
+  font-weight: 900;
+  line-height: 1;
+  letter-spacing: -0.013em;
+  white-space: nowrap;
+  color: var(--tinta);
+}
+
+.intro-fim .intro__nome {
+  visibility: hidden;
+}
+
+.intro__palavra {
+  display: inline-flex;
+  align-items: flex-start;
+}
+
+.intro__maiuscula {
+  position: relative;
+  z-index: 1;
+  display: inline-block;
+  transform-origin: 0 0;
+  will-change: transform;
+}
+
+.intro__resto {
+  display: inline-block;
+  overflow: hidden;
+  width: calc(var(--w) * (1 - var(--p, 0)));
+  padding-bottom: 0.22em;
+  margin-bottom: -0.22em;
+}
+
+.intro__resto > span {
+  display: inline-block;
+  transform: translateX(calc(var(--w) * -1 * var(--p, 0)));
+}
+
+.intro__dica {
+  position: absolute;
+  left: 50%;
+  bottom: 6vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.75rem;
+  transform: translateX(-50%);
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  transition: opacity 0.4s;
+}
+
+.intro--a-andar .intro__dica {
+  opacity: 0;
+}
+
+/* ============================================================
    00 · Abertura
    ============================================================ */
 .abertura {
@@ -564,6 +674,14 @@ textarea {
   stroke-dashoffset: 1;
   animation: traco 1.6s var(--ease) forwards;
   animation-delay: calc(var(--i) * 0.2s + 0.4s);
+  animation-play-state: paused;
+}
+
+/* O alçado espera que a abertura entre no ecrã (sem JS, desenha logo) */
+.em-vista .alcado path,
+.em-vista .alcado circle,
+.em-vista .alcado text {
+  animation-play-state: running;
 }
 
 .alcado .fino {
@@ -584,6 +702,7 @@ textarea {
   opacity: 0;
   animation: surge 1s var(--ease) forwards;
   animation-delay: calc(var(--i) * 0.2s + 0.4s);
+  animation-play-state: paused;
 }
 
 @keyframes traco {
@@ -1442,6 +1561,10 @@ textarea {
     height: 32px;
   }
 
+  .logo-ama {
+    font-size: 28px;
+  }
+
   /* Carimbo compacto: tira inferior com cliente, fase e folha */
   .carimbo {
     left: 8px;
@@ -1582,6 +1705,14 @@ textarea {
   .rodape {
     grid-template-columns: 1fr;
     padding-bottom: 14vh;
+  }
+}
+
+@media (max-width: 700px) {
+  /* Em ecrã estreito o nome empilha: André e / Melissa / Arquitetos */
+  .intro__nome {
+    flex-direction: column;
+    align-items: flex-start;
   }
 }
 

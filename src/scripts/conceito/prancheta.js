@@ -158,13 +158,15 @@ function iniciarCarimbo() {
   const ioNav = new IntersectionObserver(
     (entradas) => {
       entradas.forEach((en) => {
+        if (!en.isIntersecting) return;
+        // Secções fora do menu (intro, abertura) limpam a ligação ativa
         const i = alvos.indexOf(en.target);
-        if (i >= 0 && en.isIntersecting) ligacoes.forEach((a, k) => a.setAttribute('aria-current', String(k === i)));
+        ligacoes.forEach((a, k) => a.setAttribute('aria-current', String(k === i)));
       });
     },
     { rootMargin: '-50% 0px -50% 0px' },
   );
-  alvos.forEach((a) => a && ioNav.observe(a));
+  [...alvos, document.querySelector('[data-intro]'), document.querySelector('.abertura')].forEach((a) => a && ioNav.observe(a));
 
   const atualizarProgresso = () => {
     const max = document.documentElement.scrollHeight - window.innerHeight;

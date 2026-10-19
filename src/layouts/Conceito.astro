@@ -8,9 +8,12 @@ import '../styles/conceito.css';
 interface Props {
   title?: string;
   description?: string;
+  /** A página abre com a intro "André e Melissa Arquitetos" → AMA */
+  intro?: boolean;
 }
 
 const {
+  intro = false,
   title = 'AMA André Melissa Arquitetos · Tudo começa com uma linha',
   description = 'Gabinete de arquitetura em Viana do Castelo. Projeto, reabilitação e obra com equipa própria, do primeiro traço à entrega da chave.',
 } = Astro.props;
@@ -20,7 +23,7 @@ const data = `${String(hoje.getDate()).padStart(2, '0')}.${String(hoje.getMonth(
 ---
 
 <!doctype html>
-<html lang="pt">
+<html lang="pt" class={intro ? 'com-intro' : undefined}>
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -28,6 +31,7 @@ const data = `${String(hoje.getDate()).padStart(2, '0')}.${String(hoje.getMonth(
     <meta name="description" content={description} />
     <meta name="theme-color" content="#e6e4e0" />
     <link rel="icon" href="/favicon.svg" />
+    <noscript><style>.com-intro .topo__marca { opacity: 1 !important; } .alcado * { animation-play-state: running !important; }</style></noscript>
     <script>
       import '../scripts/conceito/index.js';
     </script>
@@ -46,8 +50,10 @@ const data = `${String(hoje.getDate()).padStart(2, '0')}.${String(hoje.getMonth(
     </div>
 
     <header class="topo">
+      <!-- O logótipo AMA (o mesmo lettering de /images/marca/ama-mark.svg) em
+           texto, letra a letra: é o destino exato das maiúsculas da intro -->
       <a class="topo__marca" href="/" aria-label="AMA, início">
-        <span class="logo" style="--logo:url('/images/marca/ama-mark.svg')"></span>
+        <span class="logo-ama" aria-hidden="true" data-logo-ama><span>A</span><span>M</span><span>A</span></span>
       </a>
       <nav class="topo__nav" aria-label="Secções">
         <a href="#processo">Processo</a>

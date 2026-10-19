@@ -7,8 +7,10 @@ import { iniciarRevelar, partirPalavras } from './revelar.js';
 import { iniciarCasa, FASES_OBRA } from './casa.js';
 import { iniciarFachada } from './fachada.js';
 import { iniciarPedido } from './pedido.js';
+import { iniciarIntro } from './intro.js';
 
 iniciarRevelar();
+iniciarIntro();
 iniciarPrancheta();
 iniciarConversa();
 iniciarProcesso();
@@ -74,15 +76,29 @@ function iniciarProcesso() {
   });
 }
 
-// Abertura: o alçado acompanha ligeiramente o cursor
+// Abertura: o alçado só se desenha quando entra no ecrã (depois da
+// intro) e acompanha ligeiramente o cursor
 function iniciarParalaxe() {
   const alcado = document.querySelector('[data-alcado]');
+  const abertura = alcado?.closest('.abertura');
+  if (abertura) {
+    const io = new IntersectionObserver(
+      ([en]) => {
+        if (!en.isIntersecting) return;
+        abertura.classList.add('em-vista');
+        io.disconnect();
+      },
+      { threshold: 0.35 },
+    );
+    io.observe(abertura);
+  }
   if (!alcado || !matchMedia('(hover: hover) and (pointer: fine)').matches) return;
   if (matchMedia('(prefers-reduced-motion: reduce)').matches) return;
   window.addEventListener(
     'pointermove',
     (e) => {
-      if (window.scrollY > window.innerHeight) return;
+      const r = abertura?.getBoundingClientRect();
+      if (r && (r.bottom < 0 || r.top > window.innerHeight)) return;
       const dx = (e.clientX / window.innerWidth - 0.5) * -18;
       const dy = (e.clientY / window.innerHeight - 0.5) * -10;
       alcado.style.setProperty('--px', `${dx.toFixed(1)}px`);
