@@ -1,0 +1,103 @@
+---
+// Layout do site conceito AMA: uma prancheta de arquiteto.
+// Réguas, mira do cursor, moldura da folha e carimbo (legenda) são
+// fixos e acompanham toda a página; o conteúdo de cada página entra
+// no <slot />. O carimbo é preenchido com o nome do visitante.
+import '../styles/conceito.css';
+
+interface Props {
+  title?: string;
+  description?: string;
+}
+
+const {
+  title = 'AMA André Melissa Arquitetos · Tudo começa com uma linha',
+  description = 'Gabinete de arquitetura em Viana do Castelo. Projeto, reabilitação e obra com equipa própria, do primeiro traço à entrega da chave.',
+} = Astro.props;
+
+const hoje = new Date();
+const data = `${String(hoje.getDate()).padStart(2, '0')}.${String(hoje.getMonth() + 1).padStart(2, '0')}.${hoje.getFullYear()}`;
+---
+
+<!doctype html>
+<html lang="pt">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    <meta name="theme-color" content="#e6e4e0" />
+    <link rel="icon" href="/favicon.svg" />
+    <script>
+      import '../scripts/conceito/index.js';
+    </script>
+  </head>
+  <body>
+    <a class="salto" href="#conteudo">Saltar para o conteúdo</a>
+
+    <!-- Prancheta: elementos fixos, puramente decorativos -->
+    <div class="regua regua--topo" aria-hidden="true" data-regua="x"><span class="regua__marca"></span></div>
+    <div class="regua regua--lado" aria-hidden="true" data-regua="y"><span class="regua__marca"></span></div>
+    <div class="moldura" aria-hidden="true"></div>
+    <div class="mira" aria-hidden="true">
+      <span class="mira__h"></span>
+      <span class="mira__v"></span>
+      <span class="mira__leitura"></span>
+    </div>
+
+    <header class="topo">
+      <a class="topo__marca" href="/" aria-label="AMA, início">
+        <span class="logo" style="--logo:url('/images/marca/ama-mark.svg')"></span>
+      </a>
+      <nav class="topo__nav" aria-label="Secções">
+        <a href="#processo">Processo</a>
+        <a href="#reabilitacao">Reabilitação</a>
+        <a href="#equipa">Equipa</a>
+      </nav>
+      <a class="topo__cta" href="#contacto">Começar projeto</a>
+    </header>
+
+    <!-- Carimbo da folha: projeto, cliente, fase e folha -->
+    <aside class="carimbo" aria-label="Carimbo do projeto" data-carimbo>
+      <div class="carimbo__linha carimbo__linha--marca">
+        <span class="logo logo--mini" style="--logo:url('/images/marca/ama-mark.svg')"></span>
+        <span>André Melissa Arquitetos</span>
+      </div>
+      <div class="carimbo__grelha">
+        <div class="carimbo__campo carimbo__campo--largo">
+          <span class="rotulo">Projeto</span>
+          <span data-c="projeto">A sua casa</span>
+        </div>
+        <div class="carimbo__campo">
+          <span class="rotulo">Cliente</span>
+          <span data-c="cliente">Por definir</span>
+        </div>
+        <div class="carimbo__campo">
+          <span class="rotulo">Programa</span>
+          <span data-c="programa">Por definir</span>
+        </div>
+        <div class="carimbo__campo carimbo__campo--largo">
+          <span class="rotulo">Fase</span>
+          <span data-c="fase">Folha em branco</span>
+        </div>
+        <div class="carimbo__campo">
+          <span class="rotulo">Escala</span>
+          <span>1:100</span>
+        </div>
+        <div class="carimbo__campo">
+          <span class="rotulo">Folha</span>
+          <span data-c="folha">00/09</span>
+        </div>
+        <div class="carimbo__campo carimbo__campo--largo">
+          <span class="rotulo">Data</span>
+          <span>{data}</span>
+        </div>
+      </div>
+      <span class="carimbo__progresso"><span data-c="progresso"></span></span>
+    </aside>
+
+    <main id="conteudo">
+      <slot />
+    </main>
+  </body>
+</html>

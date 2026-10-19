@@ -1,14 +1,14 @@
 ---
-import Base from '../layouts/Base.astro';
-import { t, LOCALE_DEFAULT, hrefLocale, type Locale } from '../lib/i18n';
-
-const locale: Locale = (Astro.locals as { locale?: Locale }).locale ?? LOCALE_DEFAULT;
+import Conceito from '../layouts/Conceito.astro';
 ---
 
-<Base title={`${t('404.titulo', locale)} · AMA`}>
-  <section class="erro wrap">
-    <h1>{t('404.titulo', locale)}</h1>
-    <p>{t('404.descricao', locale)}</p>
-    <p><a class="cta" href={hrefLocale('/', locale)}>{t('404.voltar', locale)}</a></p>
+<Conceito title="Folha não encontrada · AMA">
+  <section class="abertura" data-folha="404" data-fase="Folha não encontrada">
+    <div class="abertura__texto">
+      <p class="sobretitulo">Erro 404</p>
+      <h1 class="abertura__titulo">Esta folha ficou por desenhar.</h1>
+      <p class="abertura__lead">A página que procura não existe ou mudou de lugar.</p>
+      <p style="margin-top:2rem"><a class="botao" href="/">Voltar ao início</a></p>
+    </div>
   </section>
-</Base>
+</Conceito>

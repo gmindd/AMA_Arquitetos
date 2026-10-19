@@ -1,0 +1,37 @@
+---
+// Geometria comum aos dois estados da fachada (antes e depois).
+// Renderizada duas vezes em vez de <use>, porque as regras de CSS da
+// página não atravessam a árvore-sombra criada pelo <use>.
+const vaosX = [35, 145, 255];
+---
+
+<rect x="0" y="100" width="340" height="480" fill="url(#fa-azulejo)" />
+<path class="fa-grosso" d="M0 580 V100 H340 V580" />
+<path class="fa-grosso papel" d="M-10 100 H350 V86 H-10 Z" />
+<path d="M4 86 L28 40 H312 L336 86" />
+<path class="fa-fino" d="M40 52 H300 M34 64 H306 M28 76 H312" />
+<path class="papel" d="M0 420 H340 V428 H0 Z M0 262 H340 V268 H0 Z" />
+<!-- Rés-do-chão: porta em arco e duas montras -->
+<path class="papel" d="M150 580 V475 A30 30 0 0 1 210 475 V580 Z" />
+<path d="M180 505 V580" />
+<rect class="papel" x="30" y="470" width="90" height="90" />
+<rect class="papel" x="220" y="470" width="90" height="90" />
+<path d="M75 470 V560 M265 470 V560" />
+<!-- 1.º andar: janelas de sacada com varanda -->
+{vaosX.map((x) => (
+  <g>
+    <rect class="papel" x={x} y="295" width="50" height="100" />
+    <path d={`M${x + 25} 295 V395 M${x} 325 H${x + 50}`} />
+    <path class="papel" d={`M${x - 10} 395 H${x + 60} V401 H${x - 10} Z`} />
+    <path d={`M${x - 10} 366 H${x + 60}`} />
+  </g>
+))}
+<!-- 2.º andar -->
+{vaosX.map((x) => (
+  <g>
+    <rect class="papel" x={x} y="140" width="50" height="95" />
+    <path d={`M${x + 25} 140 V235 M${x} 168 H${x + 50}`} />
+    <path d={`M${x - 5} 238 H${x + 55}`} />
+  </g>
+))}
+<path class="fa-fino" d="M-200 580 H540" />

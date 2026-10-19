@@ -1,59 +1,311 @@
 ---
-import { listarProjetosPublicos, obterDefinicoes, chaveVariante, resolverProjeto } from '../lib/store';
-import { LOCALE_DEFAULT, hrefLocale, type Locale } from '../lib/i18n';
-import Base from '../layouts/Base.astro';
-import ProjectCard from '../components/ProjectCard.astro';
+// Site conceito AMA: o visitante percorre o projeto de uma casa, da
+// folha em branco à entrega da chave. Uma única planta (canvas) evolui
+// com o scroll; o texto de cada fase passa por cima.
+import Conceito from '../layouts/Conceito.astro';
+import Fachada from '../components/conceito/Fachada.astro';
 
-const locale: Locale = (Astro.locals as { locale?: Locale }).locale ?? LOCALE_DEFAULT;
+const passos = [
+  {
+    n: '01',
+    fase: 'Programa',
+    titulo: 'Primeiro, ouvimos.',
+    texto:
+      'Antes de qualquer traço há uma conversa. Como vive, o que guarda, onde bate o sol ao fim da tarde. É aqui que o projeto passa a ser seu.',
+  },
+  {
+    n: '02',
+    fase: 'Estudo prévio',
+    titulo: 'As ideias ganham forma.',
+    texto:
+      'O que era solto organiza-se em espaços. Aproximamos o que deve estar junto, afastamos o que pede sossego e testamos hipóteses consigo, folha após folha.',
+  },
+  {
+    n: '03',
+    fase: 'Projeto e licenciamento',
+    titulo: 'Cada medida tem uma razão.',
+    texto:
+      'O desenho rigoroso define paredes, vãos e áreas. Preparamos o projeto de licenciamento e acompanhamos o processo até à aprovação.',
+  },
+  {
+    n: '04',
+    fase: 'Modelo',
+    titulo: 'Antes de existir, já pode entrar nela.',
+    texto:
+      'A planta levanta-se do papel. Percorre a casa, percebe a escala de cada divisão e decide connosco antes da primeira pedra.',
+  },
+  {
+    n: '05',
+    fase: 'Obra',
+    titulo: 'Quem desenha, constrói.',
+    texto:
+      'A AMA tem equipa especializada para executar a obra. O gabinete que desenhou a casa acompanha cada fase em estaleiro, sem perder o fio ao projeto.',
+  },
+  {
+    n: '06',
+    fase: 'Entrega',
+    titulo: 'A casa é sua.',
+    texto:
+      'Do primeiro traço à entrega da chave, o percurso é feito lado a lado. No fim, a planta deixa de ser desenho e passa a ser lugar.',
+  },
+];
 
-// Home = grelha de projetos visíveis, sem texto de abertura.
-const projetosRaw = await listarProjetosPublicos();
-const projetos = projetosRaw.map((p) => resolverProjeto(p, locale));
-const { logos } = await obterDefinicoes();
-
-// Variante de logótipo a sobrepor na capa de cada projeto (se carregada)
-const variante = (v: 'A/MA' | 'A/AM' | 'MA/A') => logos[chaveVariante(v)];
+const fasesObra = ['Estaleiro', 'Fundações', 'Estrutura', 'Cobertura', 'Caixilharia', 'Acabamentos'];
+const programas = ['Casa nova', 'Reabilitação', 'Interiores', 'Reconversão'];
 ---
 
-<Base>
-  <h1 class="oculto">AMA André Melissa Arquitetos</h1>
+<Conceito>
+  <!-- ============ 00 · Folha em branco ============ -->
+  <section class="abertura" data-folha="00" data-fase="Folha em branco">
+    <div class="abertura__texto">
+      <p class="sobretitulo" data-aparece>AMA · André Melissa Arquitetos · Viana do Castelo</p>
+      <h1 class="abertura__titulo" data-palavras>Tudo começa com uma linha.</h1>
+      <p class="abertura__lead" data-aparece>
+        Uma casa nasce numa folha em branco. Desenhamo-la consigo, construímo-la
+        com equipa própria e só a largamos quando lhe entregamos a chave.
+      </p>
+    </div>
 
-  <!-- Abertura a ecrã inteiro: os projetos em rotação lenta, sem texto de abertura -->
-  <section class="hero" data-hero aria-label="Projetos">
-    {projetos.map((p, i) => (
-      <a
-        class={`hero__slide${i === 0 ? ' ativo' : ''}`}
-        href={hrefLocale(`/projetos/${p.slug}`, locale)}
-        data-hero-slide
-        tabindex={i === 0 ? undefined : -1}
-        aria-hidden={i === 0 ? undefined : 'true'}
-      >
-        <img
-          src={p.capa}
-          alt={`${p.titulo}, ${p.tipologia}`}
-          loading={i === 0 ? 'eager' : 'lazy'}
+    <svg class="alcado" viewBox="0 0 1200 620" aria-hidden="true" data-alcado>
+      <g class="alcado__tracos">
+        <path style="--i:0" d="M0 470 H1200" pathLength="1" />
+        <path style="--i:1" d="M440 470 V300 M760 470 V300" pathLength="1" />
+        <path style="--i:2" d="M410 318 L600 190 L790 318" pathLength="1" />
+        <path style="--i:3" d="M690 250.6 V212 H715 V267.5" pathLength="1" />
+        <path style="--i:3.4" d="M560 470 V380 H620 V470" pathLength="1" />
+        <path style="--i:3.8" d="M470 340 h60 v70 h-60 Z M500 340 v70" pathLength="1" />
+        <path style="--i:4.2" d="M670 340 h60 v70 h-60 Z M700 340 v70" pathLength="1" />
+        <circle style="--i:4.6" cx="600" cy="262" r="16" pathLength="1" />
+        <path
+          class="fino"
+          style="--i:5"
+          d="M400 482 l-12 14 M430 482 l-12 14 M460 482 l-12 14 M490 482 l-12 14 M520 482 l-12 14 M550 482 l-12 14 M580 482 l-12 14 M610 482 l-12 14 M640 482 l-12 14 M670 482 l-12 14 M700 482 l-12 14 M730 482 l-12 14 M760 482 l-12 14 M790 482 l-12 14"
+          pathLength="1"
         />
-        <p class="hero__legenda">{p.titulo} · {p.local}, {p.ano}</p>
-      </a>
-    ))}
-    <button class="hero__seta" type="button" data-hero-seta aria-label="↓">
-      ↓
-    </button>
+        <path class="fino" style="--i:5.4" d="M850 470 V190 M840 480 l20 -20 M840 200 l20 -20 M832 470 H868 M832 190 H868" pathLength="1" />
+        <path class="fino" style="--i:5.8" d="M440 530 H760 M430 540 l20 -20 M750 540 l20 -20 M440 518 V542 M760 518 V542" pathLength="1" />
+        <path class="fino" style="--i:6.2" d="M360 470 V430 M360 438 l-10 18 M360 438 l10 18 M360 470 l-8 -0 M350 420 a10 10 0 1 0 20 0 a10 10 0 1 0 -20 0" pathLength="1" />
+        <path class="fino" style="--i:6.4" d="M930 470 V420 M880 380 a50 50 0 1 0 100 0 a50 50 0 1 0 -100 0" pathLength="1" />
+        <path class="fino tracejado" style="--i:6.6" d="M216 150 a24 24 0 1 0 48 0 a24 24 0 1 0 -48 0" pathLength="1" />
+        <path class="fino" style="--i:6.8" d="M236 470 l14 -14 l14 14 Z M250 456 V420" pathLength="1" />
+      </g>
+      <g class="alcado__textos">
+        <text x="862" y="334" style="--i:7">7,20</text>
+        <text x="600" y="560" text-anchor="middle" style="--i:7.2">8,00</text>
+        <text x="258" y="418" style="--i:7.4">± 0,00</text>
+        <text x="24" y="456" style="--i:7.6">Alçado sul · esc. 1:100</text>
+      </g>
+    </svg>
+
+    <a class="deslizar" href="#processo" data-aparece>
+      <span>Desça e entre no projeto</span>
+      <span class="deslizar__seta" aria-hidden="true"></span>
+    </a>
   </section>
 
-  <section class="grelha-projetos" id="projetos">
-    {projetos.map((p, i) => (
-      <ProjectCard
-        href={hrefLocale(`/projetos/${p.slug}`, locale)}
-        titulo={p.titulo}
-        tipologia={p.tipologia}
-        ano={p.ano}
-        capa={p.capa}
-        variacaoLogo={p.variacaoLogo}
-        logoClaro={p.logoClaro}
-        indice={i}
-        varImg={variante(p.variacaoLogo)}
-      />
-    ))}
+  <!-- ============ 01–06 · O processo numa única planta ============ -->
+  <section class="processo" id="processo" data-processo>
+    <div class="palco" aria-hidden="true">
+      <canvas class="palco__tela" data-tela></canvas>
+      <div class="palco__dica" data-dica></div>
+    </div>
+
+    <div class="passos">
+      {
+        passos.map((p, i) => (
+          <article
+            class={`passo ${i === 4 ? 'passo--obra' : ''}`}
+            data-passo={i}
+            data-folha={p.n}
+            data-fase={p.fase}
+          >
+            <div class="passo__cartao">
+              <p class="passo__num">
+                <span>{p.n}</span>
+                <span>{p.fase}</span>
+              </p>
+              <h2 class="passo__titulo" data-palavras {...(i === 5 ? { 'data-titulo-entrega': '' } : {})}>
+                {p.titulo}
+              </h2>
+              <p class="passo__texto">{p.texto}</p>
+
+              {i === 0 && (
+                <div class="conversa" data-conversa>
+                  <label class="conversa__campo">
+                    <span class="rotulo">Como se chama?</span>
+                    <input type="text" name="nome-visitante" maxlength="32" autocomplete="given-name" placeholder="O seu nome" data-nome />
+                  </label>
+                  <fieldset class="conversa__campo">
+                    <legend class="rotulo">O que quer construir?</legend>
+                    <div class="etiquetas">
+                      {programas.map((pr) => (
+                        <button type="button" class="etiqueta" data-programa={pr} aria-pressed="false">
+                          {pr}
+                        </button>
+                      ))}
+                    </div>
+                  </fieldset>
+                  <p class="conversa__nota">O seu nome passa a constar no carimbo da folha.</p>
+                </div>
+              )}
+
+              {i === 2 && (
+                <ul class="lista-tracos">
+                  <li>Projeto de arquitetura</li>
+                  <li>Interiores</li>
+                  <li>Licenciamento</li>
+                </ul>
+              )}
+
+              {i === 3 && <p class="passo__nota">Passe o cursor pela planta para visitar cada divisão.</p>}
+
+              {i === 4 && (
+                <div class="obra" data-obra>
+                  <p class="obra__pct">
+                    <span data-obra-pct>0</span>
+                    <span>%</span>
+                  </p>
+                  <ol class="obra__fases">
+                    {fasesObra.map((f) => (
+                      <li data-obra-fase>{f}</li>
+                    ))}
+                  </ol>
+                </div>
+              )}
+
+              {i === 5 && (
+                <a class="botao" href="#contacto">
+                  Começar a minha planta
+                </a>
+              )}
+            </div>
+          </article>
+        ))
+      }
+    </div>
   </section>
-</Base>
+
+  <!-- ============ 07 · Reabilitação ============ -->
+  <section class="reabilitacao" id="reabilitacao" data-folha="07" data-fase="Reabilitação">
+    <div class="seccao__cabeca">
+      <p class="sobretitulo" data-aparece>07 · Reabilitação</p>
+      <h2 class="seccao__titulo" data-palavras>Reabilitar é desenhar sobre o que já existe.</h2>
+      <p class="seccao__lead" data-aparece>
+        Fachadas, coberturas, condomínios e interiores com história. Fazemos o
+        levantamento, o projeto e a obra com equipa própria. Arraste a linha e
+        veja o mesmo prédio antes e depois.
+      </p>
+    </div>
+
+    <Fachada />
+
+    <ol class="etapas" data-aparece>
+      <li><span>01</span>Levantamento</li>
+      <li><span>02</span>Diagnóstico</li>
+      <li><span>03</span>Projeto</li>
+      <li><span>04</span>Execução</li>
+    </ol>
+  </section>
+
+  <!-- ============ 08 · Equipa ============ -->
+  <section class="equipa" id="equipa" data-folha="08" data-fase="Equipa">
+    <div class="seccao__cabeca">
+      <p class="sobretitulo" data-aparece>08 · Quem assina</p>
+      <h2 class="seccao__titulo" data-palavras>Cada folha leva duas assinaturas.</h2>
+      <p class="seccao__lead" data-aparece>
+        O AMA nasceu em 2022, em Viana do Castelo, pelas mãos de André Machado e
+        Melissa Fazendeiro. Um gabinete pequeno de propósito: quem o recebe na
+        primeira conversa é quem está consigo no dia da entrega.
+      </p>
+    </div>
+
+    <div class="assinaturas">
+      <figure class="assinatura" data-aparece>
+        <svg viewBox="0 0 320 90" aria-hidden="true"><path pathLength="1" d="M6 62 C18 22 36 16 32 48 C29 74 52 70 60 40 C66 18 76 28 72 52 C69 72 88 66 96 44 C104 24 114 32 110 54 C107 72 126 66 136 46 L158 24 C166 18 170 38 160 58 C152 74 178 62 192 46 C206 30 214 44 208 58 C202 72 232 60 248 44 C262 32 276 42 314 38" /></svg>
+        <span class="assinatura__linha"></span>
+        <figcaption><strong>André Machado</strong><span>Arquiteto</span></figcaption>
+      </figure>
+      <figure class="assinatura" data-aparece>
+        <svg viewBox="0 0 320 90" aria-hidden="true"><path pathLength="1" d="M8 66 C14 30 30 14 40 30 C48 44 30 70 46 66 C60 62 64 32 74 34 C84 36 74 64 88 62 C100 60 104 36 114 38 C124 40 116 66 130 62 C144 58 150 26 164 22 C178 18 172 50 160 64 C150 76 180 66 196 50 C210 36 222 40 218 56 C214 70 244 58 262 46 C276 36 290 44 312 40" /></svg>
+        <span class="assinatura__linha"></span>
+        <figcaption><strong>Melissa Fazendeiro</strong><span>Arquiteta</span></figcaption>
+      </figure>
+    </div>
+  </section>
+
+  <!-- ============ 09 · Contacto ============ -->
+  <section class="contacto" id="contacto" data-folha="09" data-fase="Pedido de projeto">
+    <div class="seccao__cabeca">
+      <p class="sobretitulo" data-aparece>09 · A sua folha</p>
+      <h2 class="seccao__titulo" data-palavras>Vamos desenhar a sua?</h2>
+      <p class="seccao__lead" data-aparece>
+        Conte-nos o que tem em mente. Respondemos em 24 a 48 horas úteis para
+        marcar a primeira conversa.
+      </p>
+    </div>
+
+    <form class="folha-pedido" method="POST" action="/api/pedido" data-pedido novalidate>
+      <div class="folha-pedido__desenho" aria-hidden="true">
+        <span class="folha-pedido__vazio">A sua planta começa aqui</span>
+        <span class="folha-pedido__titulo" data-folha-titulo>A sua casa</span>
+      </div>
+
+      <div class="folha-pedido__carimbo">
+        <p class="oculto" aria-hidden="true">
+          <label>Não preencher <input name="empresa" tabindex="-1" autocomplete="off" /></label>
+        </p>
+        <label class="celula celula--metade">
+          <span class="rotulo">Cliente</span>
+          <input name="nome" type="text" autocomplete="name" required data-campo-nome />
+        </label>
+        <label class="celula celula--metade">
+          <span class="rotulo">Contacto</span>
+          <input name="contacto" type="text" autocomplete="email" placeholder="Email ou telefone" required />
+        </label>
+        <label class="celula celula--metade">
+          <span class="rotulo">Programa</span>
+          <select name="tipo" data-campo-tipo>
+            {programas.map((pr) => <option value={pr}>{pr}</option>)}
+          </select>
+        </label>
+        <label class="celula celula--metade">
+          <span class="rotulo">Local</span>
+          <input name="localizacao" type="text" placeholder="Concelho ou freguesia" required />
+        </label>
+        <label class="celula">
+          <span class="rotulo">Memória descritiva</span>
+          <textarea name="mensagem" rows="4" placeholder="O que gostaria de construir ou reabilitar" required></textarea>
+        </label>
+        <div class="celula celula--acao">
+          <p class="folha-pedido__estado" role="status" data-estado></p>
+          <button class="botao" type="submit">Enviar pedido</button>
+        </div>
+      </div>
+
+      <span class="carimbo-recebido" aria-hidden="true">Recebido</span>
+    </form>
+  </section>
+
+  <footer class="rodape">
+    <span class="logo logo--rodape" style="--logo:url('/images/marca/ama-logo.svg')" role="img" aria-label="AMA André Melissa Arquitetos"></span>
+    <div class="rodape__bloco">
+      <span class="rotulo">Morada</span>
+      <p>Avenida do Atlântico 221, loja 10<br />4935-580 Chafé, Viana do Castelo</p>
+    </div>
+    <div class="rodape__bloco">
+      <span class="rotulo">Telefone</span>
+      <p>
+        André · <a href="tel:+351917091338">917 091 338</a><br />
+        Melissa · <a href="tel:+351918133120">918 133 120</a>
+      </p>
+    </div>
+    <div class="rodape__bloco">
+      <span class="rotulo">Contacto</span>
+      <p>
+        <a href="mailto:andremelissaarquitetos@gmail.com">andremelissaarquitetos@gmail.com</a><br />
+        <a href="https://www.instagram.com/andremelissaarquitetos" rel="noopener" target="_blank">@andremelissaarquitetos</a>
+      </p>
+    </div>
+    <p class="rodape__nota">Website conceito · {new Date().getFullYear()}</p>
+  </footer>
+</Conceito>

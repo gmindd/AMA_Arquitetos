@@ -1,6 +1,49 @@
-# AMA — André Melissa Arquitetos
+# AMA · André Melissa Arquitetos · site conceito
 
-Website portfólio do gabinete de arquitetura AMA, com backoffice próprio. Fonte de verdade do design e do copy: `AMA_contexto_website.md` (posicionamento, design system, regras duras).
+> **Branch `claude/site-conceito-planta`**: website conceito, sem fotografias. O site portfólio (com projetos e reabilitações geridos no backoffice) continua nos branches `claude/architecture-firm-design-animations-9r4h5z` e `claude/lateral-menu-logo-update-r8qtpl`.
+
+## Conceito: "Tudo começa com uma linha"
+
+O cliente da AMA é como as obras: nasce de uma planta e é acompanhado até ao fim. O site é uma prancheta de arquiteto (papel milimétrico, réguas, mira de CAD e carimbo da folha) e o visitante percorre o projeto de uma casa do primeiro traço à entrega da chave:
+
+| Folha | Fase | O que acontece no desenho |
+| --- | --- | --- |
+| 00 | Folha em branco | Um alçado desenha-se traço a traço |
+| 01 | Programa | Diagrama de bolhas e notas à mão (luz a sul, mar a poente). O visitante escreve o nome e escolhe o programa |
+| 02 | Estudo prévio | As bolhas transformam-se em divisões e as paredes são traçadas |
+| 03 | Projeto e licenciamento | Planta rigorosa: poché, vãos, portas, cotas, áreas, corte A-A' e norte. O cursor visita cada divisão |
+| 04 | Modelo | A planta levanta-se em axonometria (a mesma câmara, em contínuo) |
+| 05 | Obra | O papel inverte para negro, o modelo vira projeto fantasma e a obra cresce dentro dele: laje, paredes, andaimes, grua, cobertura, caixilharia |
+| 06 | Entrega | A cobertura levanta, o plano de corte desce, o mobiliário e a luz entram e a casa passa a ser do visitante ("A casa é sua, Ana.") |
+| 07 | Reabilitação | Alçado de um prédio de Viana: levantamento com patologias vs. fachada reabilitada, com linha arrastável |
+| 08 | Equipa | André Machado e Melissa Fazendeiro, as duas assinaturas da folha |
+| 09 | Pedido | O formulário é uma folha com carimbo. Ao enviar, a folha recebe a primeira linha do projeto e o carimbo "Recebido" |
+
+O nome e o programa do visitante acompanham tudo: carimbo fixo, título do desenho, etiqueta do visitante dentro da casa, título da entrega e formulário (guardados só em `localStorage`, por conveniência).
+
+Paleta e regras da marca mantidas: só `#0A0A0A`, `#E6E4E0` e `#FFFFFF` (o branco é a luz), uma família tipográfica (com uma mono de sistema para cotas e anotações), sem fotografias. `prefers-reduced-motion` respeitado.
+
+### Ficheiros do conceito
+
+```
+src/pages/index.astro                 → as 10 folhas do site
+src/pages/api/pedido.ts               → recebe o formulário (email via lib/email.ts, recuo para DATA_DIR/mensagens)
+src/layouts/Conceito.astro            → prancheta: réguas, mira, moldura, cabeçalho e carimbo
+src/components/conceito/Fachada*.astro → alçado antes/depois (SVG)
+src/scripts/conceito/
+├── modelo.js     → a casa em metros: divisões, paredes com vãos, mobiliário, sol, percurso
+├── casa.js       → a planta viva (canvas): projeção contínua planta → axonometria, fases por scroll
+├── prancheta.js  → réguas, mira e carimbo
+├── estado.js     → nome e programa do visitante
+├── fachada.js    → linha de corte arrastável
+├── pedido.js     → envio do formulário
+└── revelar.js    → títulos palavra a palavra
+src/styles/conceito.css               → estilos do site (o backoffice continua em global.css + admin.css)
+```
+
+Neste branch as páginas públicas antigas (Projetos, Reabilitação, Sobre, Contactos) foram retiradas; o backoffice (`/admin`) e o envio de email ficam como estavam.
+
+---
 
 ## Stack
 
