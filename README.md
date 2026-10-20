@@ -17,14 +17,15 @@ Abre com a intro "André e Melissa Arquitetos": três gestos de scroll recolhem 
 | 04 | Modelo | A planta levanta-se em axonometria (a mesma câmara, em contínuo) |
 | 05 | Obra | O papel inverte para negro, o modelo vira projeto fantasma e a obra cresce dentro dele |
 | 06 | Entrega | A cobertura levanta, o plano de corte desce, o mobiliário e a luz entram ("A casa é sua, Ana.") |
-| 07 | Equipa | André Machado e Melissa Fazendeiro, as duas assinaturas da folha |
-| 08 | Pedido | Formulário em forma de quadro de legenda. Ao enviar, recebe o carimbo "Recebido" |
+| 07 | Pedido | Formulário em forma de quadro de legenda. Ao enviar, recebe o carimbo "Recebido" |
 
-Outras páginas: **`/reabilitacao`** (caso real em cinco fases sobre a planta de um projeto AMA, equipa de construção própria, antes/depois da fachada, tipologias e pormenor construtivo de cobertura), **`/legal`** (identificação, habilitações, Livro de Reclamações, RAL) e **`/privacidade`** (RGPD e cookies).
+Outras páginas: **`/equipa`** (as duas assinaturas e a ligação à equipa de construção), **`/reabilitacao`** (caso real em cinco fases sobre a planta de um projeto AMA, com o sótão habitável em axonometria explodida na entrega, equipa de construção própria, antes/depois da fachada, tipologias e pormenor construtivo de cobertura), **`/legal`** (identificação, habilitações, Livro de Reclamações, RAL) e **`/privacidade`** (RGPD e cookies).
 
 ### Dados legais por preencher
 
 Em `src/lib/legal.ts`: firma, NIPC, conservatória, capital social, n.º de inscrição na Ordem dos Arquitectos de cada arquiteto e alvará/certificado IMPIC. Enquanto estiverem vazios aparecem no site assinalados como "A preencher".
+
+Modo claro / escuro no cabeçalho: segue a definição do dispositivo até o visitante escolher (a escolha fica guardada); sem nenhuma, claro. A obra inverte sempre o tema em curso.
 
 O nome e o programa do visitante acompanham tudo: título do desenho, etiqueta do visitante dentro da casa, título da entrega e formulário (guardados só em `localStorage`, por conveniência).
 
@@ -49,6 +50,7 @@ src/scripts/conceito/
 ├── prancheta.js  → réguas, mira e menu
 ├── estado.js     → nome e programa do visitante
 ├── intro.js      → intro André e Melissa Arquitetos → AMA
+├── tema.js       → modo claro / escuro
 ├── fachada.js    → linha de corte arrastável
 ├── pedido.js     → envio do formulário
 └── revelar.js    → títulos palavra a palavra

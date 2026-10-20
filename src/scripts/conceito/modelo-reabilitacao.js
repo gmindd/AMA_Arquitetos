@@ -130,29 +130,36 @@ function retangulo(eixo, t0, t1) {
   return [x1 - m, y1 + t0, x1 + m, y1 + t1];
 }
 
-export const paredes = []; // { r, z0, z1, ext, ordem }
-export const vaos = []; // { tipo, r, h, lado, grande, n }
-
-eixos.forEach((eixo, ie) => {
-  const comp = Math.hypot(eixo.b[0] - eixo.a[0], eixo.b[1] - eixo.a[1]);
-  let t = 0;
-  const ordenados = [...eixo.vaos].sort((p, q) => p.em - q.em);
-  for (const v of ordenados) {
-    if (v.em > t) paredes.push({ r: retangulo(eixo, t, v.em), z0: 0, z1: ALTURA, ext: !!eixo.ext, eixo: ie, estado: eixo.estado });
-    const r = retangulo(eixo, v.em, v.em + v.l);
-    if (v.tipo === 'janela') {
-      const peitoril = v.grande ? 0.05 : 0.9;
-      paredes.push({ r, z0: 0, z1: peitoril, ext: true, eixo: ie, baixo: true, estado: eixo.estado });
-      paredes.push({ r, z0: 2.25, z1: ALTURA, ext: true, eixo: ie, estado: eixo.estado });
-      vaos.push({ tipo: 'janela', r, h: eixo.a[1] === eixo.b[1], z0: peitoril, z1: 2.25, grande: !!v.grande, n: eixo.n });
-    } else {
-      paredes.push({ r, z0: 2.15, z1: ALTURA, ext: !!eixo.ext, eixo: ie, estado: eixo.estado });
-      vaos.push({ tipo: v.tipo, r, h: eixo.a[1] === eixo.b[1], lado: v.lado || 1, l: v.l });
+// Gera os troços de parede (e os vãos) de uma lista de eixos, para uma
+// altura de parede; as cotas z são relativas ao pavimento do piso
+function gerar(lista, altura, alvoParedes, alvoVaos) {
+  lista.forEach((eixo, ie) => {
+    const comp = Math.hypot(eixo.b[0] - eixo.a[0], eixo.b[1] - eixo.a[1]);
+    const base = { ext: !!eixo.ext, eixo: ie, estado: eixo.estado };
+    let t = 0;
+    const ordenados = [...eixo.vaos].sort((p, q) => p.em - q.em);
+    for (const v of ordenados) {
+      if (v.em > t) alvoParedes.push({ ...base, r: retangulo(eixo, t, v.em), z0: 0, z1: altura });
+      const r = retangulo(eixo, v.em, v.em + v.l);
+      if (v.tipo === 'janela') {
+        const peitoril = v.grande ? 0.05 : 0.9;
+        const verga = Math.min(2.25, altura - 0.2);
+        alvoParedes.push({ ...base, r, z0: 0, z1: peitoril, ext: true, baixo: true });
+        alvoParedes.push({ ...base, r, z0: verga, z1: altura, ext: true });
+        alvoVaos.push({ tipo: 'janela', r, h: eixo.a[1] === eixo.b[1], z0: peitoril, z1: verga, grande: !!v.grande, n: eixo.n });
+      } else {
+        alvoParedes.push({ ...base, r, z0: Math.min(2.15, altura - 0.15), z1: altura });
+        alvoVaos.push({ tipo: v.tipo, r, h: eixo.a[1] === eixo.b[1], lado: v.lado || 1, l: v.l });
+      }
+      t = v.em + v.l;
     }
-    t = v.em + v.l;
-  }
-  if (t < comp - 1e-6) paredes.push({ r: retangulo(eixo, t, comp), z0: 0, z1: ALTURA, ext: !!eixo.ext, eixo: ie, estado: eixo.estado });
-});
+    if (t < comp - 1e-6) alvoParedes.push({ ...base, r: retangulo(eixo, t, comp), z0: 0, z1: altura });
+  });
+}
+
+export const paredes = []; // { r, z0, z1, ext, ordem, estado }
+export const vaos = []; // { tipo, r, h, lado, grande, n }
+gerar(eixos, ALTURA, paredes, vaos);
 
 // Ordem de construção das paredes novas: exteriores primeiro, de poente
 // para nascente (as paredes a manter já lá estão)
@@ -163,12 +170,13 @@ paredes.forEach((p, i) => {
 const ordens = [...paredes].sort((a, b) => a.ordem - b.ordem);
 ordens.forEach((p, k) => (p.ordem = k / (ordens.length - 1)));
 
-// Escada (caixa entre a casa e a ampliação): degraus [x0, y0, x1, y1, z]
-export const escada = Array.from({ length: 11 }, (_, i) => [11.27, 4.1 - (i + 1) * 0.22, 12.03, 4.1 - i * 0.22, (i + 1) * 0.19]);
+// Escada para o sótão (entre a cozinha/sala e a casa existente), a subir
+// para sul até ao piso 1: degraus [x0, y0, x1, y1, z]
+export const escada = Array.from({ length: 11 }, (_, i) => [11.27, 1.75 + i * 0.26, 12.03, 1.75 + (i + 1) * 0.26, ((i + 1) * ALTURA) / 11]);
 
 // Coberturas: duas águas (cumeeira ao longo do lote) e uma laje plana
 export const coberturas = [
-  { tipo: 'duas-aguas', x0: 4.6, x1: LARGURA + 0.15, y0: -0.2, y1: PROFUNDIDADE + 0.2, subida: 2.4 },
+  { tipo: 'duas-aguas', x0: 4.6, x1: LARGURA + 0.15, y0: -0.2, y1: PROFUNDIDADE + 0.2, subida: 3.2, cumeeira: 4.55 },
   { tipo: 'plana', r: [-0.1, -0.1, 4.85, 2.75] },
 ];
 
@@ -262,3 +270,41 @@ export const notas = [
   { tipo: 'linha', pts: [[0.3, -0.45], [0.3, -0.8], [12.0, -0.8], [12.0, -0.45]] },
   { tipo: 'texto', x: 6.15, y: -1.35, t: 'construção anexa e logradouro' },
 ];
+
+// Piso 1: o sótão passa a ser habitável, numa faixa ao longo da cumeeira
+// (sala, chegada da escada, instalação sanitária, arrumos e varanda a norte)
+const PISO1_Z = ALTURA;
+const MEIA = 2.2; // altura das paredes do sótão (meias-paredes sob o telhado)
+const y0P = 3.28;
+const y1P = 5.82;
+const eixosPiso1 = [
+  { a: [4.85, y0P], b: [18.8, y0P], e: INT, vaos: [] },
+  { a: [4.85, y1P], b: [18.8, y1P], e: INT, vaos: [] },
+  { a: [11.4, y0P], b: [11.4, y1P], e: INT, vaos: [{ em: 1.4, l: 0.9, tipo: 'vao' }] },
+  { a: [12.66, y0P], b: [12.66, 4.76], e: INT, vaos: [] },
+  { a: [12.66, 4.76], b: [15.15, 4.76], e: INT, vaos: [{ em: 0.8, l: 0.7, tipo: 'porta', lado: -1 }] },
+  { a: [15.15, y0P], b: [15.15, y1P], e: INT, vaos: [{ em: 1.6, l: 0.8, tipo: 'porta', lado: 1 }] },
+  { a: [18.8, y0P], b: [18.8, y1P], e: 0.15, n: [1, 0], vaos: [{ em: 0.2, l: 2.1, tipo: 'janela', grande: true }] },
+];
+const paredesPiso1 = [];
+gerar(eixosPiso1, MEIA, paredesPiso1, []);
+
+export const piso1 = {
+  z: PISO1_Z,
+  altura: MEIA,
+  laje: [4.85, y0P, LARGURA - 0.15, y1P],
+  paredes: paredesPiso1,
+  mobiliario: [
+    // sala do sótão: mesa, cadeiras e sofá
+    [6.1, 4.4, 7.2, 5.5, 0.75],
+    [5.7, 4.55, 6.05, 4.9, 0.45], [5.7, 5.0, 6.05, 5.35, 0.45],
+    [7.25, 4.55, 7.6, 4.9, 0.45], [7.25, 5.0, 7.6, 5.35, 0.45],
+    [8.0, 3.45, 9.9, 4.2, 0.8], [8.0, 4.2, 8.75, 5.4, 0.8],
+    // instalação sanitária
+    [12.8, 3.4, 13.3, 3.95, 0.4], [13.65, 3.4, 14.45, 3.85, 0.85], [14.3, 3.95, 15.05, 4.7, 0.06],
+    // arrumos
+    [15.3, 3.4, 18.65, 3.85, 1.8],
+    // varanda: banco
+    [19.05, 5.15, 20.4, 5.65, 0.45],
+  ],
+};

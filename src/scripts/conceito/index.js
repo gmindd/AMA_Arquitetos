@@ -10,9 +10,11 @@ import * as modeloReabilitacao from './modelo-reabilitacao.js';
 import { iniciarFachada } from './fachada.js';
 import { iniciarPedido } from './pedido.js';
 import { iniciarIntro } from './intro.js';
+import { iniciarTema } from './tema.js';
 
 const MODELOS = { processo: modeloCasa, reabilitacao: modeloReabilitacao };
 
+iniciarTema();
 const intro = iniciarIntro();
 iniciarPrancheta();
 iniciarConversa();
@@ -26,23 +28,15 @@ intro.then(() => {
   iniciarParalaxe();
 });
 
-// Passo 01: nome e programa do visitante
+// Passo 01: nome do visitante
 function iniciarConversa() {
   const nome = document.querySelector('[data-nome]');
-  const etiquetas = [...document.querySelectorAll('[data-programa]')];
   if (nome) {
     nome.value = estado.nome;
     nome.addEventListener('input', () => definir({ nome: nome.value }));
     nome.addEventListener('keydown', (e) => e.key === 'Enter' && nome.blur());
   }
-  etiquetas.forEach((b) =>
-    b.addEventListener('click', () => {
-      const escolhido = b.dataset.programa;
-      definir({ programa: estado.programa === escolhido ? '' : escolhido });
-    }),
-  );
   ouvir((e, mudou) => {
-    etiquetas.forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.programa === e.programa)));
     if (nome && 'nome' in mudou && document.activeElement !== nome) nome.value = e.nome;
   });
 

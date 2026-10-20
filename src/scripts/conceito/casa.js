@@ -26,7 +26,7 @@ const rgba = (c, a = 1) => `rgba(${c[0]},${c[1]},${c[2]},${a})`;
 // Fases da obra e o ponto (0–1 do progresso de obra) em que ficam feitas
 export const FASES_OBRA = {
   processo: [0.04, 0.16, 0.5, 0.74, 0.86, 0.99],
-  reabilitacao: [0.05, 0.2, 0.42, 0.6, 0.74, 0.99],
+  reabilitacao: [0.05, 0.2, 0.5, 0.74, 0.86, 0.99],
 };
 
 export function iniciarCasa({ seccao, tela, dica, passos, aoPasso, aoObra, aoLeitura, modelo, roteiro = 'processo' }) {
@@ -42,6 +42,8 @@ export function iniciarCasa({ seccao, tela, dica, passos, aoPasso, aoObra, aoLei
   const levantamento = modelo.levantamento || [];
   const notasModelo = modelo.notas || [];
   const margens = modelo.margens || [2.6, 1.9, 1.6, 2.9];
+  const piso1 = modelo.piso1 || null;
+  const EXPLODE = 2.8; // afastamento do piso 1 na axonometria explodida da entrega
   const R = roteiro === 'reabilitacao';
   // Cantos de cada volume construído
   const CANTOS = pegadas.flatMap(([x0, y0, x1, y1]) => [[x0, y0], [x1, y0], [x1, y1], [x0, y1]]);
@@ -132,7 +134,7 @@ export function iniciarCasa({ seccao, tela, dica, passos, aoPasso, aoObra, aoLei
   }
 
   // Enquadra a caixa da casa (e da grua, quando existe) na área do palco
-  function enquadrar(c, grua) {
+  function enquadrar(c, grua, afasta = 0) {
     const area = areaPalco();
     const pts = [];
     // Em planta há margem para notas e cotas; em axonometria aperta-se
@@ -140,7 +142,8 @@ export function iniciarCasa({ seccao, tela, dica, passos, aoPasso, aoObra, aoLei
     const [me, mt, md, mb] = margens.map((v) => v * mg);
     const caixa = [[-me, -mt], [LARGURA + md, -mt], [LARGURA + md, PROFUNDIDADE + mb], [-me, PROFUNDIDADE + mb]];
     caixa.forEach(([x, y]) => pts.push([x, y, 0]));
-    CANTOS.forEach(([x, y]) => pts.push([x, y, ALTURA + 0.4]));
+    const topo = piso1 ? piso1.z + piso1.altura + afasta : ALTURA + 0.4;
+    CANTOS.forEach(([x, y]) => pts.push([x, y, topo]));
     const base = { ...c, s: 1, ox: 0, oy: 0 };
     let minX = Infinity, maxX = -Infinity, minY = Infinity, maxY = -Infinity;
     for (const [x, y, z] of pts) {
@@ -281,7 +284,7 @@ export function iniciarCasa({ seccao, tela, dica, passos, aoPasso, aoObra, aoLei
   // Telhado de duas águas com cumeeira ao longo de x
   function duasAguas(t, zb, estilo, lista) {
     const { x0, x1, y0, y1, subida } = t;
-    const ym = (y0 + y1) / 2;
+    const ym = t.cumeeira ?? (y0 + y1) / 2;
     const zt = zb + subida;
     const juntas = (ya) => {
       const l = [];
@@ -329,8 +332,11 @@ export function iniciarCasa({ seccao, tela, dica, passos, aoPasso, aoObra, aoLei
     const demolir = R ? emInOut(seg(bp, 0.07, 0.2)) : 1;
 
     // Cores (papel e tinta trocam durante a obra)
-    const tinta = mistura(NEGRO, OSSO, d);
-    const papel = mistura(OSSO, NEGRO, d);
+    // Tema escuro troca papel e tinta; a obra inverte o tema (tema XOR d)
+    const tema = document.documentElement.dataset.tema === 'escuro' ? 1 : 0;
+    const inv = tema + d - 2 * tema * d;
+    const tinta = mistura(NEGRO, OSSO, inv);
+    const papel = mistura(OSSO, NEGRO, inv);
     if (Math.abs(d - dAnterior) > 0.002) {
       document.documentElement.style.setProperty('--d', d.toFixed(3));
       dAnterior = d;
@@ -338,7 +344,8 @@ export function iniciarCasa({ seccao, tela, dica, passos, aoPasso, aoObra, aoLei
 
     // Câmara: planta → axonometria; na entrega continua a rodar devagar
     const orbita = seg(s, 4.5, 5.4) * 0.22;
-    cam = enquadrar({ a: lerp(0, modelo.rotacao ?? -0.62, camP) - orbita, b: lerp(0, 0.98, camP), e: camP }, grua);
+    const afasta = piso1 ? emInOut(seg(s, 4.55, 5.0)) * EXPLODE : 0;
+    cam = enquadrar({ a: lerp(0, modelo.rotacao ?? -0.62, camP) - orbita, b: lerp(0, 0.98, camP), e: camP }, grua, afasta);
 
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
     ctx.clearRect(0, 0, L, A);
@@ -688,10 +695,13 @@ export function iniciarCasa({ seccao, tela, dica, passos, aoPasso, aoObra, aoLei
     if (aSimb > 0 && escada.length) {
       const ex = (escada[0][0] + escada[0][2]) / 2;
       const ultimo = escada[escada.length - 1];
-      polilinhaParcial([projetar(ex, escada[0][3] - 0.1), projetar(ex, ultimo[1] + 0.15)], simbolos);
-      const ponta = projetar(ex, ultimo[1] + 0.15);
-      linha(ponta, projetar(ex - 0.15, ultimo[1] + 0.4));
-      linha(ponta, projetar(ex + 0.15, ultimo[1] + 0.4));
+      const sobe = Math.sign(ultimo[1] - escada[0][1]) || 1;
+      const yi = sobe > 0 ? escada[0][1] + 0.1 : escada[0][3] - 0.1;
+      const yf = sobe > 0 ? ultimo[3] - 0.15 : ultimo[1] + 0.15;
+      polilinhaParcial([projetar(ex, yi), projetar(ex, yf)], simbolos);
+      const ponta = projetar(ex, yf);
+      linha(ponta, projetar(ex - 0.15, yf - sobe * 0.25));
+      linha(ponta, projetar(ex + 0.15, yf - sobe * 0.25));
     }
     if (aSimb > 0) {
       vaos.forEach((v) => {
@@ -872,7 +882,7 @@ export function iniciarCasa({ seccao, tela, dica, passos, aoPasso, aoObra, aoLei
         if (z1 > 0.02) faces([x0, y0, x1, y1], 0, z1, { tipo: 'parede', alfa: m * (1 - demolir * 0.6), recorte: true, manter: true, preenche: 1 }, lista);
       });
     }
-    const desce = m > 0 ? emOut(seg(bp, 0.62, 0.74)) : 0;
+    const desce = m > 0 ? emOut(R && piso1 ? seg(bp, 0.76, 0.86) : seg(bp, 0.62, 0.74)) : 0;
     const aCob = desce * (1 - levanta);
     if (aCob > 0.01) {
       const zc = ALTURA + (1 - desce) * 6 + levanta * 7;
@@ -888,6 +898,28 @@ export function iniciarCasa({ seccao, tela, dica, passos, aoPasso, aoObra, aoLei
         if (z * sobe > 0.01) faces([x0, y0, x1, y1], 0, Math.min(z * sobe, corte), { tipo: 'movel', alfa: seg(camP, 0, 0.4) }, lista);
       });
     }
+    if (piso1 && camP > 0) {
+      const zP = piso1.z + afasta;
+      const fLaje = m > 0 ? lerp(1, emOut(seg(bp, 0.62, 0.68)), m) : 1;
+      const fPar = m > 0 ? lerp(1, emOut(seg(bp, 0.66, 0.76)), m) : 1;
+      const aP = seg(camP, 0.3, 0.8);
+      const corteP = lerp(piso1.altura, 1.2, levanta);
+      if (fLaje > 0.01) {
+        faces(piso1.laje, zP - 0.22 * fLaje, zP, { tipo: 'laje', alfa: aP * fLaje }, lista);
+      }
+      piso1.paredes.forEach((p) => {
+        const z1 = Math.min(p.z1, piso1.altura * fPar, corteP);
+        if (z1 <= p.z0 + 0.001) return;
+        const recorte = z1 >= p.z1 - 0.001 || corteP < p.z1;
+        faces(p.r, zP + p.z0, zP + z1, { tipo: 'parede', alfa: aP, recorte }, lista);
+      });
+      if (moveis > 0) {
+        piso1.mobiliario.forEach((mv, i) => {
+          const v = emOut(seg(moveis, 0.3 + (i / piso1.mobiliario.length) * 0.4, 0.7 + (i / piso1.mobiliario.length) * 0.3));
+          if (v > 0) faces(mv.slice(0, 4), zP, zP + Math.min(mv[4], corteP) * v, { tipo: 'movel', alfa: v }, lista);
+        });
+      }
+    }
     if (moveis > 0) {
       mobiliario.forEach((mv, i) => {
         const v = emOut(seg(moveis, (i / mobiliario.length) * 0.6, (i / mobiliario.length) * 0.6 + 0.4));
@@ -898,6 +930,22 @@ export function iniciarCasa({ seccao, tela, dica, passos, aoPasso, aoObra, aoLei
     pintarFaces(lista);
 
     andaimes(true);
+
+    if (piso1 && camP > 0) {
+      const aEt = Math.max(seg(camP, 0.7, 1) * (1 - m), seg(levanta, 0.5, 1));
+      if (aEt > 0) {
+        // etiquetas na ponta poente, fora do volume
+        const ym = (piso1.laje[1] + piso1.laje[3]) / 2;
+        const p0 = projetar(-0.4, ym, piso1.z + afasta + 0.6);
+        ctx.globalAlpha = aEt;
+        texto('PISO 1 · SÓTÃO', p0[0] - 8, p0[1], { tam: 10, mono: true, peso: 700, alinha: 'right', cor: T });
+        if (afasta > 0.5) {
+          const p1 = projetar(-0.4, ym + 1.5, 0.6);
+          texto('RÉS-DO-CHÃO', p1[0] - 8, p1[1], { tam: 10, mono: true, peso: 700, alinha: 'right', cor: T });
+        }
+        ctx.globalAlpha = 1;
+      }
+    }
 
     // Árvore do pátio: copa em planta; em axonometria, tronco e copa no ar
     const aArv = !arvore ? 0 : Math.max(poche, camP) * (1 - levanta * 0) * (m > 0 ? lerp(1, seg(bp, 0.86, 1), m) : 1);
@@ -1104,6 +1152,7 @@ export function iniciarCasa({ seccao, tela, dica, passos, aoPasso, aoObra, aoLei
   medir();
   S = Sv = calcularS();
   window.addEventListener('resize', remedir);
+  window.addEventListener('ama:tema', () => desenhar(Sv, performance.now()));
   // As fontes podem mudar a altura dos passos: volta a medir quando carregam
   document.fonts?.ready.then(remedir);
   window.addEventListener('load', remedir);

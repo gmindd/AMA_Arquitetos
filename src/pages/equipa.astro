@@ -1,0 +1,57 @@
+---
+// Equipa: página própria com as duas assinaturas do gabinete e a ligação
+// entre arquitetura e obra (equipa de construção própria).
+import Conceito from '../layouts/Conceito.astro';
+---
+
+<Conceito
+  title="Equipa · AMA André Melissa Arquitetos"
+  description="André Machado e Melissa Fazendeiro, arquitetos fundadores do AMA, em Viana do Castelo, com equipa de construção própria."
+  pagina="equipa"
+>
+  <section class="equipa equipa--pagina">
+    <div class="seccao__cabeca">
+      <p class="sobretitulo" data-aparece>Equipa · Quem assina</p>
+      <h1 class="seccao__titulo seccao__titulo--grande" data-palavras>Cada folha leva duas assinaturas.</h1>
+      <p class="seccao__lead" data-aparece>
+        O AMA nasceu em 2022, em Viana do Castelo, pelas mãos de André Machado e
+        Melissa Fazendeiro. Um gabinete pequeno de propósito: quem o recebe na
+        primeira conversa é quem está consigo no dia da entrega.
+      </p>
+    </div>
+
+    <div class="assinaturas">
+      <figure class="assinatura" data-aparece>
+        <svg viewBox="0 0 320 90" aria-hidden="true"><path pathLength="1" d="M6 62 C18 22 36 16 32 48 C29 74 52 70 60 40 C66 18 76 28 72 52 C69 72 88 66 96 44 C104 24 114 32 110 54 C107 72 126 66 136 46 L158 24 C166 18 170 38 160 58 C152 74 178 62 192 46 C206 30 214 44 208 58 C202 72 232 60 248 44 C262 32 276 42 314 38" /></svg>
+        <span class="assinatura__linha"></span>
+        <figcaption><strong>André Machado</strong><span>Arquiteto</span></figcaption>
+      </figure>
+      <figure class="assinatura" data-aparece>
+        <svg viewBox="0 0 320 90" aria-hidden="true"><path pathLength="1" d="M8 66 C14 30 30 14 40 30 C48 44 30 70 46 66 C60 62 64 32 74 34 C84 36 74 64 88 62 C100 60 104 36 114 38 C124 40 116 66 130 62 C144 58 150 26 164 22 C178 18 172 50 160 64 C150 76 180 66 196 50 C210 36 222 40 218 56 C214 70 244 58 262 46 C276 36 290 44 312 40" /></svg>
+        <span class="assinatura__linha"></span>
+        <figcaption><strong>Melissa Fazendeiro</strong><span>Arquiteta</span></figcaption>
+      </figure>
+    </div>
+  </section>
+
+  <section class="reab-seccao">
+    <div class="seccao__cabeca">
+      <p class="sobretitulo" data-aparece>Arquitetura e obra</p>
+      <h2 class="seccao__titulo" data-palavras>Quem desenha acompanha até ao fim.</h2>
+      <p class="seccao__lead" data-aparece>
+        Ao lado dos arquitetos trabalha a equipa de construção própria do
+        gabinete, que executa as obras de reabilitação. O desenho e a obra ficam
+        nas mesmas mãos, do levantamento à entrega da chave.
+      </p>
+    </div>
+
+    <div class="reab-cta" data-aparece>
+      <h2>Vamos conversar sobre o seu projeto?</h2>
+      <p>Uma casa nova, uma reabilitação ou um interior: a primeira conversa é connosco.</p>
+      <p class="equipa__acoes">
+        <a class="botao" href="/#contacto">Contactar</a>
+        <a class="equipa__ligacao" href="/reabilitacao">Ver reabilitação</a>
+      </p>
+    </div>
+  </section>
+</Conceito>

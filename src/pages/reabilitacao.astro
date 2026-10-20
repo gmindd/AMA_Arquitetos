@@ -70,21 +70,21 @@ const passosCaso = [
     fase: 'Levantamento',
     titulo: 'Primeiro, medimos o que existe.',
     texto:
-      'Antes de desenhar, registamos o edifício tal como está: paredes, vãos, cotas e o estado de cada elemento. Neste caso, uma casa térrea em pedra com uma construção anexa no logradouro.',
+      'Antes de desenhar, registamos o edifício tal como está: paredes, vãos, cotas e o estado de cada elemento. Neste caso, uma casa em pedra com uma construção anexa no logradouro.',
   },
   {
     n: '02',
     fase: 'Manter, demolir, construir',
     titulo: 'O projeto decide o que fica.',
     texto:
-      'Mantêm-se as paredes de pedra da casa. A construção anexa é demolida e dá lugar a uma cozinha e sala abertas para um pátio interior. O interior é todo redesenhado.',
+      'Mantêm-se as paredes de pedra da casa. A construção anexa é demolida e dá lugar a uma cozinha e sala abertas para um pátio interior. O sótão passa a ser habitável e o interior é todo redesenhado.',
   },
   {
     n: '03',
     fase: 'Modelo',
     titulo: 'O antigo e o novo, lado a lado.',
     texto:
-      'Antes da obra, a casa já se percorre. As paredes que ficam e as que nascem leem-se no mesmo modelo, e cada decisão é tomada consigo.',
+      'Antes da obra, a casa já se percorre. As paredes que ficam, as que nascem e o novo piso no sótão leem-se no mesmo modelo, e cada decisão é tomada consigo.',
   },
   {
     n: '04',
@@ -101,7 +101,7 @@ const passosCaso = [
       'A pedra que já lá estava e o desenho novo passam a ser uma só casa, entregue pelas mesmas mãos que a desenharam e construíram.',
   },
 ];
-const fasesObraCaso = ['Escoramento', 'Demolições', 'Estrutura nova', 'Paredes', 'Cobertura', 'Acabamentos'];
+const fasesObraCaso = ['Escoramento', 'Demolições', 'Estrutura nova', 'Piso 1', 'Cobertura', 'Acabamentos'];
 
 ---
 
@@ -132,7 +132,7 @@ const fasesObraCaso = ['Escoramento', 'Demolições', 'Estrutura nova', 'Paredes
       <p class="sobretitulo" data-aparece>02 · Caso real</p>
       <h2 class="seccao__titulo" data-palavras>Do levantamento à entrega da chave.</h2>
       <p class="seccao__lead" data-aparece>
-        A reabilitação e ampliação de uma casa térrea em pedra, desenhada pela AMA.
+        A reabilitação e ampliação de uma casa em pedra, desenhada pela AMA.
         Desça e acompanhe a obra a acontecer na planta.
       </p>
     </div>
@@ -156,7 +156,7 @@ const fasesObraCaso = ['Escoramento', 'Demolições', 'Estrutura nova', 'Paredes
               {i === 0 && (
                 <ul class="lista-tracos">
                   <li>Reabilitação e ampliação</li>
-                  <li>Casa térrea em pedra</li>
+                  <li>Casa em pedra, rés-do-chão e sótão</li>
                   <li>Projeto AMA</li>
                 </ul>
               )}

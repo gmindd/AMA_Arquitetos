@@ -11,7 +11,7 @@ interface Props {
   /** A página abre com a intro "André e Melissa Arquitetos" → AMA */
   intro?: boolean;
   /** Página ativa no menu */
-  pagina?: 'inicio' | 'reabilitacao' | 'legal';
+  pagina?: 'inicio' | 'reabilitacao' | 'equipa' | 'legal';
 }
 
 const {
@@ -30,6 +30,19 @@ const {
     <title>{title}</title>
     <meta name="description" content={description} />
     <meta name="theme-color" content="#e6e4e0" />
+    <script is:inline>
+      // Tema antes de pintar: a escolha do visitante (se a fez) ou a do
+      // dispositivo; sem nenhuma, fica o claro.
+      (function () {
+        try {
+          var t = localStorage.getItem('ama-tema');
+          if (t !== 'claro' && t !== 'escuro') t = matchMedia('(prefers-color-scheme: dark)').matches ? 'escuro' : 'claro';
+          document.documentElement.dataset.tema = t;
+        } catch (e) {
+          document.documentElement.dataset.tema = 'claro';
+        }
+      })();
+    </script>
     <link rel="icon" href="/favicon.svg" />
     <noscript><style>.alcado * { animation-play-state: running !important; }</style></noscript>
     {
@@ -80,8 +93,12 @@ const {
       <nav class="topo__nav" aria-label="Secções">
         <a href="/#processo">Processo</a>
         <a href="/reabilitacao" aria-current={pagina === 'reabilitacao' ? 'page' : undefined}>Reabilitação</a>
-        <a href="/#equipa">Equipa</a>
+        <a href="/equipa" aria-current={pagina === 'equipa' ? 'page' : undefined}>Equipa</a>
       </nav>
+      <button class="topo__tema" type="button" data-tema-botao aria-label="Mudar para modo escuro">
+        <span class="topo__tema-icone" aria-hidden="true"></span>
+        <span class="topo__tema-texto" data-tema-texto>Escuro</span>
+      </button>
       <a class="topo__cta" href="/#contacto">Contactar</a>
     </header>
 

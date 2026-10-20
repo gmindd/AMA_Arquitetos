@@ -12,9 +12,13 @@
   --bone: #e6e4e0;
   --white: #ffffff;
 
+  /* --tema: 0 claro, 1 escuro. --d (obra) inverte o tema em contínuo:
+     --inv = tema XOR d, para que a obra seja sempre o "negativo" */
+  --tema: 0;
   --d: 0;
-  --tinta: color-mix(in srgb, var(--bone) calc(var(--d) * 100%), var(--black));
-  --papel: color-mix(in srgb, var(--black) calc(var(--d) * 100%), var(--bone));
+  --inv: calc(var(--tema) + var(--d) - 2 * var(--tema) * var(--d));
+  --tinta: color-mix(in srgb, var(--bone) calc(var(--inv) * 100%), var(--black));
+  --papel: color-mix(in srgb, var(--black) calc(var(--inv) * 100%), var(--bone));
   --linha: color-mix(in srgb, var(--tinta) 18%, transparent);
   --grelha: color-mix(in srgb, var(--tinta) 4.5%, transparent);
   --grelha-forte: color-mix(in srgb, var(--tinta) 8%, transparent);
@@ -28,6 +32,11 @@
   --regua: 22px;
   --gutter: clamp(1.25rem, 4vw, 4rem);
   --ease: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+[data-tema='escuro'] {
+  --tema: 1;
+  color-scheme: dark;
 }
 
 /* ---------- Base ---------- */
@@ -407,6 +416,7 @@ html {
 
 .intro-ativa main,
 .intro-ativa .topo__nav,
+.intro-ativa .topo__tema,
 .intro-ativa .topo__cta {
   opacity: 0;
 }
@@ -414,6 +424,7 @@ html {
 /* Viagem do logótipo: a página entra em fade in ao mesmo tempo */
 .intro-saida main,
 .intro-saida .topo__nav,
+.intro-saida .topo__tema,
 .intro-saida .topo__cta {
   opacity: 1;
   transition: opacity 0.5s ease;
@@ -451,6 +462,34 @@ html {
 .topo__nav a[aria-current='page']::after {
   transform: scaleX(1);
   transform-origin: left;
+}
+
+/* Botão de tema */
+.topo__tema {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.55rem 0.2rem;
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+
+/* Meio círculo: o lado cheio roda com o tema */
+.topo__tema-icone {
+  flex: none;
+  width: 13px;
+  height: 13px;
+  border: 1px solid currentColor;
+  border-radius: 50%;
+  background: linear-gradient(90deg, currentColor 50%, transparent 50%);
+  transition: transform 0.5s var(--ease);
+}
+
+[data-tema='escuro'] .topo__tema-icone {
+  transform: rotate(180deg);
 }
 
 .topo__cta {
@@ -1620,6 +1659,28 @@ html {
   margin-bottom: 1.75rem;
 }
 
+/* Página da Equipa */
+.equipa--pagina {
+  padding-top: calc(var(--regua) + 18vh);
+}
+
+.equipa__acoes {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 1.5rem;
+  margin-bottom: 0;
+}
+
+.equipa__ligacao {
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+
 /* Páginas legais */
 .documento {
   max-width: 760px;
@@ -1768,7 +1829,7 @@ html {
     display: none;
   }
 
-  .topo__cta {
+  .topo__tema {
     margin-left: auto;
   }
 }
@@ -1846,7 +1907,8 @@ html {
 
   .obra__fases,
   .lista-tracos,
-  .passo__nota {
+  .passo__nota,
+  .conversa {
     display: none;
   }
 
