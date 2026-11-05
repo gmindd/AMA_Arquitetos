@@ -19,7 +19,13 @@ Abre com a intro "André e Melissa Arquitetos": três gestos de scroll recolhem 
 | 06 | Entrega | A cobertura levanta, o plano de corte desce, o mobiliário e a luz entram ("A casa é sua, Ana.") |
 | 07 | Pedido | Formulário em forma de quadro de legenda. Ao enviar, recebe o carimbo "Recebido" |
 
-Outras páginas: **`/equipa`** (as duas assinaturas e a ligação à equipa de construção), **`/reabilitacao`** (caso real em cinco fases sobre a planta de um projeto AMA, com o sótão habitável em axonometria explodida na entrega, equipa de construção própria, antes/depois da fachada, tipologias e pormenor construtivo de cobertura), **`/legal`** (identificação, habilitações, Livro de Reclamações, RAL) e **`/privacidade`** (RGPD e cookies).
+O conteúdo divide-se em três partes, que são o menu do site (em ecrãs estreitos, um menu em ecrã inteiro):
+
+- **Processo** (`/`): intro, abertura, o percurso de uma casa nova na planta viva e o pedido de contacto.
+- **Arquitetura** (`/arquitetura`): projetos novos, reabilitações e requalificações, ampliações, interiores e licenciamento; "com ou sem obra"; e o caso real de reabilitação em cinco fases (com o sótão em axonometria explodida na entrega).
+- **Obras** (`/obras`): construção e requalificação com mão-de-obra própria: a equipa de construção, o antes/depois de uma fachada, o que executamos, um pormenor construtivo e como trabalhamos em obra.
+
+Outras páginas: **`/equipa`**, **`/legal`** e **`/privacidade`** (ligadas no rodapé). O endereço antigo `/reabilitacao` redireciona para Arquitetura.
 
 ### Dados legais por preencher
 
@@ -35,7 +41,8 @@ Paleta e regras da marca mantidas: só `#0A0A0A`, `#E6E4E0` e `#FFFFFF` (o branc
 
 ```
 src/pages/index.astro                 → início: intro + 9 folhas
-src/pages/reabilitacao.astro          → página de reabilitação
+src/pages/arquitetura.astro, obras.astro → as páginas de Arquitetura e de Obras
+src/pages/reabilitacao.astro          → redireciona para /arquitetura
 src/pages/legal.astro, privacidade.astro → informação legal e política de privacidade
 src/pages/api/pedido.ts               → recebe o formulário (email via lib/email.ts, recuo para DATA_DIR/mensagens)
 src/lib/legal.ts                      → dados legais da empresa
@@ -51,6 +58,7 @@ src/scripts/conceito/
 ├── estado.js     → nome e programa do visitante
 ├── intro.js      → intro André e Melissa Arquitetos → AMA
 ├── tema.js       → modo claro / escuro
+├── menu.js       → menu em ecrã inteiro (ecrãs estreitos)
 ├── fachada.js    → linha de corte arrastável
 ├── pedido.js     → envio do formulário
 └── revelar.js    → títulos palavra a palavra

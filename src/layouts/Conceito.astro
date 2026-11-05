@@ -11,14 +11,14 @@ interface Props {
   /** A página abre com a intro "André e Melissa Arquitetos" → AMA */
   intro?: boolean;
   /** Página ativa no menu */
-  pagina?: 'inicio' | 'reabilitacao' | 'equipa' | 'legal';
+  pagina?: 'inicio' | 'arquitetura' | 'obras' | 'equipa' | 'legal';
 }
 
 const {
   intro = false,
   pagina = 'inicio',
   title = 'AMA André Melissa Arquitetos · Tudo começa com uma linha',
-  description = 'Gabinete de arquitetura em Viana do Castelo. Projeto, reabilitação e obra com equipa própria, do primeiro traço à entrega da chave.',
+  description = 'Gabinete de arquitetura na Praia da Amorosa, Viana do Castelo. Projeto, reabilitação e obra com equipa própria, do primeiro traço à entrega da chave.',
 } = Astro.props;
 ---
 
@@ -92,15 +92,32 @@ const {
       </a>
       <nav class="topo__nav" aria-label="Secções">
         <a href="/#processo">Processo</a>
-        <a href="/reabilitacao" aria-current={pagina === 'reabilitacao' ? 'page' : undefined}>Reabilitação</a>
-        <a href="/equipa" aria-current={pagina === 'equipa' ? 'page' : undefined}>Equipa</a>
+        <a href="/arquitetura" aria-current={pagina === 'arquitetura' ? 'page' : undefined}>Arquitetura</a>
+        <a href="/obras" aria-current={pagina === 'obras' ? 'page' : undefined}>Obras</a>
       </nav>
       <button class="topo__tema" type="button" data-tema-botao aria-label="Mudar para modo escuro">
         <span class="topo__tema-icone" aria-hidden="true"></span>
         <span class="topo__tema-texto" data-tema-texto>Escuro</span>
       </button>
       <a class="topo__cta" href="/#contacto">Contactar</a>
+      <button class="topo__menu" type="button" aria-expanded="false" aria-controls="menu-movel" data-menu-botao>
+        <span class="topo__menu-traco" aria-hidden="true"></span>
+        <span data-menu-texto>Menu</span>
+      </button>
     </header>
+
+    <!-- Menu em ecrã inteiro (mobile e ecrãs estreitos) -->
+    <nav class="menu-movel" id="menu-movel" aria-label="Menu" hidden data-menu>
+      <ol class="menu-movel__lista">
+        <li><a href="/#processo"><span>01</span>Processo</a></li>
+        <li><a href="/arquitetura" aria-current={pagina === 'arquitetura' ? 'page' : undefined}><span>02</span>Arquitetura</a></li>
+        <li><a href="/obras" aria-current={pagina === 'obras' ? 'page' : undefined}><span>03</span>Obras</a></li>
+      </ol>
+      <div class="menu-movel__extra">
+        <a href="/equipa" aria-current={pagina === 'equipa' ? 'page' : undefined}>Equipa</a>
+        <a class="botao" href="/#contacto">Contactar</a>
+      </div>
+    </nav>
 
 
     <!-- Intro da página (fora do <main>, que fica escondido enquanto corre) -->

@@ -6,7 +6,7 @@ import type { APIRoute } from 'astro';
 import { obterDefinicoes, guardarMensagem, type PedidoOrcamento } from '../../lib/store';
 import { envioDisponivel, enviarPedido } from '../../lib/email';
 
-const PROGRAMAS = ['Casa nova', 'Reabilitação', 'Interiores', 'Reconversão'];
+const PROGRAMAS = ['Projeto novo', 'Reabilitação', 'Obra', 'Projeto e obra'];
 const LIMITE = { nome: 120, contacto: 160, localizacao: 160, mensagem: 4000 };
 
 export const POST: APIRoute = async ({ request, redirect }) => {

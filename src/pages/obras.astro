@@ -1,0 +1,192 @@
+---
+// Obras: construção e requalificação com mão-de-obra própria. A equipa de
+// construção, o antes/depois de uma fachada, o que executamos, um
+// pormenor construtivo e como trabalhamos em obra.
+import Conceito from '../layouts/Conceito.astro';
+import Fachada from '../components/conceito/Fachada.astro';
+import Pormenor from '../components/conceito/Pormenor.astro';
+
+const vantagens = [
+  {
+    titulo: 'Um só interlocutor',
+    texto:
+      'Projeto, licenciamento e obra com a mesma equipa. Há sempre uma pessoa que responde por tudo, do orçamento à entrega da chave.',
+  },
+  {
+    titulo: 'Decisões tomadas em obra',
+    texto:
+      'Quando a obra revela o que o levantamento não mostrava, quem decide está lá. As alterações resolvem-se no local, sem semanas de troca de mensagens entre projetista e empreiteiro.',
+  },
+  {
+    titulo: 'Orçamento e prazo sob controlo',
+    texto:
+      'Quem orçamenta é quem executa. O planeamento da obra nasce com o projeto, não depois dele, e cada fase é acompanhada pelos arquitetos.',
+  },
+  {
+    titulo: 'O pormenor desenhado é o pormenor construído',
+    texto:
+      'Remates, impermeabilizações e acabamentos seguem o projeto, sem interpretações. A responsabilidade não se perde entre empresas.',
+  },
+];
+
+// Ícones a traço (viewBox 64 × 64)
+const trabalhos = [
+  {
+    nome: 'Fachadas e empenas',
+    texto: 'Tratamento de fissuras e humidades, reboco, pintura, revestimentos cerâmicos e azulejo, caixilharia e serralharia.',
+    icone: 'M14 58 V10 H50 V58 M22 18 h8 v10 h-8 Z M34 18 h8 v10 h-8 Z M22 36 h8 v10 h-8 Z M34 36 h8 v10 h-8 Z M8 58 H56',
+  },
+  {
+    nome: 'Coberturas',
+    texto: 'Substituição de telhado, isolamento térmico, impermeabilização, caleiras, rufos e claraboias.',
+    icone: 'M6 34 L32 12 L58 34 M12 30 V54 H52 V30 M10 38 L32 20 L54 38',
+  },
+  {
+    nome: 'Condomínios',
+    texto: 'Obras em partes comuns: fachadas, coberturas, caixas de escada e entradas, em articulação com a administração do prédio.',
+    icone: 'M10 58 V8 H30 V58 M34 58 V20 H54 V58 M16 14 h8 M16 22 h8 M16 30 h8 M16 38 h8 M40 26 h8 M40 34 h8 M40 42 h8 M6 58 H58',
+  },
+  {
+    nome: 'Casas e apartamentos',
+    texto: 'Remodelação integral ou parcial, redistribuição de espaços, cozinhas, casas de banho e instalações.',
+    icone: 'M8 56 V24 L32 8 L56 24 V56 Z M8 56 H56 M26 56 V40 h12 v16 M14 30 h8 v8 h-8 Z',
+  },
+  {
+    nome: 'Centro histórico',
+    texto: 'Edifícios antigos tratados com respeito pelo que já existe, pelos materiais originais e pelas regras de proteção do património.',
+    icone: 'M12 58 V22 H52 V58 M8 22 H56 V16 H8 Z M20 58 V42 a12 12 0 0 1 24 0 V58 M20 28 h6 v8 h-6 Z M38 28 h6 v8 h-6 Z',
+  },
+  {
+    nome: 'Reconversão',
+    texto: 'Lojas, armazéns ou espaços sem uso que ganham uma nova função, de habitação, trabalho ou comércio.',
+    icone: 'M8 56 V18 H56 V56 Z M8 30 H56 M18 56 V40 h12 v16 M38 40 h10 v8 h-10 Z M40 12 l8 6 l-8 6',
+  },
+];
+
+const etapas = [
+  { titulo: 'Visita ao local', texto: 'Vemos o edifício, ouvimos o que precisa e registamos o estado de cada elemento.' },
+  { titulo: 'Orçamento', texto: 'Preparamos o orçamento da obra, com base no levantamento ou no projeto, quando já existe.' },
+  {
+    titulo: 'Planeamento',
+    texto: 'Definimos fases e prazos e articulamos a obra com quem vive ou trabalha no edifício.',
+  },
+  {
+    titulo: 'Execução com equipa própria',
+    texto: 'A nossa equipa executa os trabalhos, com os arquitetos a acompanhar cada fase.',
+  },
+  { titulo: 'Entrega', texto: 'Percorremos a obra consigo, ponto por ponto, antes de a dar por concluída.' },
+];
+---
+
+<Conceito
+  title="Obras · AMA André Melissa Arquitetos"
+  description="Construção e requalificação com mão-de-obra própria: fachadas, coberturas, condomínios, remodelações e obras de reabilitação na Praia da Amorosa e em Viana do Castelo."
+  pagina="obras"
+>
+  <!-- O·01 · Abertura -->
+  <section class="reab-abertura">
+    <p class="sobretitulo" data-aparece>Obras · Mão-de-obra própria</p>
+    <h1 class="seccao__titulo seccao__titulo--grande" data-palavras>Construímos e requalificamos com a nossa equipa.</h1>
+    <p class="seccao__lead" data-aparece>
+      Construção, fachadas e coberturas, remodelações e obras em condomínios,
+      executadas pela equipa de construção do gabinete. Quem desenha acompanha a
+      obra, e quem constrói conhece o desenho.
+    </p>
+    <a class="deslizar deslizar--estatico" href="#equipa-obra" data-aparece>
+      <span>Porque trabalhamos assim</span>
+      <span class="deslizar__seta" aria-hidden="true"></span>
+    </a>
+  </section>
+
+  <!-- O·02 · Equipa de construção própria -->
+  <section class="reab-seccao reab-equipa" id="equipa-obra">
+    <div class="seccao__cabeca">
+      <p class="sobretitulo" data-aparece>01 · Equipa de construção própria</p>
+      <h2 class="seccao__titulo" data-palavras>Quem desenha, constrói.</h2>
+      <p class="seccao__lead" data-aparece>
+        A AMA tem equipa de construção própria. Não entregamos a obra a um
+        empreiteiro desconhecido nem a gerimos à distância: os arquitetos estão em
+        obra, lado a lado com a equipa que a executa.
+      </p>
+    </div>
+    <ol class="vantagens">
+      {vantagens.map((v, i) => (
+        <li data-aparece style={`transition-delay:${i * 90}ms`}>
+          <span class="vantagens__n">{String(i + 1).padStart(2, '0')}</span>
+          <h3>{v.titulo}</h3>
+          <p>{v.texto}</p>
+        </li>
+      ))}
+    </ol>
+  </section>
+
+  <!-- O·03 · Antes e depois -->
+  <section class="reab-seccao" id="antes-depois">
+    <div class="seccao__cabeca">
+      <p class="sobretitulo" data-aparece>02 · Antes e depois</p>
+      <h2 class="seccao__titulo" data-palavras>O mesmo prédio, no mesmo desenho.</h2>
+      <p class="seccao__lead" data-aparece>
+        À esquerda, o levantamento: fissuras, azulejo em falta, caixilharia gasta.
+        À direita, a fachada requalificada. Arraste a linha para comparar.
+      </p>
+    </div>
+    <Fachada />
+  </section>
+
+  <!-- O·04 · O que executamos -->
+  <section class="reab-seccao">
+    <div class="seccao__cabeca">
+      <p class="sobretitulo" data-aparece>03 · O que executamos</p>
+      <h2 class="seccao__titulo" data-palavras>Do telhado à caixa de escada.</h2>
+    </div>
+    <ul class="tipologias">
+      {trabalhos.map((t, i) => (
+        <li class="tipologia" data-aparece style={`transition-delay:${(i % 3) * 90}ms`}>
+          <svg viewBox="0 0 64 64" aria-hidden="true">
+            <path d={t.icone} pathLength="1" />
+          </svg>
+          <h3>{t.nome}</h3>
+          <p>{t.texto}</p>
+        </li>
+      ))}
+    </ul>
+  </section>
+
+  <!-- O·05 · Pormenor construtivo -->
+  <section class="reab-seccao">
+    <div class="seccao__cabeca">
+      <p class="sobretitulo" data-aparece>04 · Pormenor construtivo</p>
+      <h2 class="seccao__titulo" data-palavras>O que não se vê também se constrói com rigor.</h2>
+      <p class="seccao__lead" data-aparece>
+        Numa cobertura requalificada, cada camada tem uma função. A nossa equipa
+        executa o pormenor tal como foi desenhado.
+      </p>
+    </div>
+    <Pormenor />
+  </section>
+
+  <!-- O·06 · Como trabalhamos em obra -->
+  <section class="reab-seccao">
+    <div class="seccao__cabeca">
+      <p class="sobretitulo" data-aparece>05 · Como trabalhamos</p>
+      <h2 class="seccao__titulo" data-palavras>Da visita à entrega, sem mudar de mãos.</h2>
+    </div>
+    <ol class="etapas-obra">
+      {etapas.map((e, i) => (
+        <li data-aparece>
+          <span class="etapas-obra__n">{String(i + 1).padStart(2, '0')}</span>
+          <div>
+            <h3>{e.titulo}</h3>
+            <p>{e.texto}</p>
+          </div>
+        </li>
+      ))}
+    </ol>
+
+    <div class="reab-cta" data-aparece>
+      <h2>Tem uma obra para fazer?</h2>
+      <p>Conte-nos o que se passa. Marcamos uma visita para ver o edifício e preparar o orçamento.</p>
+      <a class="botao" href="/#contacto" data-programa-link="Obra">Pedir orçamento de obra</a>
+    </div>
+  </section>
+</Conceito>

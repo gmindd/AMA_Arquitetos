@@ -417,6 +417,7 @@ html {
 .intro-ativa main,
 .intro-ativa .topo__nav,
 .intro-ativa .topo__tema,
+.intro-ativa .topo__menu,
 .intro-ativa .topo__cta {
   opacity: 0;
 }
@@ -425,6 +426,7 @@ html {
 .intro-saida main,
 .intro-saida .topo__nav,
 .intro-saida .topo__tema,
+.intro-saida .topo__menu,
 .intro-saida .topo__cta {
   opacity: 1;
   transition: opacity 0.5s ease;
@@ -490,6 +492,149 @@ html {
 
 [data-tema='escuro'] .topo__tema-icone {
   transform: rotate(180deg);
+}
+
+/* Botão do menu (só em ecrãs estreitos) */
+.topo__menu {
+  display: none;
+  align-items: center;
+  gap: 0.55rem;
+  padding: 0.55rem 0.2rem;
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+
+/* Dois traços que se cruzam quando o menu abre */
+.topo__menu-traco {
+  position: relative;
+  width: 18px;
+  height: 8px;
+}
+
+.topo__menu-traco::before,
+.topo__menu-traco::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: currentColor;
+  transition: transform 0.4s var(--ease), top 0.4s var(--ease);
+}
+
+.topo__menu-traco::before {
+  top: 0;
+}
+
+.topo__menu-traco::after {
+  top: 7px;
+}
+
+.menu-aberto .topo__menu-traco::before {
+  top: 4px;
+  transform: rotate(45deg);
+}
+
+.menu-aberto .topo__menu-traco::after {
+  top: 4px;
+  transform: rotate(-45deg);
+}
+
+.menu-aberto {
+  overflow: hidden;
+}
+
+/* Menu em ecrã inteiro, por baixo do cabeçalho */
+.menu-movel {
+  position: fixed;
+  inset: 0;
+  z-index: 39;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 7.5rem 1.5rem 2rem;
+  background: var(--papel);
+  color: var(--tinta);
+  opacity: 0;
+  transition: opacity 0.35s var(--ease);
+}
+
+.menu-movel[hidden] {
+  display: none;
+}
+
+.menu-movel.aberto {
+  opacity: 1;
+}
+
+.menu-movel__lista {
+  list-style: none;
+  border-top: 1px solid var(--linha);
+}
+
+.menu-movel__lista li {
+  border-bottom: 1px solid var(--linha);
+  opacity: 0;
+  transform: translateY(14px);
+  transition: opacity 0.5s var(--ease), transform 0.6s var(--ease);
+}
+
+.menu-movel.aberto .menu-movel__lista li {
+  opacity: 1;
+  transform: none;
+}
+
+.menu-movel.aberto .menu-movel__lista li:nth-child(2) {
+  transition-delay: 0.06s;
+}
+
+.menu-movel.aberto .menu-movel__lista li:nth-child(3) {
+  transition-delay: 0.12s;
+}
+
+.menu-movel__lista a {
+  display: flex;
+  align-items: baseline;
+  gap: 1rem;
+  padding: 1.1rem 0;
+  font-size: clamp(2.2rem, 9vw, 3.4rem);
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: -0.035em;
+}
+
+.menu-movel__lista a span {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  font-weight: 400;
+  letter-spacing: 0.1em;
+  opacity: 0.6;
+}
+
+.menu-movel__lista a[aria-current='page'] {
+  text-decoration: underline;
+  text-decoration-thickness: 2px;
+  text-underline-offset: 6px;
+}
+
+.menu-movel__extra {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+/* Ligação no meio de um texto */
+.ligacao {
+  text-decoration: underline;
+  text-underline-offset: 3px;
 }
 
 .topo__cta {
@@ -1832,6 +1977,10 @@ html {
   .topo__tema {
     margin-left: auto;
   }
+
+  .topo__menu {
+    display: inline-flex;
+  }
 }
 
 @media (max-width: 900px) {
@@ -2008,6 +2157,15 @@ html {
 }
 
 @media (max-width: 520px) {
+  .topo {
+    gap: 1.1rem;
+  }
+
+  .topo__cta,
+  .topo__tema-texto {
+    display: none;
+  }
+
   .celula--metade {
     grid-column: 1 / -1;
   }

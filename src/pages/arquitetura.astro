@@ -1,0 +1,231 @@
+---
+// Arquitetura: projetos novos, reabilitações e requalificações, com ou
+// sem obra. Inclui o caso real animado (planta viva da reabilitação).
+import Conceito from '../layouts/Conceito.astro';
+
+// Ícones a traço (viewBox 64 × 64)
+const servicos = [
+  {
+    nome: 'Casas novas',
+    texto: 'Projeto de raiz para habitação, do programa e do estudo prévio ao licenciamento e ao projeto de execução.',
+    icone: 'M8 56 V24 L32 8 L56 24 V56 Z M8 56 H56 M26 56 V40 h12 v16 M14 30 h8 v8 h-8 Z',
+  },
+  {
+    nome: 'Reabilitação e requalificação',
+    texto: 'Casas, prédios e edifícios antigos: levantamento, diagnóstico e um projeto que mantém o que tem valor.',
+    icone: 'M12 58 V22 H52 V58 M8 22 H56 V16 H8 Z M20 58 V42 a12 12 0 0 1 24 0 V58 M20 28 h6 v8 h-6 Z M38 28 h6 v8 h-6 Z',
+  },
+  {
+    nome: 'Ampliações',
+    texto: 'Novos volumes que dialogam com o existente, para ganhar espaço sem perder o carácter da casa.',
+    icone: 'M6 56 V26 H30 V56 M30 56 V36 H58 V56 M6 56 H58 M14 34 h8 v8 h-8 Z M38 44 h12',
+  },
+  {
+    nome: 'Interiores',
+    texto: 'Redistribuição de espaços, cozinhas, casas de banho, iluminação e mobiliário fixo, desenhados à medida.',
+    icone: 'M8 8 H56 V56 H8 Z M8 32 H30 M30 32 V56 M30 44 a12 12 0 0 1 12 -12',
+  },
+  {
+    nome: 'Reconversão',
+    texto: 'Lojas, armazéns ou espaços sem uso que ganham uma nova função, de habitação, trabalho ou comércio.',
+    icone: 'M8 56 V18 H56 V56 Z M8 30 H56 M18 56 V40 h12 v16 M38 40 h10 v8 h-10 Z M40 12 l8 6 l-8 6',
+  },
+  {
+    nome: 'Licenciamento',
+    texto: 'Preparamos os processos de licenciamento e acompanhamos a aprovação junto da câmara municipal.',
+    icone: 'M16 6 H40 L50 16 V58 H16 Z M40 6 V16 H50 M22 28 H44 M22 36 H44 M22 44 H36',
+  },
+];
+
+const modos = [
+  {
+    titulo: 'Só o projeto',
+    texto:
+      'Desenhamos e licenciamos o projeto e podemos acompanhar a obra como arquitetos, seja qual for o construtor que escolher.',
+  },
+  {
+    titulo: 'Projeto e obra',
+    texto:
+      'O mesmo gabinete desenha e constrói, com a nossa equipa de obra. Um só interlocutor do primeiro traço à entrega da chave.',
+    ligacao: { href: '/obras', texto: 'Ver Obras' },
+  },
+];
+
+// Caso real: do levantamento à entrega, sobre a planta de um projeto AMA
+const passosCaso = [
+  {
+    n: '01',
+    fase: 'Levantamento',
+    titulo: 'Primeiro, medimos o que existe.',
+    texto:
+      'Antes de desenhar, registamos o edifício tal como está: paredes, vãos, cotas e o estado de cada elemento. Neste caso, uma casa em pedra com uma construção anexa no logradouro.',
+  },
+  {
+    n: '02',
+    fase: 'Manter, demolir, construir',
+    titulo: 'O projeto decide o que fica.',
+    texto:
+      'Mantêm-se as paredes de pedra da casa. A construção anexa é demolida e dá lugar a uma cozinha e sala abertas para um pátio interior. O sótão passa a ser habitável e o interior é todo redesenhado.',
+  },
+  {
+    n: '03',
+    fase: 'Modelo',
+    titulo: 'O antigo e o novo, lado a lado.',
+    texto:
+      'Antes da obra, a casa já se percorre. As paredes que ficam, as que nascem e o novo piso no sótão leem-se no mesmo modelo, e cada decisão é tomada consigo.',
+  },
+  {
+    n: '04',
+    fase: 'Obra com equipa própria',
+    titulo: 'Escorar, demolir, construir.',
+    texto:
+      'Numa obra AMA, a nossa equipa de construção executa o que desenhámos: escora e protege as paredes que ficam, demole o que sai e ergue o novo, com os arquitetos em obra em cada fase.',
+  },
+  {
+    n: '05',
+    fase: 'Entrega',
+    titulo: 'Uma casa antiga com vida nova.',
+    texto:
+      'A pedra que já lá estava e o desenho novo passam a ser uma só casa, entregue pelas mesmas mãos que a desenharam e construíram.',
+  },
+];
+const fasesObraCaso = ['Escoramento', 'Demolições', 'Estrutura nova', 'Piso 1', 'Cobertura', 'Acabamentos'];
+---
+
+<Conceito
+  title="Arquitetura · AMA André Melissa Arquitetos"
+  description="Projetos de arquitetura para casas novas, reabilitação e requalificação, ampliações, interiores e licenciamento, com ou sem obra pela equipa própria do gabinete."
+  pagina="arquitetura"
+>
+  <!-- A·01 · Abertura -->
+  <section class="reab-abertura">
+    <p class="sobretitulo" data-aparece>Arquitetura · Projeto novo e reabilitação</p>
+    <h1 class="seccao__titulo seccao__titulo--grande" data-palavras>Desenhamos casas novas e damos vida às que já existem.</h1>
+    <p class="seccao__lead" data-aparece>
+      Projetos de raiz, reabilitações e requalificações, ampliações, interiores e
+      licenciamento. Com obra pela nossa equipa ou só o projeto: a escolha é sua.
+    </p>
+    <a class="deslizar deslizar--estatico" href="#servicos" data-aparece>
+      <span>O que desenhamos</span>
+      <span class="deslizar__seta" aria-hidden="true"></span>
+    </a>
+  </section>
+
+  <!-- A·02 · Serviços -->
+  <section class="reab-seccao" id="servicos">
+    <div class="seccao__cabeca">
+      <p class="sobretitulo" data-aparece>01 · O que desenhamos</p>
+      <h2 class="seccao__titulo" data-palavras>Da folha em branco à casa com história.</h2>
+      <p class="seccao__lead" data-aparece>
+        Cada projeto começa por uma conversa e por um levantamento rigoroso do
+        lugar. O <a class="ligacao" href="/#processo">processo</a> é o mesmo, seja
+        uma casa nova ou uma reabilitação.
+      </p>
+    </div>
+    <ul class="tipologias">
+      {servicos.map((t, i) => (
+        <li class="tipologia" data-aparece style={`transition-delay:${(i % 3) * 90}ms`}>
+          <svg viewBox="0 0 64 64" aria-hidden="true">
+            <path d={t.icone} pathLength="1" />
+          </svg>
+          <h3>{t.nome}</h3>
+          <p>{t.texto}</p>
+        </li>
+      ))}
+    </ul>
+  </section>
+
+  <!-- A·03 · Com ou sem obra -->
+  <section class="reab-seccao">
+    <div class="seccao__cabeca">
+      <p class="sobretitulo" data-aparece>02 · Com ou sem obra</p>
+      <h2 class="seccao__titulo" data-palavras>O projeto é seu. A obra também pode ser connosco.</h2>
+    </div>
+    <ol class="vantagens">
+      {modos.map((v, i) => (
+        <li data-aparece style={`transition-delay:${i * 90}ms`}>
+          <span class="vantagens__n">{String(i + 1).padStart(2, '0')}</span>
+          <h3>{v.titulo}</h3>
+          <p>{v.texto}</p>
+          {v.ligacao && <a class="equipa__ligacao" href={v.ligacao.href}>{v.ligacao.texto}</a>}
+        </li>
+      ))}
+    </ol>
+  </section>
+
+  <!-- A·04 · Caso real -->
+  <section class="reab-seccao reab-seccao--caso" id="caso">
+    <div class="seccao__cabeca">
+      <p class="sobretitulo" data-aparece>03 · Caso real</p>
+      <h2 class="seccao__titulo" data-palavras>Uma reabilitação, do levantamento à chave.</h2>
+      <p class="seccao__lead" data-aparece>
+        A reabilitação e ampliação de uma casa em pedra, desenhada pela AMA.
+        Desça e acompanhe o projeto e a obra a acontecer na planta.
+      </p>
+    </div>
+  </section>
+
+  <section class="processo processo--reabilitacao" data-processo data-roteiro="reabilitacao">
+    <div class="palco">
+      <canvas class="palco__tela" data-tela aria-hidden="true"></canvas>
+      <div class="palco__dica" data-dica aria-hidden="true"></div>
+      <div class="palco__textos">
+        {
+          passosCaso.map((p, i) => (
+            <article class="passo__cartao" data-cartao={i}>
+              <p class="passo__num">
+                <span>{p.n}</span>
+                <span>{p.fase}</span>
+              </p>
+              <h3 class="passo__titulo" data-palavras-passo>{p.titulo}</h3>
+              <p class="passo__texto">{p.texto}</p>
+
+              {i === 0 && (
+                <ul class="lista-tracos">
+                  <li>Reabilitação e ampliação</li>
+                  <li>Casa em pedra, rés-do-chão e sótão</li>
+                  <li>Projeto AMA</li>
+                </ul>
+              )}
+
+              {i === 2 && <p class="passo__nota">Passe o cursor pela planta para visitar cada divisão.</p>}
+
+              {i === 3 && (
+                <div class="obra">
+                  <p class="obra__pct">
+                    <span data-obra-pct>0</span>
+                    <span>%</span>
+                  </p>
+                  <ol class="obra__fases">
+                    {fasesObraCaso.map((f) => (
+                      <li data-obra-fase>{f}</li>
+                    ))}
+                  </ol>
+                </div>
+              )}
+
+              {i === 4 && (
+                <a class="botao" href="/#contacto" data-programa-link="Reabilitação">
+                  Pedir uma visita
+                </a>
+              )}
+            </article>
+          ))
+        }
+      </div>
+    </div>
+
+    <div class="passos" aria-hidden="true">
+      {passosCaso.map((p, i) => <div class="passo" data-passo={i} data-fase={p.fase} />)}
+    </div>
+  </section>
+
+  <!-- A·05 · Pedido -->
+  <section class="reab-seccao">
+    <div class="reab-cta" data-aparece>
+      <h2>Tem um projeto em mente?</h2>
+      <p>Uma casa nova, uma reabilitação ou um interior: a primeira conversa é connosco.</p>
+      <a class="botao" href="/#contacto" data-programa-link="Projeto novo">Contactar</a>
+    </div>
+  </section>
+</Conceito>

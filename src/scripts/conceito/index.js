@@ -11,10 +11,12 @@ import { iniciarFachada } from './fachada.js';
 import { iniciarPedido } from './pedido.js';
 import { iniciarIntro } from './intro.js';
 import { iniciarTema } from './tema.js';
+import { iniciarMenu } from './menu.js';
 
 const MODELOS = { processo: modeloCasa, reabilitacao: modeloReabilitacao };
 
 iniciarTema();
+iniciarMenu();
 const intro = iniciarIntro();
 iniciarPrancheta();
 iniciarConversa();
