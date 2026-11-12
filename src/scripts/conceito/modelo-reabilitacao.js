@@ -210,13 +210,6 @@ export const mobiliario = [
 // Árvore do pátio: centro, raio da copa e altura
 export const arvore = { x: 1.55, y: 6.35, r: 0.9, h: 3.6 };
 
-// Manchas de sol no pavimento: pelo envidraçado do pátio e pelos quartos
-export const sol = [
-  [[4.87, 3.1], [4.87, 7.2], [7.3, 6.5], [7.3, 3.7]],
-  [[13.7, 7.7], [15.3, 7.7], [15.65, 6.5], [14.05, 6.5]],
-  [[18.3, 7.7], [19.7, 7.7], [20.0, 6.6], [18.6, 6.6]],
-];
-
 // Percurso do visitante: da rua, pelo portão e pelo pátio, até à sala
 export const percurso = [
   [3.65, 9.4],

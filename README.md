@@ -51,9 +51,16 @@ src/components/conceito/Fachada*.astro → alçado antes/depois (SVG)
 src/components/conceito/Pormenor.astro → pormenor construtivo de cobertura (SVG animado)
 src/components/conceito/Rodape.astro, LogoLockup.astro → rodapé com informação legal e lockup AMA em texto
 src/scripts/conceito/
-├── modelo-casa.js         → a casa do processo (início), em metros
+├── modelo-casa.js         → a casa do processo (início), em metros: casa térrea em L com pátio, espelho de água e pérgula
 ├── modelo-reabilitacao.js → caso real de reabilitação (simplificado de um projeto AMA): paredes a manter, demolições, ampliação, escada, telhado de duas águas
-├── casa.js       → a planta viva (canvas), partilhada pelos dois percursos: processo e reabilitação (levantamento → manter/demolir/construir → axonometria → obra → entrega)
+├── planta/       → a planta viva (canvas), partilhada pelos dois percursos: processo e reabilitação (levantamento → manter/demolir/construir → axonometria → obra → entrega)
+│   ├── motor.js           → mede, calcula as fases de cada quadro pelo scroll e chama as camadas
+│   ├── camadas-desenho.js → o que se desenha no papel: bolhas, esboço à mão, cotas, rótulos, símbolos, escala, lápis, visitante
+│   ├── camadas-volume.js  → o que tem volume: sombras, pavimento, sol, estaleiro, paredes, vidros, coberturas, móveis
+│   ├── solidos.js         → faces visíveis e ordem de pintura dos sólidos (de trás para a frente)
+│   ├── camara.js          → projeção contínua planta ↔ axonometria e enquadramento
+│   ├── traco.js           → traço à mão, linha parcial, tramas e texto
+│   └── util.js            → curvas de tempo, cores, ruído estável, fecho convexo
 ├── prancheta.js  → réguas, mira e menu
 ├── estado.js     → nome e programa do visitante
 ├── intro.js      → intro André e Melissa Arquitetos → AMA

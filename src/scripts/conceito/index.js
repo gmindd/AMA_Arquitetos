@@ -4,7 +4,7 @@
 import { estado, ouvir, definir, primeiroNome } from './estado.js';
 import { iniciarPrancheta, definirLeitura } from './prancheta.js';
 import { iniciarRevelar, partirPalavras } from './revelar.js';
-import { iniciarCasa, FASES_OBRA } from './casa.js';
+import { iniciarCasa, FASES_OBRA } from './planta/motor.js';
 import * as modeloCasa from './modelo-casa.js';
 import * as modeloReabilitacao from './modelo-reabilitacao.js';
 import { iniciarFachada } from './fachada.js';
